@@ -23,7 +23,7 @@ function addRecapButton() {
 
     const toggleSpan = document.createElement("span")
     toggleSpan.id = "toggleSpan"
-    toggleSpan.innerHTML = "Show "
+    toggleSpan.textContent = "Show "
 
     button.prepend(toggleSpan)
 
@@ -34,7 +34,7 @@ function addRecapButton() {
     icon.append("\u00A0")
 
     button.addEventListener("click", function () {
-        toggleSpan.innerHTML = RECAP_TOGGLE ? "Show " : "Hide ";
+        toggleSpan.textContent = RECAP_TOGGLE ? "Show " : "Hide ";
         RECAP_TOGGLE = !RECAP_TOGGLE;
     });
 
@@ -101,23 +101,23 @@ async function setRecapText() {
     // Extract and add the fiction title to the recap container
     const fictionTitle = extractContent(prevChapterHTML, SELECTOR_FICTION_TITLE)
     const recapFictionTitle = document.createElement("h1")
-    recapFictionTitle.innerHTML = `Previously in ${fictionTitle.italics()}...`
+    recapFictionTitle.textContent = `Previously in ${fictionTitle}...`
     recapContainer.appendChild(recapFictionTitle)
 
     // Extract and add the previous chapter title to the recap container
     const recapTitle = extractContent(prevChapterHTML, SELECTOR_CHAPTER_TITLE)
     const recapIntro = document.createElement("h2")
-    recapIntro.innerHTML = `Last chapter name: ${recapTitle.italics()}`
+    recapIntro.textContent = `Last chapter name: ${recapTitle}`
     recapContainer.appendChild(recapIntro)
 
     const recapBlurb = document.createElement("h4")
-    recapBlurb.innerHTML = `Showing last ${RECAP_WORD_COUNT} words:`
+    recapBlurb.textContent = `Showing last ${RECAP_WORD_COUNT} words:`
     recapContainer.appendChild(recapBlurb)
 
     // Extract and add the content to the recap container
     const recapText = extractContent(prevChapterHTML, SELECTOR_CHAPTER_CONTENT)
     const recapContent = document.createElement("div")
-    recapContent.innerHTML = "..." + recapText
+    recapContent.textContent = "..." + recapText
     recapContainer.appendChild(recapContent)
 
     // Add the line separator between the recap and the new chapter
