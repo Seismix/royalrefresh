@@ -21,6 +21,23 @@ function init() {
  * Adds the recap button to the DOM on initial page render and adds various click event listeners
  */
 function addRecapButton() {
+    const button = createRecapButton()
+
+    button.addEventListener("click", function () {
+        toggleSpan.textContent = RECAP_TOGGLE ? "Show " : "Hide ";
+        RECAP_TOGGLE = !RECAP_TOGGLE;
+        toggleRecapContainer(!RECAP_TOGGLE)
+    });
+
+    button.addEventListener("click", addRecapContainer, { once: true })
+
+    const navButtons = document.querySelector(".actions");
+    if (navButtons) {
+        navButtons.prepend(button);
+    }
+}
+
+function createRecapButton() {
     const button = document.createElement("button");
     button.id = "recapButton";
     button.textContent = "Recap";
@@ -38,18 +55,7 @@ function addRecapButton() {
     button.prepend(bookIcon);
     bookIcon.append("\u00A0")
 
-    button.addEventListener("click", function () {
-        toggleSpan.textContent = RECAP_TOGGLE ? "Show " : "Hide ";
-        RECAP_TOGGLE = !RECAP_TOGGLE;
-        toggleRecapContainer(!RECAP_TOGGLE)
-    });
-
-    button.addEventListener("click", addRecapContainer, { once: true })
-
-    const navButtons = document.querySelector(".actions");
-    if (navButtons) {
-        navButtons.prepend(button);
-    }
+    return button
 }
 
 
