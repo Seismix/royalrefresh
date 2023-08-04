@@ -1,21 +1,43 @@
 document.body.style.border = "10px solid red"; // TODO: remove, Debug only
 
-const SELECTOR_PREV_CHAPTER_BTN = "div.col-md-4:nth-child(1) > a:nth-child(1)"
-const SELECTOR_CHAPTER_CONTENT = "div.chapter-inner:nth-child(3)"
-const SELECTOR_CHAPTER_TITLE = "h1.font-white"
-const SELECTOR_FICTION_TITLE = "h2.font-white"
+const SELECTORS = {
+    PREV_CHAPTER_BTN: "div.col-md-4:nth-child(1) > a:nth-child(1)",
+    CHAPTER_CONTENT: "div.chapter-inner:nth-child(3)",
+    CHAPTER_TITLE: "h1.font-white",
+    FICTION_TITLE: "h2.font-white"
+};
 let RECAP_WORD_COUNT = 250
 let RECAP_TOGGLE = false
 
+init();
 
-if (!document.getElementById("recapButton")) {
-    addRecapButton()
+function init() {
+    if (!document.getElementById("recapButton")) {
+        addRecapButton();
+    }
 }
 
 /**
  * Adds the recap button to the DOM on initial page render and adds various click event listeners
  */
 function addRecapButton() {
+    const button = createRecapButton()
+
+    button.addEventListener("click", function () {
+        toggleSpan.textContent = RECAP_TOGGLE ? "Show " : "Hide ";
+        RECAP_TOGGLE = !RECAP_TOGGLE;
+        toggleRecapContainer(!RECAP_TOGGLE)
+    });
+
+    button.addEventListener("click", addRecapContainer, { once: true })
+
+    const navButtons = document.querySelector(".actions");
+    if (navButtons) {
+        navButtons.prepend(button);
+    }
+}
+
+function createRecapButton() {
     const button = document.createElement("button");
     button.id = "recapButton";
     button.textContent = "Recap";
@@ -27,29 +49,15 @@ function addRecapButton() {
 
     button.prepend(toggleSpan)
 
-    const icon = document.createElement("i");
-    icon.classList.add("fa", "fa-book");
+    const bookIcon = document.createElement("i");
+    bookIcon.classList.add("fa", "fa-book");
 
-    button.prepend(icon);
-    icon.append("\u00A0")
+    button.prepend(bookIcon);
+    bookIcon.append("\u00A0")
 
-    button.addEventListener("click", function () {
-        toggleSpan.textContent = RECAP_TOGGLE ? "Show " : "Hide ";
-        RECAP_TOGGLE = !RECAP_TOGGLE;
-    });
-
-    button.addEventListener("click", addRecapContainer)
-
-    button.addEventListener("click", function () {
-        toggleRecapContainer(!RECAP_TOGGLE)
-    });
-
-    const navButtons = document.querySelector(".actions");
-    if (navButtons) {
-        navButtons.prepend(button);
-    }
-
+    return button
 }
+
 
 /**
  * Adds the recap container div to the DOM, if it doesn't already exist
@@ -62,7 +70,7 @@ function addRecapContainer() {
     recapContainer.classList.add("chapter-inner", "chapter-content")
     recapContainer.id = "recapContainer"
 
-    const chapterDiv = document.querySelector(SELECTOR_CHAPTER_CONTENT)
+    const chapterDiv = document.querySelector(SELECTORS.CHAPTER_CONTENT)
 
     if (chapterDiv) {
         chapterDiv.prepend(recapContainer)
@@ -86,7 +94,7 @@ function toggleRecapContainer(RECAP_TOGGLE) {
  */
 async function setRecapText() {
     const recapContainer = document.getElementById("recapContainer")
-    const prevChapterURL = document.querySelector(SELECTOR_PREV_CHAPTER_BTN).href
+    const prevChapterURL = document.querySelector(SELECTORS.PREV_CHAPTER_BTN).href
 
     if (!recapContainer || !prevChapterURL) {
         return console.error("Could not find necessary DOM Elements")
@@ -98,32 +106,42 @@ async function setRecapText() {
         return console.error("Error fetching previous chapter")
     }
 
-    // Extract and add the fiction title to the recap container
-    const fictionTitle = extractContent(prevChapterHTML, SELECTOR_FICTION_TITLE)
-    const recapFictionTitle = document.createElement("h1")
-    recapFictionTitle.textContent = `Previously in ${fictionTitle}...`
-    recapContainer.appendChild(recapFictionTitle)
+    // Create a document fragment
+    const fragment = document.createDocumentFragment();
 
-    // Extract and add the previous chapter title to the recap container
-    const recapTitle = extractContent(prevChapterHTML, SELECTOR_CHAPTER_TITLE)
-    const recapIntro = document.createElement("h2")
-    recapIntro.textContent = `Last chapter name: ${recapTitle}`
-    recapContainer.appendChild(recapIntro)
+    // Object containing the extracted information
+    const recapContainerStrings = {
+        fictionTitle: extractContent(prevChapterHTML, SELECTORS.FICTION_TITLE),
+        lastChapterName: extractContent(prevChapterHTML, SELECTORS.CHAPTER_TITLE),
+        lastChapterContent: extractContent(prevChapterHTML, SELECTORS.CHAPTER_CONTENT)
+    }
 
-    const recapBlurb = document.createElement("h4")
-    recapBlurb.textContent = `Showing last ${RECAP_WORD_COUNT} words:`
-    recapContainer.appendChild(recapBlurb)
-
-    // Extract and add the content to the recap container
-    const recapText = extractContent(prevChapterHTML, SELECTOR_CHAPTER_CONTENT)
-    const recapContent = document.createElement("div")
-    recapContent.textContent = "..." + recapText
-    recapContainer.appendChild(recapContent)
+    appendTextElement(fragment, recapContainerStrings.fictionTitle, "h1");
+    appendTextElement(fragment, recapContainerStrings.lastChapterName, "h2");
+    appendTextElement(fragment, `Showing last ${RECAP_WORD_COUNT} words:`, "h4");
+    appendTextElement(fragment, "..." + recapContainerStrings.lastChapterContent, "div");
 
     // Add the line separator between the recap and the new chapter
-    recapContainer.append(document.createElement("hr"))
+    fragment.append(document.createElement("hr"))
+
+    // Append the fragment to the recapContainer
+    recapContainer.appendChild(fragment);
 
     recapContainer.scrollIntoView({ behavior: "smooth" })
+}
+
+/**
+ * 
+ * @param {HTMLElement} parent The parent element to append to
+ * @param {string} text The text the element contains
+ * @param {string} elementType The HTML element you want to create
+ * @example 
+ * appendTextElement(fragment, `Showing last ${RECAP_WORD_COUNT} words:`, "h4");
+ */
+function appendTextElement(parent, text, elementType) {
+    const element = document.createElement(elementType);
+    element.textContent = text;
+    parent.appendChild(element);
 }
 
 /**
@@ -133,13 +151,22 @@ async function setRecapText() {
 async function fetchChapter(url) {
     try {
         const response = await fetch(url)
-        const text = response.text()
+
+        if (!response.ok) {
+            throw new Error("Error fetching the previous chapter...")
+        }
+
+        const text = await response.text()
+
         return text;
     } catch (error) {
         console.error('Error fetching the chapter:', error);
+
         return null;
     }
 }
+
+const parser = new DOMParser();
 
 /**
  * Parses HTML text and extracts data based on the given selector. Defaults to the value of RECAP_WORD_COUNT, but can be overwritten.
@@ -148,11 +175,12 @@ async function fetchChapter(url) {
  * @param {number} wordcount default `RECAP_WORD_COUNT`
  */
 function extractContent(html, selector, wordcount = RECAP_WORD_COUNT) {
-    const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
     const contentElement = doc.querySelector(selector);
+    if (!contentElement) {
+        return null;
+    }
     // Get only the last x words, where x is wordcount
-    const extracted = contentElement ? contentElement.textContent.trim().split(/\s+/).slice(-wordcount).join(' ') : null;
-
+    const extracted = contentElement.textContent.trim().split(/\s+/).slice(-wordcount).join(' ');
     return extracted;
 }
