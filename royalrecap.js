@@ -2,7 +2,7 @@ document.body.style.border = "10px solid red"; // TODO: remove, Debug only
 
 const SELECTORS = {
     PREV_CHAPTER_BTN: "div.col-md-4:nth-child(1) > a:nth-child(1)",
-    CHAPTER_CONTENT: "div.chapter-inner:nth-child(3)",
+    CHAPTER_CONTENT: ".chapter-inner",
     CHAPTER_TITLE: "h1.font-white",
     FICTION_TITLE: "h2.font-white"
 };
