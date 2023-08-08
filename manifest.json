@@ -5,16 +5,9 @@
     "description": "A web extension for royalroad.com to get a recap of the previous chapter. For people who juggle multiple stories",
     "content_scripts": [
         {
-            "matches": [
-                "*://*.royalroad.com/*"
-            ],
-            "js": [
-                "royalrecap.js"
-            ]
+            "matches": ["*://*.royalroad.com/*"],
+            "js": ["royalrecap.js"]
         }
     ],
-    "permissions": [
-        "activeTab",
-        "*://*.royalroad.com/*"
-    ]
+    "permissions": ["activeTab", "*://*.royalroad.com/*"]
 }
