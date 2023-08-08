@@ -13,17 +13,17 @@ init();
 
 function init() {
     if (!document.getElementById("recapButton")) {
-        addRecapButton();
+        const button = createRecapButton();
+        addRecapButton(button);
     }
 }
 
 /**
  * Adds the recap button to the DOM on initial page render and adds various click event listeners
  */
-function addRecapButton() {
-    const button = createRecapButton();
-
+function addRecapButton(button) {
     button.addEventListener("click", function () {
+        const toggleSpan = document.getElementById("toggleSpan")
         toggleSpan.textContent = RECAP_TOGGLE ? "Show " : "Hide ";
         RECAP_TOGGLE = !RECAP_TOGGLE;
         toggleRecapContainer(!RECAP_TOGGLE);
@@ -37,6 +37,10 @@ function addRecapButton() {
     }
 }
 
+/**
+ * Creates the recap button including the icon and returns in
+ * @returns {HTMLButtonElement}
+ */
 function createRecapButton() {
     const button = document.createElement("button");
     button.id = "recapButton";
