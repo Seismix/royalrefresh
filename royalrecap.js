@@ -1,27 +1,43 @@
 document.body.style.border = "10px solid red"; // TODO: remove, Debug only
+let extensionSettings = {}
 
-const SELECTORS = {
+let SELECTORS = {
     prevChapterBtn: "div.col-md-4:nth-child(1) > a:nth-child(1)",
     chapterContent: ".chapter-inner",
     chapterTitle: "h1.font-white",
     fictionTitle: "h2.font-white",
 };
-let RECAP_WORD_COUNT = 250;
+const RECAP_WORD_COUNT = 250;
 let RECAP_TOGGLE = false;
 
 init();
 
-function init() {
+async function init() {
+    await loadExtensionSettings()
+
+    injectRecapButton();
+}
+
+function injectRecapButton() {
     if (!document.getElementById("recapButton")) {
         const button = createRecapButton();
         addRecapButton(button);
     }
 }
 
+async function loadExtensionSettings() {
+    const storageItems = await browser.storage.sync.get();
+    extensionSettings = {
+        wordCount: storageItems.wordcount || RECAP_WORD_COUNT,
+    };
+}
+
 /**
  * Adds the recap button to the DOM on initial page render and adds various click event listeners
  */
 function addRecapButton(button) {
+    button.addEventListener("click", addRecapContainer, { once: true });
+
     button.addEventListener("click", function () {
         const toggleSpan = document.getElementById("toggleSpan")
         toggleSpan.textContent = RECAP_TOGGLE ? "Show " : "Hide ";
@@ -29,7 +45,6 @@ function addRecapButton(button) {
         toggleRecapContainer(!RECAP_TOGGLE);
     });
 
-    button.addEventListener("click", addRecapContainer, { once: true });
 
     const navButtons = document.querySelector(".actions");
 
@@ -136,7 +151,7 @@ async function setRecapText() {
 
     appendTextElement(fragment, recapContainerStrings.fictionTitle, "h1");
     appendTextElement(fragment, recapContainerStrings.lastChapterName, "h2");
-    appendTextElement(fragment, `Showing last ${RECAP_WORD_COUNT} words:`, "h4");
+    appendTextElement(fragment, `Showing last ${extensionSettings.wordCount} words:`, "h4");
     appendTextElement(
         fragment,
         "..." + recapContainerStrings.lastChapterContent,
@@ -191,12 +206,14 @@ async function fetchChapter(url) {
 const parser = new DOMParser();
 
 /**
- * Parses HTML text and extracts data based on the given selector. Defaults to the value of RECAP_WORD_COUNT, but can be overwritten.
+ * Parses HTML text and extracts data based on the given selector. 
+ * Takes the value from the extension settings {@link loadExtensionSettings()}
+ * but defaults to the value of RECAP_WORD_COUNT.
  * @param {string} html
  * @param {string} selector
  * @param {number} wordcount default `RECAP_WORD_COUNT`
  */
-function extractContent(html, selector, wordcount = RECAP_WORD_COUNT) {
+function extractContent(html, selector, wordcount = extensionSettings.wordCount || RECAP_WORD_COUNT) {
     const doc = parser.parseFromString(html, "text/html");
     const contentElement = doc.querySelector(selector);
     if (!contentElement) {

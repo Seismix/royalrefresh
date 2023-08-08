@@ -2,12 +2,27 @@
     "manifest_version": 2,
     "name": "RoyalRecap",
     "version": "1.0",
-    "description": "A web extension for royalroad.com to get a recap of the previous chapter. For people who juggle multiple stories",
+    "description": "A web extension for royalroad.com. For people who juggle multiple stories",
+    "homepage_url": "https://github.com/Seismix/RoyalRecap",
+    "browser_action": {
+        "default_title": "RoyalRecap"
+    },
     "content_scripts": [
         {
             "matches": ["*://*.royalroad.com/*"],
             "js": ["royalrecap.js"]
         }
     ],
-    "permissions": ["activeTab", "*://*.royalroad.com/*"]
+    "background": {
+        "scripts": ["background.js"]
+    },
+    "options_ui": {
+        "page": "options.html"
+    },
+    "permissions": ["*://*.royalroad.com/*", "storage"],
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "royalrecaptestaddonemail@gmail.com"
+        }
+    }
 }
