@@ -32,9 +32,21 @@ function addRecapButton(button) {
     button.addEventListener("click", addRecapContainer, { once: true });
 
     const navButtons = document.querySelector(".actions");
-    if (navButtons) {
+
+    if (navButtons && isURLChapter()) {
         navButtons.prepend(button);
     }
+}
+
+/**
+ * Check if the current URL is a chapter URL
+ * @returns {boolean} True if chapter is in the URL path, otherwise false
+ * @example https://www.royalroad.com/fiction/63759/super-supportive/chapter/1097958/two-mistakes -> true
+ * @example https://www.royalroad.com/fiction/63759/super-supportive -> false
+ */
+function isURLChapter() {
+    let pathSegmments = window.location.pathname.split("/")
+    return pathSegmments.includes("chapter")
 }
 
 /**
