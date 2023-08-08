@@ -18,7 +18,8 @@ least a way to stop navigating to the previous chapter every time.
 RoyalRecap is a browser extension (only for Firefox at the moment) that inserts a button next to RoyalRoad's "Reader
 Preferences" button. When clicked, the last few paragraphs of the previous chapter get fetched and displayed at the top
 of the chapter, which you can toggle on and off using the button. The extension defaults to showing you the last
-250 words of the previous chapter, but you will be able to tune this to your liking (see [TODOs](#todos), and #3).
+250 words of the previous chapter, but you will be able to tune this to your liking (see [TODOs](#todos),
+and [#3](https://github.com/Seismix/RoyalRecap/issues/3)).
 
 Here's an example of what it looks like:
 
@@ -31,10 +32,10 @@ Here's an example of what it looks like:
 This extension is still a work in progress so there's plenty left to accomplish. If you have a good idea, you can create
 a new issue to describe it/contribute and I will consider it. Here's a list of what I have planned:
 
-- #3: A settings page for various current and also future settings
-- #5: Cross browser compatibility
-- #6: Prettier recap text (with formatting)
-- #7: Generate an actual recap
+- [#3](https://github.com/Seismix/RoyalRecap/issues/3): A settings page for various current and also future settings
+- [#5](https://github.com/Seismix/RoyalRecap/issues/5): Cross browser compatibility
+- [#6](https://github.com/Seismix/RoyalRecap/issues/6): Prettier recap text (with formatting)
+- [#7](https://github.com/Seismix/RoyalRecap/issues/7): Generate an actual recap
 
 ## Contributing and bug reports
 
