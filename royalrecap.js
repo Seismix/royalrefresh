@@ -1,7 +1,7 @@
 document.body.style.border = "10px solid red"; // TODO: remove, Debug only
 let extensionSettings = {}
 
-let SELECTORS = {
+const SELECTORS = {
     prevChapterBtn: "div.col-md-4:nth-child(1) > a:nth-child(1)",
     chapterContent: ".chapter-inner",
     chapterTitle: "h1.font-white",
