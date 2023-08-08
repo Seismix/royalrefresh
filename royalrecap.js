@@ -37,6 +37,10 @@ function addRecapButton(button) {
     }
 }
 
+/**
+ * Creates the recap button including the icon and returns in
+ * @returns {HTMLButtonElement}
+ */
 function createRecapButton() {
     const button = document.createElement("button");
     button.id = "recapButton";
