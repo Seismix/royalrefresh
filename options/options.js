@@ -8,9 +8,8 @@ function saveOptions(e) {
 }
 
 function restoreOptions() {
-    let gettingItem = browser.storage.sync.get('wordcount')
-    gettingItem.then((res) => {
-        console.log(res.wordcount)
+    let wordcount = browser.storage.sync.get('wordcount')
+    wordcount.then((res) => {
         document.getElementById('setting1').textContent = res.wordcount
         document.querySelector('#wordcount').value = res.wordcount || 250
     })

@@ -40,7 +40,7 @@ async function loadExtensionSettings() {
 }
 
 /**
- * Adds the recap button to the DOM and adds various click event listeners 
+ * Adds the recap button to the DOM and adds various click event listeners
  * ! The space after `Show` and `Hide` is intentional
  */
 function addRecapButton(button) {
