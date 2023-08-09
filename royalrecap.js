@@ -1,6 +1,9 @@
 document.body.style.border = '10px solid red' // TODO: remove, Debug only
 let extensionSettings = {}
 
+/**
+ * If these selectors change, `CONSTANTS` in `options.js` also needs to be adjusted
+ */
 const SELECTORS = {
     prevChapterBtn: 'div.col-md-4:nth-child(1) > a:nth-child(1)',
     chapterContent: '.chapter-inner',
@@ -35,8 +38,13 @@ function injectRecapButton() {
 async function loadExtensionSettings() {
     const storageItems = await browser.storage.sync.get()
     extensionSettings = {
-        wordCount: storageItems.wordcount || RECAP_WORD_COUNT,
+        wordCount: storageItems.wordCount || RECAP_WORD_COUNT,
+        prevChapterBtn: storageItems.prevChapterBtn || SELECTORS.prevChapterBtn,
+        chapterContent: storageItems.chapterContent || SELECTORS.chapterContent,
+        chapterTitle: storageItems.chapterTitle || SELECTORS.chapterTitle,
+        fictionTitle: storageItems.fictionTitle || SELECTORS.fictionTitle,
     }
+    console.log(extensionSettings)
 }
 
 /**
@@ -107,7 +115,7 @@ function addRecapContainer() {
     recapContainer.classList.add('chapter-inner', 'chapter-content')
     recapContainer.id = 'recapContainer'
 
-    const chapterDiv = document.querySelector(SELECTORS.chapterContent)
+    const chapterDiv = document.querySelector(extensionSettings.chapterContent)
 
     if (chapterDiv) {
         chapterDiv.prepend(recapContainer)
@@ -131,7 +139,9 @@ function toggleRecapContainer(RECAP_TOGGLE) {
  */
 async function setRecapText() {
     const recapContainer = document.getElementById('recapContainer')
-    const prevChapterURL = document.querySelector(SELECTORS.prevChapterBtn).href
+    const prevChapterURL = document.querySelector(
+        extensionSettings.prevChapterBtn,
+    ).href
 
     if (!recapContainer || !prevChapterURL) {
         return console.error('Could not find necessary DOM Elements')
@@ -148,14 +158,17 @@ async function setRecapText() {
 
     // Object containing the extracted information
     const recapContainerStrings = {
-        fictionTitle: extractContent(prevChapterHTML, SELECTORS.fictionTitle),
+        fictionTitle: extractContent(
+            prevChapterHTML,
+            extensionSettings.fictionTitle,
+        ),
         lastChapterName: extractContent(
             prevChapterHTML,
-            SELECTORS.chapterTitle,
+            extensionSettings.chapterTitle,
         ),
         lastChapterContent: extractContent(
             prevChapterHTML,
-            SELECTORS.chapterContent,
+            extensionSettings.chapterContent,
         ),
     }
 
