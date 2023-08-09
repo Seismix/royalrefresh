@@ -1,16 +1,21 @@
 document.body.style.border = "10px solid red" // TODO: remove, Debug only
-let extensionSettings = {}
 
 /**
- * If these selectors change, `CONSTANTS` in `options.js` also needs to be adjusted
+ * @typedef {Object} extensionSettings
+ * @property {string} prevChapterBtn - The selector for the previous chapter button.
+ * @property {string} chapterContent - The selector for the chapter content.
+ * @property {string} chapterTitle - The selector for the chapter title.
+ * @property {string} fictionTitle - The selector for the fiction title.
+ * @property {number} wordCount - The selector for the fiction title.
  */
-const SELECTORS = {
-    prevChapterBtn: "div.col-md-4:nth-child(1) > a:nth-child(1)",
-    chapterContent: ".chapter-inner",
-    chapterTitle: "h1.font-white",
-    fictionTitle: "h2.font-white",
-}
-const RECAP_WORD_COUNT = 250
+
+/**
+ * The object containing all extension settings need for this content-script
+ * ! This needs to be edited if the options change to get full intellisense
+ * @type {extensionSettings}
+ */
+let extensionSettings = {}
+
 let RECAP_TOGGLE = false
 
 init()
