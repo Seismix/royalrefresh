@@ -1,14 +1,14 @@
-document.body.style.border = '10px solid red' // TODO: remove, Debug only
+document.body.style.border = "10px solid red" // TODO: remove, Debug only
 let extensionSettings = {}
 
 /**
  * If these selectors change, `CONSTANTS` in `options.js` also needs to be adjusted
  */
 const SELECTORS = {
-    prevChapterBtn: 'div.col-md-4:nth-child(1) > a:nth-child(1)',
-    chapterContent: '.chapter-inner',
-    chapterTitle: 'h1.font-white',
-    fictionTitle: 'h2.font-white',
+    prevChapterBtn: "div.col-md-4:nth-child(1) > a:nth-child(1)",
+    chapterContent: ".chapter-inner",
+    chapterTitle: "h1.font-white",
+    fictionTitle: "h2.font-white",
 }
 const RECAP_WORD_COUNT = 250
 let RECAP_TOGGLE = false
@@ -25,7 +25,7 @@ async function init() {
  * Adds the recap button to the DOM, if it doesn't alredy exist
  */
 function injectRecapButton() {
-    if (!document.getElementById('recapButton')) {
+    if (!document.getElementById("recapButton")) {
         const button = createRecapButton()
         addRecapButton(button)
     }
@@ -52,16 +52,16 @@ async function loadExtensionSettings() {
  * ! The space after `Show` and `Hide` is intentional
  */
 function addRecapButton(button) {
-    button.addEventListener('click', addRecapContainer, { once: true })
+    button.addEventListener("click", addRecapContainer, { once: true })
 
-    button.addEventListener('click', function () {
-        const toggleSpan = document.getElementById('toggleSpan')
-        toggleSpan.textContent = RECAP_TOGGLE ? 'Show ' : 'Hide '
+    button.addEventListener("click", function () {
+        const toggleSpan = document.getElementById("toggleSpan")
+        toggleSpan.textContent = RECAP_TOGGLE ? "Show " : "Hide "
         RECAP_TOGGLE = !RECAP_TOGGLE
         toggleRecapContainer(!RECAP_TOGGLE)
     })
 
-    const navButtons = document.querySelector('.actions')
+    const navButtons = document.querySelector(".actions")
 
     if (navButtons && isURLChapter()) {
         navButtons.prepend(button)
@@ -75,8 +75,8 @@ function addRecapButton(button) {
  * @example https://www.royalroad.com/fiction/63759/super-supportive -> false
  */
 function isURLChapter() {
-    let pathSegmments = window.location.pathname.split('/')
-    return pathSegmments.includes('chapter')
+    let pathSegmments = window.location.pathname.split("/")
+    return pathSegmments.includes("chapter")
 }
 
 /**
@@ -84,22 +84,22 @@ function isURLChapter() {
  * @returns {HTMLButtonElement}
  */
 function createRecapButton() {
-    const button = document.createElement('button')
-    button.id = 'recapButton'
-    button.textContent = 'Recap'
-    button.classList.add('btn', 'btn-primary', 'btn-circle')
+    const button = document.createElement("button")
+    button.id = "recapButton"
+    button.textContent = "Recap"
+    button.classList.add("btn", "btn-primary", "btn-circle")
 
-    const toggleSpan = document.createElement('span')
-    toggleSpan.id = 'toggleSpan'
-    toggleSpan.textContent = 'Show '
+    const toggleSpan = document.createElement("span")
+    toggleSpan.id = "toggleSpan"
+    toggleSpan.textContent = "Show "
 
     button.prepend(toggleSpan)
 
-    const bookIcon = document.createElement('i')
-    bookIcon.classList.add('fa', 'fa-book')
+    const bookIcon = document.createElement("i")
+    bookIcon.classList.add("fa", "fa-book")
 
     button.prepend(bookIcon)
-    bookIcon.append('\u00A0')
+    bookIcon.append("\u00A0")
 
     return button
 }
@@ -108,12 +108,12 @@ function createRecapButton() {
  * Adds the recap container div to the DOM, if it doesn't already exist
  */
 function addRecapContainer() {
-    if (document.getElementById('recapContainer')) {
+    if (document.getElementById("recapContainer")) {
         return
     }
-    const recapContainer = document.createElement('div')
-    recapContainer.classList.add('chapter-inner', 'chapter-content')
-    recapContainer.id = 'recapContainer'
+    const recapContainer = document.createElement("div")
+    recapContainer.classList.add("chapter-inner", "chapter-content")
+    recapContainer.id = "recapContainer"
 
     const chapterDiv = document.querySelector(extensionSettings.chapterContent)
 
@@ -129,8 +129,8 @@ function addRecapContainer() {
  * @param {boolean} RECAP_TOGGLE
  */
 function toggleRecapContainer(RECAP_TOGGLE) {
-    const recapContainer = document.getElementById('recapContainer')
-    recapContainer.style.display = RECAP_TOGGLE ? 'none' : 'block'
+    const recapContainer = document.getElementById("recapContainer")
+    recapContainer.style.display = RECAP_TOGGLE ? "none" : "block"
 }
 
 /**
@@ -138,19 +138,19 @@ function toggleRecapContainer(RECAP_TOGGLE) {
  *  set the recap text inside the recap container
  */
 async function setRecapText() {
-    const recapContainer = document.getElementById('recapContainer')
+    const recapContainer = document.getElementById("recapContainer")
     const prevChapterURL = document.querySelector(
         extensionSettings.prevChapterBtn,
     ).href
 
     if (!recapContainer || !prevChapterURL) {
-        return console.error('Could not find necessary DOM Elements')
+        return console.error("Could not find necessary DOM Elements")
     }
 
     const prevChapterHTML = await fetchChapter(prevChapterURL)
 
     if (!prevChapterHTML) {
-        return console.error('Error fetching previous chapter')
+        return console.error("Error fetching previous chapter")
     }
 
     // Create a document fragment
@@ -172,25 +172,25 @@ async function setRecapText() {
         ),
     }
 
-    appendTextElement(fragment, recapContainerStrings.fictionTitle, 'h1')
-    appendTextElement(fragment, recapContainerStrings.lastChapterName, 'h2')
+    appendTextElement(fragment, recapContainerStrings.fictionTitle, "h1")
+    appendTextElement(fragment, recapContainerStrings.lastChapterName, "h2")
     appendTextElement(
         fragment,
         `Showing last ${extensionSettings.wordCount} words:`,
-        'h4',
+        "h4",
     )
     appendTextElement(
         fragment,
-        '...' + recapContainerStrings.lastChapterContent,
-        'div',
+        "..." + recapContainerStrings.lastChapterContent,
+        "div",
     )
 
     // Add the line separator between the recap and the new chapter
-    fragment.append(document.createElement('hr'))
+    fragment.append(document.createElement("hr"))
 
     recapContainer.appendChild(fragment)
 
-    recapContainer.scrollIntoView({ behavior: 'smooth' })
+    recapContainer.scrollIntoView({ behavior: "smooth" })
 }
 
 /**
@@ -216,14 +216,14 @@ async function fetchChapter(url) {
         const response = await fetch(url)
 
         if (!response.ok) {
-            throw new Error('Error fetching the previous chapter...')
+            throw new Error("Error fetching the previous chapter...")
         }
 
         const text = await response.text()
 
         return text
     } catch (error) {
-        console.error('Error fetching the chapter:', error)
+        console.error("Error fetching the chapter:", error)
 
         return null
     }
@@ -244,7 +244,7 @@ function extractContent(
     selector,
     wordcount = extensionSettings.wordCount || RECAP_WORD_COUNT,
 ) {
-    const doc = parser.parseFromString(html, 'text/html')
+    const doc = parser.parseFromString(html, "text/html")
     const contentElement = doc.querySelector(selector)
     if (!contentElement) {
         return null
@@ -254,6 +254,6 @@ function extractContent(
         .trim()
         .split(/\s+/)
         .slice(-wordcount)
-        .join(' ')
+        .join(" ")
     return extracted
 }

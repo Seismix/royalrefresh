@@ -28,8 +28,8 @@ label {
     font-weight: bold;
 }
 
-input[type='text'],
-input[type='number'] {
+input[type="text"],
+input[type="number"] {
     width: 100%;
     padding: 5px;
     margin-bottom: 10px;
@@ -61,10 +61,10 @@ button {
     text-align: center;
     cursor: pointer;
 }
-button[type='submit'] {
+button[type="submit"] {
     background-color: #007bff;
 }
-button[type='button'] {
+button[type="button"] {
     background-color: crimson;
 }
 
