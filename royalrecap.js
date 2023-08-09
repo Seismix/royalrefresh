@@ -38,18 +38,18 @@ function injectRecapButton() {
 async function loadExtensionSettings() {
     const storageItems = await browser.storage.sync.get()
     extensionSettings = {
-        wordCount: storageItems.wordCount || RECAP_WORD_COUNT,
-        prevChapterBtn: storageItems.prevChapterBtn || SELECTORS.prevChapterBtn,
-        chapterContent: storageItems.chapterContent || SELECTORS.chapterContent,
-        chapterTitle: storageItems.chapterTitle || SELECTORS.chapterTitle,
-        fictionTitle: storageItems.fictionTitle || SELECTORS.fictionTitle,
+        wordCount: storageItems.wordCount,
+        prevChapterBtn: storageItems.prevChapterBtn,
+        chapterContent: storageItems.chapterContent,
+        chapterTitle: storageItems.chapterTitle,
+        fictionTitle: storageItems.fictionTitle,
     }
     console.log(extensionSettings)
 }
 
 /**
  * Adds the recap button to the DOM and adds various click event listeners
- * ! The space after `Show` and `Hide` is intentional
+ * * The space after `Show` and `Hide` is intentional
  */
 function addRecapButton(button) {
     button.addEventListener("click", addRecapContainer, { once: true })
@@ -242,7 +242,7 @@ const parser = new DOMParser()
 function extractContent(
     html,
     selector,
-    wordcount = extensionSettings.wordCount || RECAP_WORD_COUNT,
+    wordcount = extensionSettings.wordCount,
 ) {
     const doc = parser.parseFromString(html, "text/html")
     const contentElement = doc.querySelector(selector)
