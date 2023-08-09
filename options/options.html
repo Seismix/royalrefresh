@@ -1,18 +1,59 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
+        <link rel="stylesheet" type="text/css" href="options.css" />
         <title>RoyalRecap Options</title>
     </head>
 
     <body>
-        <p>setting: <b id="setting1">no value</b></p>
-        <form>
-            <h3>Wordcount</h3>
-            <label for="wordcount">Wordcount:</label><br />
-            <input type="text" name="wordcount" id="wordcount" /><br /><br />
-            <button type="submit">Save</button>
+        <div class="container">
+            <h3>RoyalRecap Settings Page</h3>
+            <p>
+                Adjust the different values to your liking. The current values
+                are displayed in the respective input fields.
+            </p>
+            <p>
+                <strong>
+                    I recommend only changing values in the advanced options if
+                    you know what you're doing.
+                </strong>
+            </p>
+            <!-- TODO: Remove -->
+            <span id="debug"></span>
+            <form>
+                <label for="wordCount">Word count (max 500):</label>
+                <input
+                    type="number"
+                    min="1"
+                    max="500"
+                    name="wordCount"
+                    id="wordCount" />
+                <details>
+                    <summary>Advanced options: CSS-Selectors</summary>
+                    <label for="prevChapterBtn"
+                        >Previous chapter buttton:</label
+                    >
+                    <input
+                        type="text"
+                        name="prevChapterBtn"
+                        id="prevChapterBtn" />
+                    <label for="chapterContent">Chapter content: </label>
+                    <input
+                        type="text"
+                        name="chapterContent"
+                        id="chapterContent" />
+                    <label for="chapterTitle">Chapter title: </label>
+                    <input type="text" name="chapterTitle" id="chapterTitle" />
+                    <label for="fictionTitle">Fiction title:</label>
+                    <input type="text" name="fictionTitle" id="fictionTitle" />
+                </details>
+                <button type="submit">Save</button>
+                <button type="button" id="defaults">
+                    Restore Default Settings
+                </button>
+            </form>
             <div id="status"></div>
-        </form>
-        <script src="options.js"></script>
+            <script src="options.js"></script>
+        </div>
     </body>
 </html>
