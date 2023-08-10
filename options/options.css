@@ -36,7 +36,6 @@ input[type="number"] {
     border: 1px solid #ccc;
     border-radius: 4px;
 }
-
 details {
     margin-top: 10px;
     padding: 10px;
@@ -63,22 +62,13 @@ button {
 }
 button[type="submit"] {
     background-color: #007bff;
+    transition: background-color 0.2s ease-in-out;
 }
 button[type="button"] {
     background-color: crimson;
+    transition: background-color 0.2s ease-in-out;
 }
 
-#status {
-    margin-top: 10px;
-    padding: 5px;
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    /* color: #4bb543; */
-    display: none;
-}
-
-/* TODO: implement */
-.error {
-    border: 1px solid crimson;
+button.saved {
+    background-color: #00cc00;
 }

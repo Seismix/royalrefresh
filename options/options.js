@@ -1,11 +1,56 @@
-const CONSTANTS = {
-    prevChapterBtnSelector: "div.col-md-4:nth-child(1) > a:nth-child(1)",
-    chapterContentSelector: ".chapter-inner",
-    chapterTitleSelector: "h1.font-white",
-    fictionTitleSelector: "h2.font-white",
-    defaultWordCount: 250,
+/**
+ * @constant
+ */
+const DEFAULTS = {
+    wordCount: 250,
+    prevChapterBtn: "div.col-md-4:nth-child(1) > a:nth-child(1)",
+    chapterContent: ".chapter-inner",
+    chapterTitle: "h1.font-white",
+    fictionTitle: "h2.font-white",
 }
 
+/**
+ * Loads saved options and populates input fields.
+ */
+async function loadOptions() {
+    const options = await browser.storage.sync.get(Object.keys(DEFAULTS))
+
+    for (const key in DEFAULTS) {
+        setInputValue(key, options[key] || DEFAULTS[key])
+    }
+}
+
+/**
+ * Saves the options entered by the user.
+ * @param { Event } event - The submit event.
+ */
+async function saveOptions(event) {
+    event.preventDefault()
+
+    const options = {}
+    for (const key in DEFAULTS) {
+        options[key] =
+            document.getElementById(key).value.trim() || DEFAULTS[key]
+    }
+
+    await browser.storage.sync.set(options)
+    displayMessage("success")
+}
+
+/**
+ * Restores the default options by setting the options to default values.
+ */
+async function restoreDefaultOptions() {
+    await browser.storage.sync.set(DEFAULTS)
+    await loadOptions()
+    displayMessage("restore")
+}
+
+/**
+ * Sets the value of an input element.
+ * @param { string } elementId - The ID of the input element.
+ * @param { string } value - The value to set.
+ */
 function setInputValue(elementId, value) {
     const inputElement = document.getElementById(elementId)
     if (inputElement) {
@@ -13,84 +58,43 @@ function setInputValue(elementId, value) {
     }
 }
 
-function saveOptions(e) {
-    e.preventDefault()
+/**
+ * @typedef { "success" | "restore" } MessageType
+ */
 
-    const newWordCount = document.getElementById("wordCount").value.trim()
-    const newPrevChapterBtn = document.getElementById("prevChapterBtn").value
-    const newChapterContent = document.getElementById("chapterContent").value
-    const newChapterTitle = document.getElementById("chapterTitle").value
-    const newFictionTitle = document.getElementById("fictionTitle").value
-
-    browser.storage.sync
-        .set({
-            wordCount: newWordCount,
-            prevChapterBtn: newPrevChapterBtn,
-            chapterContent: newChapterContent,
-            chapterTitle: newChapterTitle,
-            fictionTitle: newFictionTitle,
-        })
-        .then(() => {
-            displayMessage("Options have been saved ✔", true)
-        })
-}
-
-async function loadOptions() {
-    const options = await browser.storage.sync.get([
-        "wordCount",
-        "prevChapterBtn",
-        "chapterContent",
-        "chapterTitle",
-        "fictionTitle",
-    ])
-
-    setInputValue("wordCount", options.wordCount || CONSTANTS.defaultWordCount)
-    setInputValue(
-        "prevChapterBtn",
-        options.prevChapterBtn || CONSTANTS.prevChapterBtnSelector,
-    )
-    setInputValue(
-        "chapterContent",
-        options.chapterContent || CONSTANTS.chapterContentSelector,
-    )
-    setInputValue(
-        "chapterTitle",
-        options.chapterTitle || CONSTANTS.chapterTitleSelector,
-    )
-    setInputValue(
-        "fictionTitle",
-        options.fictionTitle || CONSTANTS.fictionTitleSelector,
-    )
-}
-
-async function restoreDefaultOptions() {
-    const options = {
-        wordCount: CONSTANTS.defaultWordCount,
-        prevChapterBtn: CONSTANTS.prevChapterBtnSelector,
-        chapterContent: CONSTANTS.chapterContentSelector,
-        chapterTitle: CONSTANTS.chapterTitleSelector,
-        fictionTitle: CONSTANTS.fictionTitleSelector,
+/**
+ * Display a status message with customizable color
+ * @param {MessageType} messageType
+ */
+function displayMessage(messageType) {
+    switch (messageType) {
+        case "success":
+            const submitButton = document.querySelector("button[type='submit'")
+            animateButton(submitButton, "Saved ✔")
+            break
+        case "restore":
+            const defaultButton = document.getElementById("defaults")
+            animateButton(defaultButton, "Restored Defaults ✔")
+            break
+        default:
+            break
     }
-
-    await browser.storage.sync.set(options)
-    await loadOptions() // Update input values with defaults
-    displayMessage("Default settings have been applied ✔", true)
 }
 
 /**
- * @param {string} message The message to pass
- * @param {boolean} isSuccess Sets the colour of the message (`true` = green, `false` = red)
+ * Animate the button text and class
+ * @param {HTMLButtonElement} button The button element to animate
+ * @param {string} newText The new text to display temporarily
  */
-function displayMessage(message, isSuccess) {
-    let status = document.getElementById("status")
-    status.textContent = message
+function animateButton(button, newText) {
+    const originalText = button.textContent
+    button.classList.add("saved")
+    button.textContent = newText
 
-    status.style.color = isSuccess ? "#4bb543" : "crimson"
-
-    status.style.display = "block"
     setTimeout(() => {
-        status.style.display = "none"
-    }, 2000) // Hide the status message after 3 seconds
+        button.textContent = originalText
+        button.classList.remove("saved")
+    }, 2000)
 }
 
 // TODO: Remove this and all mentions before deployment
