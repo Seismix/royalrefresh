@@ -30,12 +30,14 @@ Here's an example of what it looks like:
 ## TODOs
 
 This extension is still a work in progress so there's plenty left to accomplish. If you have a good idea, you can create
-a new issue to describe it/contribute and I will consider it. Here's a list of what I have planned:
+a new issue to describe it/contribute and I will consider it. Here's a few examples of what I have planned:
 
-- [#3](https://github.com/Seismix/RoyalRecap/issues/3): A settings page for various current and also future settings
-- [#5](https://github.com/Seismix/RoyalRecap/issues/5): Cross browser compatibility
-- [#6](https://github.com/Seismix/RoyalRecap/issues/6): Prettier recap text (with formatting)
-- [#7](https://github.com/Seismix/RoyalRecap/issues/7): Generate an actual recap
+- [x] [#3](https://github.com/Seismix/RoyalRecap/issues/3): ~~A settings page for various current and also future settings~~
+- [ ] [#5](https://github.com/Seismix/RoyalRecap/issues/5): Cross browser compatibility
+- [ ] [#6](https://github.com/Seismix/RoyalRecap/issues/6): Prettier recap text (with formatting)
+- [ ] [#7](https://github.com/Seismix/RoyalRecap/issues/7): Generate an actual recap
+
+Check out everything I'm tracking in this project's [issues](https://github.com/Seismix/RoyalRecap/issues/)
 
 ## Contributing and bug reports
 
