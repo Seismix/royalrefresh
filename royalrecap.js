@@ -161,17 +161,22 @@ async function setRecapText() {
     // Create a document fragment
     const fragment = document.createDocumentFragment()
 
+    const parser = new DOMParser()
+
     // Object containing the extracted information
     const recapContainerStrings = {
         fictionTitle: extractContent(
+            parser,
             prevChapterHTML,
             extensionSettings.fictionTitle,
         ),
         lastChapterName: extractContent(
+            parser,
             prevChapterHTML,
             extensionSettings.chapterTitle,
         ),
         lastChapterContent: extractContent(
+            parser,
             prevChapterHTML,
             extensionSettings.chapterContent,
         ),
@@ -234,17 +239,17 @@ async function fetchChapter(url) {
     }
 }
 
-const parser = new DOMParser()
-
 /**
  * Parses HTML text and extracts data based on the given selector.
  * Takes the value from the extension settings {@link loadExtensionSettings()}
  * but defaults to the value of RECAP_WORD_COUNT.
+ * @param {DOMParser}
  * @param {string} html
  * @param {string} selector
  * @param {number} wordcount default `RECAP_WORD_COUNT`
  */
 function extractContent(
+    parser,
     html,
     selector,
     wordcount = extensionSettings.wordCount,
