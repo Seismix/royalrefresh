@@ -1,0 +1,52 @@
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="stylesheet" type="text/css" href="options.css" />
+        <title>RoyalRecap Options</title>
+    </head>
+
+    <body>
+        <div class="container">
+            <h3>RoyalRecap Settings Page</h3>
+            <p>
+                Adjust the different values to your liking. The current values
+                are displayed in the respective input fields.
+            </p>
+            <form>
+                <label for="wordCount">Word count (max 500):</label>
+                <input
+                    type="number"
+                    min="1"
+                    max="500"
+                    inputmode="numeric"
+                    name="wordCount"
+                    required
+                    id="wordCount" />
+                <details>
+                    <summary>Advanced options: CSS-Selectors</summary>
+                    <label for="prevChapterBtn"
+                        >Previous chapter buttton:</label
+                    >
+                    <input
+                        type="text"
+                        name="prevChapterBtn"
+                        id="prevChapterBtn" />
+                    <label for="chapterContent">Chapter content: </label>
+                    <input
+                        type="text"
+                        name="chapterContent"
+                        id="chapterContent" />
+                    <label for="chapterTitle">Chapter title: </label>
+                    <input type="text" name="chapterTitle" id="chapterTitle" />
+                    <label for="fictionTitle">Fiction title:</label>
+                    <input type="text" name="fictionTitle" id="fictionTitle" />
+                </details>
+                <button type="submit">Save</button>
+                <button type="button" id="defaults">
+                    Restore Default Settings
+                </button>
+            </form>
+            <script src="options.js"></script>
+        </div>
+    </body>
+</html>
