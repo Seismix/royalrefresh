@@ -49,7 +49,6 @@ async function loadExtensionSettings() {
         chapterTitle: storageItems.chapterTitle,
         fictionTitle: storageItems.fictionTitle,
     }
-    console.log(extensionSettings)
 }
 
 /**
