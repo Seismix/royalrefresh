@@ -1,5 +1,3 @@
-document.body.style.border = "10px solid red" // TODO: remove, Debug only
-
 /**
  * @typedef {Object} extensionSettings
  * @property {string} prevChapterBtn - The selector for the previous chapter button.

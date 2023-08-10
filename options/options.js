@@ -97,12 +97,6 @@ function animateButton(button, newText) {
     }, 2000)
 }
 
-// TODO: Remove this and all mentions before deployment
-function debugHelper(content) {
-    let debugSpan = document.getElementById("debug")
-    debugSpan.textContent = content
-}
-
 document.addEventListener("DOMContentLoaded", loadOptions)
 document.querySelector("form").addEventListener("submit", saveOptions)
 document
