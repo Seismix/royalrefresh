@@ -14,8 +14,6 @@
  */
 let extensionSettings = {}
 
-let RECAP_TOGGLE = false
-
 init()
 
 async function init() {
@@ -134,6 +132,8 @@ function addRecapContainer() {
 
     setRecapText()
 }
+
+let RECAP_TOGGLE = false
 
 /**
  * Toggles the display property of the recap container between `none` and `block`
