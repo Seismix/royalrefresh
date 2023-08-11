@@ -19,9 +19,20 @@ let RECAP_TOGGLE = false
 init()
 
 async function init() {
-    await loadExtensionSettings()
+    if (isChapterURL) {
+        await loadExtensionSettings()
+        injectRecapButton()
+    }
+}
 
-    injectRecapButton()
+/**
+ * Imports the default values from the "defaults.js" file.
+ * @returns {Promise<import("./defaults").DefaultValues>}
+ */
+async function importDefaultValues() {
+    const src = browser.runtime.getURL("defaults.js")
+    const { default: defaultValues } = await import(src)
+    return defaultValues
 }
 
 /**
@@ -40,12 +51,12 @@ function injectRecapButton() {
  */
 async function loadExtensionSettings() {
     const storageItems = await browser.storage.sync.get()
-    extensionSettings = {
-        wordCount: storageItems.wordCount,
-        prevChapterBtn: storageItems.prevChapterBtn,
-        chapterContent: storageItems.chapterContent,
-        chapterTitle: storageItems.chapterTitle,
-        fictionTitle: storageItems.fictionTitle,
+
+    if (Object.keys(storageItems).length === 0) {
+        const defaultValues = await importDefaultValues()
+        extensionSettings = Object.assign({}, defaultValues)
+    } else {
+        extensionSettings = Object.assign({}, extensionSettings, storageItems)
     }
 }
 
@@ -65,18 +76,16 @@ function addRecapButton(button) {
 
     const navButtons = document.querySelector(".actions")
 
-    if (navButtons && isURLChapter()) {
+    if (navButtons && isChapterURL()) {
         navButtons.prepend(button)
     }
 }
 
 /**
- * Check if the current URL is a chapter URL
- * @returns {boolean} True if chapter is in the URL path, otherwise false
- * @example https://www.royalroad.com/fiction/63759/super-supportive/chapter/1097958/two-mistakes -> true
- * @example https://www.royalroad.com/fiction/63759/super-supportive -> false
+ * Checks if the current URL is a chapter URL.
+ * @returns {boolean} True if chapter is in the URL path, otherwise false.
  */
-function isURLChapter() {
+function isChapterURL() {
     let pathSegmments = window.location.pathname.split("/")
     return pathSegmments.includes("chapter")
 }
