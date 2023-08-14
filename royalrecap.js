@@ -19,7 +19,8 @@ init()
 async function init() {
     if (isChapterURL) {
         await loadExtensionSettings()
-        injectRecapButton()
+        const button = createRecapButton()
+        addRecapButtonToDOM(button)
     }
 }
 
@@ -31,16 +32,6 @@ async function importDefaultValues() {
     const src = browser.runtime.getURL("defaults.js")
     const { default: defaultValues } = await import(src)
     return defaultValues
-}
-
-/**
- * Adds the recap button to the DOM, if it doesn't alredy exist
- */
-function injectRecapButton() {
-    if (!document.getElementById("recapButton")) {
-        const button = createRecapButton()
-        addRecapButton(button)
-    }
 }
 
 /**
@@ -59,24 +50,36 @@ async function loadExtensionSettings() {
 }
 
 /**
- * Adds the recap button to the DOM and adds various click event listeners
- * * The space after `Show` and `Hide` is intentional
+ * Adds the recap button to the DOM if it doesn't already exist
  */
-function addRecapButton(button) {
-    button.addEventListener("click", addRecapContainer, { once: true })
+function addRecapButtonToDOM(button) {
+    if (!document.getElementById("recapButton")) {
+        const navButtons = document.querySelector(".actions")
 
-    button.addEventListener("click", function () {
-        const toggleSpan = document.getElementById("toggleSpan")
-        toggleSpan.textContent = RECAP_TOGGLE ? "Show " : "Hide "
-        RECAP_TOGGLE = !RECAP_TOGGLE
-        toggleRecapContainer(!RECAP_TOGGLE)
-    })
-
-    const navButtons = document.querySelector(".actions")
-
-    if (navButtons && isChapterURL()) {
-        navButtons.prepend(button)
+        if (navButtons) {
+            navButtons.prepend(button)
+        }
     }
+}
+
+/**
+ * Toggles the recap button text between `Show` and `Hide` based on element's display style
+ */
+function toggleRecapButton() {
+    const toggleSpan = document.getElementById("toggleSpan")
+    toggleSpan.textContent =
+        document.getElementById("recapContainer").style.display === "none"
+            ? "Hide "
+            : "Show "
+}
+
+/**
+ * Toggles the display property of the recap container between `none` and `block`
+ */
+function toggleRecapContainer() {
+    const recapContainer = document.getElementById("recapContainer")
+    recapContainer.style.display =
+        recapContainer.style.display === "none" ? "block" : "none"
 }
 
 /**
@@ -89,7 +92,8 @@ function isChapterURL() {
 }
 
 /**
- * Creates the recap button including the icon and returns it
+ * Creates the recap button including the icon and returns it.
+ * Adds the necessary Eventlisteners
  * @returns {HTMLButtonElement}
  */
 function createRecapButton() {
@@ -110,19 +114,27 @@ function createRecapButton() {
     button.prepend(bookIcon)
     bookIcon.append("\u00A0")
 
+    button.addEventListener("click", addRecapContainerToDOM, { once: true })
+
+    button.addEventListener("click", () => {
+        toggleRecapButton()
+        toggleRecapContainer()
+    })
+
     return button
 }
 
 /**
  * Adds the recap container div to the DOM, if it doesn't already exist
  */
-function addRecapContainer() {
+function addRecapContainerToDOM() {
     if (document.getElementById("recapContainer")) {
         return
     }
     const recapContainer = document.createElement("div")
     recapContainer.classList.add("chapter-inner", "chapter-content")
     recapContainer.id = "recapContainer"
+    recapContainer.style.display = "none"
 
     const chapterDiv = document.querySelector(extensionSettings.chapterContent)
 
@@ -131,17 +143,6 @@ function addRecapContainer() {
     }
 
     setRecapText()
-}
-
-let RECAP_TOGGLE = false
-
-/**
- * Toggles the display property of the recap container between `none` and `block`
- * @param {boolean} RECAP_TOGGLE
- */
-function toggleRecapContainer(RECAP_TOGGLE) {
-    const recapContainer = document.getElementById("recapContainer")
-    recapContainer.style.display = RECAP_TOGGLE ? "none" : "block"
 }
 
 /**
