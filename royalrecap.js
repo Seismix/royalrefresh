@@ -17,10 +17,12 @@ let extensionSettings = {}
 init()
 
 async function init() {
-    if (isChapterURL) {
+    if (isChapterURL()) {
         await loadExtensionSettings()
-        const button = createRecapButton()
-        addRecapButtonToDOM(button)
+
+        const shouldDisableRecapButton = hasPreviousChapterURL()
+        const recapButton = createRecapButton(shouldDisableRecapButton)
+        addRecapButtonToDOM(recapButton)
     }
 }
 
@@ -84,23 +86,36 @@ function toggleRecapContainer() {
 
 /**
  * Checks if the current URL is a chapter URL.
- * @returns {boolean} True if chapter is in the URL path, otherwise false.
+ * @returns {boolean} True if `chapter` is in the URL path, otherwise false.
  */
 function isChapterURL() {
-    let pathSegmments = window.location.pathname.split("/")
-    return pathSegmments.includes("chapter")
+    return window.location.pathname.split("/").includes("chapter")
+}
+
+/**
+ * Checks if the previous chapter button has a valid href attribute.
+ * @returns {boolean} True if the previous chapter button has a valid href attribute, otherwise false.
+ */
+function hasPreviousChapterURL() {
+    const hasPrevChapterURL = document.querySelector(
+        extensionSettings.prevChapterBtn,
+    )
+
+    return !!hasPrevChapterURL?.hasAttribute("href")
 }
 
 /**
  * Creates the recap button including the icon and returns it.
  * Adds the necessary Eventlisteners
+ * @param {boolean} disabled
  * @returns {HTMLButtonElement}
  */
-function createRecapButton() {
+function createRecapButton(shouldDisableButton) {
     const button = document.createElement("button")
     button.id = "recapButton"
     button.textContent = "Recap"
     button.classList.add("btn", "btn-primary", "btn-circle")
+    button.disabled = !shouldDisableButton // Disable the button if shouldDisableButton is true
 
     const toggleSpan = document.createElement("span")
     toggleSpan.id = "toggleSpan"
