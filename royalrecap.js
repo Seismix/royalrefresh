@@ -43,12 +43,11 @@ async function importDefaultValues() {
  */
 async function loadExtensionSettings() {
     const storageItems = await browser.storage.sync.get()
-
     if (Object.keys(storageItems).length === 0) {
         const defaultValues = await importDefaultValues()
-        extensionSettings = Object.assign({}, defaultValues)
+        extensionSettings = { ...defaultValues }
     } else {
-        extensionSettings = Object.assign({}, extensionSettings, storageItems)
+        extensionSettings = { ...extensionSettings, ...storageItems }
     }
 }
 
