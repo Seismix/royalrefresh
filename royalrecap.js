@@ -20,8 +20,9 @@ async function init() {
     if (isChapterURL()) {
         await loadExtensionSettings()
 
-        const shouldDisableRecapButton = hasPreviousChapterURL()
-        const recapButton = createRecapButton(shouldDisableRecapButton)
+        const recapButton = createRecapButton({
+            disabled: !hasPreviousChapterURL(),
+        })
         addRecapButtonToDOM(recapButton)
     }
 }
@@ -105,17 +106,20 @@ function hasPreviousChapterURL() {
 }
 
 /**
- * Creates the recap button including the icon and returns it.
- * Adds the necessary Eventlisteners
- * @param {boolean} disabled
- * @returns {HTMLButtonElement}
+ * Creates the recap button with optional disabled state.
+ * @param {Object} options - Options for creating the recap button.
+ * @param {boolean} options.disabled - Whether the button should be disabled.
+ * @returns {HTMLButtonElement} The created recap button element.
  */
-function createRecapButton(shouldDisableButton) {
+function createRecapButton(options) {
     const button = document.createElement("button")
     button.id = "recapButton"
     button.textContent = "Recap"
     button.classList.add("btn", "btn-primary", "btn-circle")
-    button.disabled = !shouldDisableButton // Disable the button if shouldDisableButton is true
+
+    if (options.disabled === true) {
+        button.disabled = true
+    }
 
     const toggleSpan = document.createElement("span")
     toggleSpan.id = "toggleSpan"
