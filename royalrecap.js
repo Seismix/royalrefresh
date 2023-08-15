@@ -47,9 +47,9 @@ async function importDefaultValues() {
  * @see {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/sync | MDN Documentation storage.sync}
  */
 async function loadExtensionSettings() {
-    const storageItems = await browser.storage.sync.get()
+    const defaultValues = await importDefaultValues()
+    const storageItems = await browser.storage.sync.get(defaultValues)
     if (Object.keys(storageItems).length === 0) {
-        const defaultValues = await importDefaultValues()
         extensionSettings = { ...defaultValues }
     } else {
         extensionSettings = { ...extensionSettings, ...storageItems }
