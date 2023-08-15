@@ -1,14 +1,16 @@
 import DEFAULTS from "./defaults.js"
 
+/**
+ * Saves the default values to the browser storage after the extension has been installed
+ */
+browser.runtime.onInstalled.addListener(setDefaultsOnInstall)
+
 browser.browserAction.onClicked.addListener(() => {
     browser.runtime.openOptionsPage()
 })
 
-/**
- * Saves the default values to the browser storage after the extension has been installed
- */
-browser.runtime.onInstalled.addListener(async (details) => {
+function setDefaultsOnInstall(details) {
     if (details.reason === "install") {
-        await browser.storage.sync.set(DEFAULTS)
+        browser.storage.sync.set(DEFAULTS)
     }
-})
+}
