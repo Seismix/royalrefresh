@@ -17,6 +17,7 @@ let extensionSettings = {}
 const RECAP_BUTTON_ID = "recapButton"
 const RECAP_CONTAINER_ID = "recapContainer"
 const TOGGLE_SPAN_ID = "toggleSpan"
+const DEFAULTS_FILE = "defaults.js"
 
 init()
 
@@ -36,7 +37,7 @@ async function init() {
  * @returns {Promise<ExtensionSettings>}
  */
 async function importDefaultValues() {
-    const src = browser.runtime.getURL("defaults.js")
+    const src = browser.runtime.getURL(DEFAULTS_FILE)
     const { default: defaultValues } = await import(src)
     return defaultValues
 }
