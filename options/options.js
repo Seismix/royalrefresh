@@ -1,13 +1,9 @@
+// @ts-check
+
+import DEFAULTS from "../defaults.js"
 /**
- * @constant
+ * @typedef {import("../types").DisplayMessageType} DisplayMessageType
  */
-const DEFAULTS = {
-    wordCount: 250,
-    prevChapterBtn: "div.col-md-4:nth-child(1) > a:nth-child(1)",
-    chapterContent: ".chapter-inner",
-    chapterTitle: "h1.font-white",
-    fictionTitle: "h2.font-white",
-}
 
 /**
  * Loads saved options and populates input fields.
@@ -29,8 +25,10 @@ async function saveOptions(event) {
 
     const options = {}
     for (const key in DEFAULTS) {
-        options[key] =
-            document.getElementById(key).value.trim() || DEFAULTS[key]
+        const element = document.getElementById(key)
+        if (element && element instanceof HTMLInputElement) {
+            options[key] = element.value || DEFAULTS[key]
+        }
     }
 
     await browser.storage.sync.set(options)
@@ -53,31 +51,34 @@ async function restoreDefaultOptions() {
  */
 function setInputValue(elementId, value) {
     const inputElement = document.getElementById(elementId)
-    if (inputElement) {
+    if (inputElement && inputElement instanceof HTMLInputElement) {
         inputElement.value = value
     }
 }
 
 /**
- * @typedef { "success" | "restore" } MessageType
- */
-
-/**
  * Display a status message with customizable color
- * @param {MessageType} messageType
+ * @param {DisplayMessageType} messageType
  */
 function displayMessage(messageType) {
-    switch (messageType) {
-        case "success":
-            const submitButton = document.querySelector("button[type='submit'")
-            animateButton(submitButton, "Saved ✔")
-            break
-        case "restore":
-            const defaultButton = document.getElementById("defaults")
-            animateButton(defaultButton, "Restored Defaults ✔")
-            break
-        default:
-            break
+    const buttonConfig = {
+        success: {
+            querySelector: "button[type='submit']",
+            buttonText: "Saved ✔",
+        },
+        restore: {
+            querySelector: "#defaults",
+            buttonText: "Restored Defaults ✔",
+        },
+    }
+
+    const config = buttonConfig[messageType]
+
+    if (config) {
+        const buttonElement = document.querySelector(config.querySelector)
+        if (buttonElement instanceof HTMLButtonElement) {
+            animateButton(buttonElement, config.buttonText)
+        }
     }
 }
 
@@ -97,8 +98,16 @@ function animateButton(button, newText) {
     }, 2000)
 }
 
-document.addEventListener("DOMContentLoaded", loadOptions)
-document.querySelector("form").addEventListener("submit", saveOptions)
-document
-    .getElementById("defaults")
-    .addEventListener("click", restoreDefaultOptions)
+document.addEventListener("DOMContentLoaded", function () {
+    const formElement = document.querySelector("form")
+    if (formElement) {
+        formElement.addEventListener("submit", saveOptions)
+    }
+
+    const defaultsElement = document.getElementById("defaults")
+    if (defaultsElement) {
+        defaultsElement.addEventListener("click", restoreDefaultOptions)
+    }
+
+    loadOptions()
+})

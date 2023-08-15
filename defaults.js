@@ -1,4 +1,7 @@
 // @ts-check
+/**
+ * @typedef {import("./types.js").ExtensionSettings} ExtensionSettings
+ */
 
 /**
  * The object containing all default settings this extension uses

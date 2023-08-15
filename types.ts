@@ -6,9 +6,10 @@ export type ExtensionSettings = {
     wordCount: number
 }
 
-// Type definitions for RecapContainerStrings
 export type RecapContainerStrings = {
     fictionTitle: string
     lastChapterName: string
     lastChapterContent: string
 }
+
+export type DisplayMessageType = "success" | "restore"
