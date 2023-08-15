@@ -188,13 +188,33 @@ async function setRecapText() {
         return console.error("Error fetching previous chapter")
     }
 
-    // Create a document fragment
-    const fragment = document.createDocumentFragment()
+    const recapContainerStrings = extractRecapContainerStrings(prevChapterHTML)
 
+    const fragment = document.createDocumentFragment()
+    appendRecapElements(fragment, recapContainerStrings)
+    fragment.append(document.createElement("hr"))
+
+    recapContainer.appendChild(fragment)
+    recapContainer.scrollIntoView({ behavior: "smooth" })
+}
+
+/**
+ * @typedef {Object} RecapContainerStrings
+ * @property {string} fictionTitle - The fiction title extracted from the HTML.
+ * @property {string} lastChapterName - The last chapter name extracted from the HTML.
+ * @property {string} lastChapterContent - The last chapter content extracted from the HTML.
+ */
+
+/**
+ * Extracts recap container strings from the provided HTML content.
+ *
+ * @param {string} prevChapterHTML - The HTML content as text of the previous chapter.
+ * @returns {RecapContainerStrings} An object containing recap container strings.
+ */
+function extractRecapContainerStrings(prevChapterHTML) {
     const parser = new DOMParser()
 
-    // Object containing the extracted information
-    const recapContainerStrings = {
+    return {
         fictionTitle: extractContent(
             parser,
             prevChapterHTML,
@@ -211,7 +231,15 @@ async function setRecapText() {
             extensionSettings.chapterContent,
         ),
     }
+}
 
+/**
+ * Appends recap elements to a document fragment.
+ *
+ * @param {DocumentFragment} fragment - The document fragment to append elements to.
+ * @param {RecapContainerStrings} recapContainerStrings - An object containing recap container strings.
+ */
+function appendRecapElements(fragment, recapContainerStrings) {
     appendTextElement(fragment, recapContainerStrings.fictionTitle, "h1")
     appendTextElement(fragment, recapContainerStrings.lastChapterName, "h2")
     appendTextElement(
@@ -224,13 +252,6 @@ async function setRecapText() {
         "..." + recapContainerStrings.lastChapterContent,
         "div",
     )
-
-    // Add the line separator between the recap and the new chapter
-    fragment.append(document.createElement("hr"))
-
-    recapContainer.appendChild(fragment)
-
-    recapContainer.scrollIntoView({ behavior: "smooth" })
 }
 
 /**
