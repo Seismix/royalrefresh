@@ -1,17 +1,8 @@
-/**
- * ! This needs to be edited if the options change to get full intellisense together
- * ! with the DEFAULTS object in `defaults.js`
- * @typedef {Object} DefaultValues
- * @property {string} prevChapterBtn - The selector for the previous chapter button.
- * @property {string} chapterContent - The selector for the chapter content.
- * @property {string} chapterTitle - The selector for the chapter title.
- * @property {string} fictionTitle - The selector for the fiction title.
- * @property {number} wordCount - The selector for the fiction title.
- */
+// @ts-check
 
 /**
  * The object containing all default settings this extension uses
- * @type {DefaultValues}
+ * @type {ExtensionSettings}
  */
 const DEFAULTS = {
     wordCount: 250,
