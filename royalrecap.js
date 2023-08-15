@@ -14,6 +14,11 @@
  */
 let extensionSettings = {}
 
+// Constants
+const RECAP_BUTTON_ID = "recapButton"
+const RECAP_CONTAINER_ID = "recapContainer"
+const TOGGLE_SPAN_ID = "toggleSpan"
+
 init()
 
 async function init() {
@@ -55,7 +60,7 @@ async function loadExtensionSettings() {
  * Adds the recap button to the DOM if it doesn't already exist
  */
 function addRecapButtonToDOM(button) {
-    if (!document.getElementById("recapButton")) {
+    if (!document.getElementById(RECAP_BUTTON_ID)) {
         const navButtons = document.querySelector(".actions")
 
         if (navButtons) {
@@ -68,9 +73,9 @@ function addRecapButtonToDOM(button) {
  * Toggles the recap button text between `Show` and `Hide` based on element's display style
  */
 function toggleRecapButton() {
-    const toggleSpan = document.getElementById("toggleSpan")
+    const toggleSpan = document.getElementById(TOGGLE_SPAN_ID)
     toggleSpan.textContent =
-        document.getElementById("recapContainer").style.display === "none"
+        document.getElementById(RECAP_CONTAINER_ID).style.display === "none"
             ? "Hide "
             : "Show "
 }
@@ -79,7 +84,7 @@ function toggleRecapButton() {
  * Toggles the display property of the recap container between `none` and `block`
  */
 function toggleRecapContainer() {
-    const recapContainer = document.getElementById("recapContainer")
+    const recapContainer = document.getElementById(RECAP_CONTAINER_ID)
     recapContainer.style.display =
         recapContainer.style.display === "none" ? "block" : "none"
 }
@@ -112,7 +117,7 @@ function hasPreviousChapterURL() {
  */
 function createRecapButton(options) {
     const button = document.createElement("button")
-    button.id = "recapButton"
+    button.id = RECAP_BUTTON_ID
     button.textContent = "Recap"
     button.classList.add("btn", "btn-primary", "btn-circle")
 
@@ -121,7 +126,7 @@ function createRecapButton(options) {
     }
 
     const toggleSpan = document.createElement("span")
-    toggleSpan.id = "toggleSpan"
+    toggleSpan.id = TOGGLE_SPAN_ID
     toggleSpan.textContent = "Show "
 
     button.prepend(toggleSpan)
@@ -146,12 +151,12 @@ function createRecapButton(options) {
  * Adds the recap container div to the DOM, if it doesn't already exist
  */
 function addRecapContainerToDOM() {
-    if (document.getElementById("recapContainer")) {
+    if (document.getElementById(RECAP_CONTAINER_ID)) {
         return
     }
     const recapContainer = document.createElement("div")
     recapContainer.classList.add("chapter-inner", "chapter-content")
-    recapContainer.id = "recapContainer"
+    recapContainer.id = RECAP_CONTAINER_ID
     recapContainer.style.display = "none"
 
     const chapterDiv = document.querySelector(extensionSettings.chapterContent)
@@ -168,7 +173,7 @@ function addRecapContainerToDOM() {
  *  set the recap text inside the recap container
  */
 async function setRecapText() {
-    const recapContainer = document.getElementById("recapContainer")
+    const recapContainer = document.getElementById(RECAP_CONTAINER_ID)
     const prevChapterURL = document.querySelector(
         extensionSettings.prevChapterBtn,
     ).href
