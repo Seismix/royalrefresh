@@ -1,8 +1,8 @@
 // @ts-check
-
+/// <reference path="./types/firefox-browser-webext.d.ts" />
 /**
- * @typedef {import("./types").ExtensionSettings} ExtensionSettings
- * @typedef {import("./types").RecapContainerStrings} RecapContainerStrings
+ * @typedef {import("./types/types").ExtensionSettings} ExtensionSettings
+ * @typedef {import("./types/types").RecapContainerStrings} RecapContainerStrings
  */
 
 /**

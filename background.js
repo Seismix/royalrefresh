@@ -1,3 +1,5 @@
+//@ts-check
+/// <reference path="./types/firefox-browser-webext.d.ts" />
 import DEFAULTS from "./defaults.js"
 
 /**

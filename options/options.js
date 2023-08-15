@@ -1,9 +1,9 @@
 // @ts-check
-
-import DEFAULTS from "../defaults.js"
+/// <reference path="../types/firefox-browser-webext.d.ts" />
 /**
- * @typedef {import("../types").DisplayMessageType} DisplayMessageType
+ * @typedef {import("../types/types").DisplayMessageType} DisplayMessageType
  */
+import DEFAULTS from "../defaults.js"
 
 /**
  * Loads saved options and populates input fields.
