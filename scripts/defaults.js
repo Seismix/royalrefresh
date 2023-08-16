@@ -1,5 +1,5 @@
 /**
- * @typedef {import("./types/types").ExtensionSettings} ExtensionSettings
+ * @typedef {import("@royalrecap/types").ExtensionSettings} ExtensionSettings
  */
 
 /**

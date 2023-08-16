@@ -1,7 +1,8 @@
 /**
- * @typedef {import("../types/types").DisplayMessageType} DisplayMessageType
+ * @typedef {import("@royalrecap/types").DisplayMessageType} DisplayMessageType
+
  */
-import DEFAULTS from "../defaults.js"
+import DEFAULTS from "../scripts/defaults.js"
 
 /**
  * Loads saved options and populates input fields.

@@ -5,13 +5,17 @@
     "strict": true,
     "allowJs": true, 
     "checkJs": true, 
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "paths": {
+      "@royalrecap/types": ["./types/types"]
+    }
   },
   "include": [
     "./*.js",
     "./types/types.ts",
     "./options/options.js"
-  ],
+, "scripts/background.js"  ],
   "exclude": [
     "node_modules"
   ]
