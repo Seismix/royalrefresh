@@ -62,7 +62,9 @@ async function loadExtensionSettings() {
  */
 function addRecapButtonToDOM(button) {
     if (!document.getElementById(RECAP_BUTTON_ID)) {
-        const navButtons = document.querySelector(".actions")
+        const navButtons = document.querySelector(
+            extensionSettings.buttonPlacement,
+        )
 
         if (navButtons) {
             navButtons.prepend(button)
@@ -212,13 +214,21 @@ async function setRecapText() {
  */
 function extractRecapContainerStrings(prevChapterHTML) {
     const parser = new DOMParser()
+    const fictionTitleElement = document.querySelector(
+        extensionSettings.fictionTitle,
+    )
+
+    let fictionTitle = "No title found"
+
+    if (
+        fictionTitleElement &&
+        fictionTitleElement instanceof HTMLHeadingElement
+    ) {
+        fictionTitle = fictionTitleElement.innerText.trim()
+    }
 
     return {
-        fictionTitle: extractContent(
-            parser,
-            prevChapterHTML,
-            extensionSettings.fictionTitle,
-        ),
+        fictionTitle: fictionTitle,
         lastChapterName: extractContent(
             parser,
             prevChapterHTML,
@@ -239,18 +249,15 @@ function extractRecapContainerStrings(prevChapterHTML) {
  * @param {RecapContainerStrings} recapContainerStrings - An object containing recap container strings.
  */
 function appendRecapElements(fragment, recapContainerStrings) {
-    appendTextElement(fragment, recapContainerStrings.fictionTitle, "h1")
-    appendTextElement(fragment, recapContainerStrings.lastChapterName, "h2")
-    appendTextElement(
-        fragment,
-        `Showing last ${extensionSettings.wordCount} words:`,
-        "h4",
-    )
-    appendTextElement(
-        fragment,
-        "..." + recapContainerStrings.lastChapterContent,
-        "div",
-    )
+    const recapHeading = `RoyalRecap of ${recapContainerStrings.fictionTitle}`
+    const recapChapter = `Previous chapter: ${recapContainerStrings.lastChapterName}`
+    const recapWordsDisplay = `Showing last ${extensionSettings.wordCount} words:`
+    const recapContent = `...${recapContainerStrings.lastChapterContent}`
+
+    appendTextElement(fragment, recapHeading, "h1")
+    appendTextElement(fragment, recapChapter, "h2")
+    appendTextElement(fragment, recapWordsDisplay, "h4")
+    appendTextElement(fragment, recapContent, "div")
 }
 
 /**
