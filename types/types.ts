@@ -1,4 +1,5 @@
 export type ExtensionSettings = {
+    [key: string]: string | number;
     prevChapterBtn: string
     chapterContent: string
     chapterTitle: string

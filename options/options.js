@@ -1,5 +1,3 @@
-// @ts-check
-/// <reference path="../types/firefox-browser-webext.d.ts" />
 /**
  * @typedef {import("../types/types").DisplayMessageType} DisplayMessageType
  */
@@ -9,10 +7,12 @@ import DEFAULTS from "../defaults.js"
  * Loads saved options and populates input fields.
  */
 async function loadOptions() {
-    const options = await browser.storage.sync.get(Object.keys(DEFAULTS))
+    const options = await browser.storage.sync.get(DEFAULTS)
 
-    for (const key in DEFAULTS) {
-        setInputValue(key, options[key] || DEFAULTS[key])
+    for (const key of Object.keys(DEFAULTS)) {
+        if (Object.prototype.hasOwnProperty.call(DEFAULTS, key)) {
+            setInputValue(key, options[key] || DEFAULTS[key])
+        }
     }
 }
 
@@ -23,6 +23,7 @@ async function loadOptions() {
 async function saveOptions(event) {
     event.preventDefault()
 
+    /** @type {{ [key: string]: string | number }} */
     const options = {}
     for (const key in DEFAULTS) {
         const element = document.getElementById(key)
