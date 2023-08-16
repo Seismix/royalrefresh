@@ -247,18 +247,15 @@ function extractRecapContainerStrings(prevChapterHTML) {
  * @param {RecapContainerStrings} recapContainerStrings - An object containing recap container strings.
  */
 function appendRecapElements(fragment, recapContainerStrings) {
-    appendTextElement(fragment, recapContainerStrings.fictionTitle, "h1")
-    appendTextElement(fragment, recapContainerStrings.lastChapterName, "h2")
-    appendTextElement(
-        fragment,
-        `Showing last ${extensionSettings.wordCount} words:`,
-        "h4",
-    )
-    appendTextElement(
-        fragment,
-        "..." + recapContainerStrings.lastChapterContent,
-        "div",
-    )
+    const recapHeading = `RoyalRecap of ${recapContainerStrings.fictionTitle}`
+    const recapChapter = `Previous chapter: ${recapContainerStrings.lastChapterName}`
+    const recapWordsDisplay = `Showing last ${extensionSettings.wordCount} words:`
+    const recapContent = `...${recapContainerStrings.lastChapterContent}`
+
+    appendTextElement(fragment, recapHeading, "h1")
+    appendTextElement(fragment, recapChapter, "h2")
+    appendTextElement(fragment, recapWordsDisplay, "h4")
+    appendTextElement(fragment, recapContent, "div")
 }
 
 /**
