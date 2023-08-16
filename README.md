@@ -23,7 +23,7 @@ and [#3](https://github.com/Seismix/RoyalRecap/issues/3)).
 
 Here's an example of what it looks like:
 
-| ![Recap example](_docs/recap_example.png) |
+| ![Recap example](docs/recap_example.png) |
 | ------------------------------------------ |
 | _Ads removed for demonstration purposes_   |
 
