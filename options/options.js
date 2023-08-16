@@ -1,7 +1,4 @@
-/**
- * @typedef {import("@royalrecap/types").DisplayMessageType} DisplayMessageType
-
- */
+/** @typedef {import("@royalrecap/types").DisplayMessageType} DisplayMessageType */
 import DEFAULTS from "../scripts/defaults.js"
 
 /**
