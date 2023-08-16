@@ -1,8 +1,6 @@
-// @ts-check
-/// <reference path="./types/firefox-browser-webext.d.ts" />
 /**
- * @typedef {import("./types/types").ExtensionSettings} ExtensionSettings
- * @typedef {import("./types/types").RecapContainerStrings} RecapContainerStrings
+ * @typedef {import("@royalrecap/types").ExtensionSettings} ExtensionSettings
+ * @typedef {import("@royalrecap/types").RecapContainerStrings} RecapContainerStrings
  */
 
 /**
@@ -17,7 +15,7 @@ let extensionSettings = {}
 const RECAP_BUTTON_ID = "recapButton"
 const RECAP_CONTAINER_ID = "recapContainer"
 const TOGGLE_SPAN_ID = "toggleSpan"
-const DEFAULTS_FILE = "defaults.js"
+const DEFAULTS_FILE = "scripts/defaults.js"
 
 init()
 
