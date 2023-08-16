@@ -212,13 +212,21 @@ async function setRecapText() {
  */
 function extractRecapContainerStrings(prevChapterHTML) {
     const parser = new DOMParser()
+    const fictionTitleElement = document.querySelector(
+        extensionSettings.fictionTitle,
+    )
+
+    let fictionTitle = "No title found"
+
+    if (
+        fictionTitleElement &&
+        fictionTitleElement instanceof HTMLHeadingElement
+    ) {
+        fictionTitle = fictionTitleElement.innerText.trim()
+    }
 
     return {
-        fictionTitle: extractContent(
-            parser,
-            prevChapterHTML,
-            extensionSettings.fictionTitle,
-        ),
+        fictionTitle: fictionTitle,
         lastChapterName: extractContent(
             parser,
             prevChapterHTML,
