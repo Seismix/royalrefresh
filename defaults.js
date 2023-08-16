@@ -1,5 +1,3 @@
-// @ts-check
-/// <reference path="./types/firefox-browser-webext.d.ts" />
 /**
  * @typedef {import("./types/types").ExtensionSettings} ExtensionSettings
  */
