@@ -62,7 +62,9 @@ async function loadExtensionSettings() {
  */
 function addRecapButtonToDOM(button) {
     if (!document.getElementById(RECAP_BUTTON_ID)) {
-        const navButtons = document.querySelector(".actions")
+        const navButtons = document.querySelector(
+            extensionSettings.buttonPlacement,
+        )
 
         if (navButtons) {
             navButtons.prepend(button)

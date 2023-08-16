@@ -14,6 +14,7 @@ const DEFAULTS = {
     chapterContent: ".chapter-inner",
     chapterTitle: "h1.font-white",
     fictionTitle: "h2.font-white",
+    buttonPlacement: ".actions",
 }
 
 export default DEFAULTS

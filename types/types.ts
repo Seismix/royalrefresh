@@ -4,6 +4,7 @@ export type ExtensionSettings = {
     chapterTitle: string
     fictionTitle: string
     wordCount: number
+    buttonPlacement: string
 }
 
 export type RecapContainerStrings = {
