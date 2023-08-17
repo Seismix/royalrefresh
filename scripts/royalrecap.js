@@ -220,9 +220,10 @@ function extractRecapContainerStrings(prevChapterHTML) {
 
     if (
         fictionTitleElement &&
-        fictionTitleElement instanceof HTMLHeadingElement
+        fictionTitleElement instanceof HTMLHeadingElement &&
+        fictionTitleElement.textContent !== null
     ) {
-        fictionTitle = fictionTitleElement.innerText.trim()
+        fictionTitle = fictionTitleElement.textContent.trim()
     }
 
     return {
