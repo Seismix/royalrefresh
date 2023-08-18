@@ -107,7 +107,7 @@ function isChapterURL() {
  */
 function hasPreviousChapterURL() {
     const hasPrevChapterURL = document.querySelector(
-        extensionSettings.prevChapterBtn,
+        extensionSettings.prevChapterBtn.toString(),
     )
 
     return !!hasPrevChapterURL?.hasAttribute("href")
@@ -179,7 +179,7 @@ function addRecapContainerToDOM() {
 async function setRecapText() {
     const recapContainer = document.getElementById(RECAP_CONTAINER_ID)
     const prevChapterBtn = document.querySelector(
-        extensionSettings.prevChapterBtn,
+        extensionSettings.prevChapterBtn.toString(),
     )
 
     if (!recapContainer || !(prevChapterBtn instanceof HTMLAnchorElement)) {

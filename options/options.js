@@ -7,11 +7,40 @@ import DEFAULTS from "../scripts/defaults.js"
 async function loadOptions() {
     const options = await browser.storage.sync.get(DEFAULTS)
 
-    for (const key of Object.keys(DEFAULTS)) {
-        if (Object.prototype.hasOwnProperty.call(DEFAULTS, key)) {
-            setInputValue(key, options[key] || DEFAULTS[key])
+    for (const key in DEFAULTS) {
+        if (DEFAULTS.hasOwnProperty(key)) {
+            const defaultValue = DEFAULTS[key]
+            const element = document.getElementById(key)
+
+            if (element instanceof HTMLInputElement) {
+                if (element.type === "number") {
+                    setInputValue(
+                        key,
+                        options[key] !== undefined
+                            ? options[key]
+                            : defaultValue,
+                    )
+                } else if (element.type === "checkbox") {
+                    element.checked =
+                        options[key] !== undefined ? options[key] : defaultValue
+                } else {
+                    setInputValue(
+                        key,
+                        options[key] !== undefined
+                            ? options[key]
+                            : defaultValue,
+                    )
+                }
+            } else {
+                setInputValue(
+                    key,
+                    options[key] !== undefined ? options[key] : defaultValue,
+                )
+            }
         }
     }
+
+    console.log(options)
 }
 
 /**
@@ -21,15 +50,26 @@ async function loadOptions() {
 async function saveOptions(event) {
     event.preventDefault()
 
-    /** @type {{ [key: string]: string | number }} */
+    /** @type {{ [key: string]: string | number | boolean }} */
     const options = {}
     for (const key in DEFAULTS) {
         const element = document.getElementById(key)
-        if (element && element instanceof HTMLInputElement) {
-            options[key] = element.value || DEFAULTS[key]
+        if (element) {
+            if (element instanceof HTMLInputElement) {
+                if (element.type === "number") {
+                    options[key] = parseFloat(element.value) || DEFAULTS[key]
+                } else if (element.type === "checkbox") {
+                    options[key] = element.checked
+                } else {
+                    options[key] = element.value
+                }
+            } else {
+                options[key] = DEFAULTS[key]
+            }
         }
     }
 
+    console.log(options)
     await browser.storage.sync.set(options)
     displayMessage("success")
 }
