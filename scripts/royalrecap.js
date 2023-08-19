@@ -201,7 +201,10 @@ async function setRecapText() {
     fragment.append(document.createElement("hr"))
 
     recapContainer.appendChild(fragment)
-    recapContainer.scrollIntoView({ behavior: "smooth" })
+
+    if (extensionSettings.smoothScroll) {
+        recapContainer.scrollIntoView({ behavior: "smooth" })
+    }
 }
 
 /**
