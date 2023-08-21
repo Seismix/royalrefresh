@@ -6,6 +6,7 @@ export type ExtensionSettings = {
     wordCount: number
     buttonPlacement: string
     smoothScroll: boolean
+    autoExpand: boolean
 }
 
 export type RecapContainerStrings = {

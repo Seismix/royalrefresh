@@ -12,6 +12,7 @@ const DEFAULTS = {
     fictionTitle: "h2.font-white",
     buttonPlacement: ".actions",
     smoothScroll: true,
+    autoExpand: false,
 }
 
 export default DEFAULTS

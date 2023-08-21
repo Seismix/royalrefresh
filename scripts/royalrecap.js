@@ -26,7 +26,13 @@ async function init() {
         const recapButton = createRecapButton({
             disabled: !hasPreviousChapterURL(),
         })
+
         addRecapButtonToDOM(recapButton)
+
+        if (extensionSettings.autoExpand) {
+            addRecapContainerToDOM()
+            toggleRecap()
+        }
     }
 }
 
@@ -70,24 +76,15 @@ function addRecapButtonToDOM(button) {
     }
 }
 
-/**
- * Toggles the recap button text between `Show` and `Hide` based on element's display style
- */
-function toggleRecapButton() {
+/** Changes the visibility of the recap div and the text on the recap button */
+function toggleRecap() {
     const toggleSpan = document.getElementById(TOGGLE_SPAN_ID)
     const recapContainer = document.getElementById(RECAP_CONTAINER_ID)
+
     if (toggleSpan && recapContainer) {
         toggleSpan.textContent =
             recapContainer.style.display === "none" ? "Hide " : "Show "
-    }
-}
 
-/**
- * Toggles the display property of the recap container between `none` and `block`
- */
-function toggleRecapContainer() {
-    const recapContainer = document.getElementById(RECAP_CONTAINER_ID)
-    if (recapContainer) {
         recapContainer.style.display =
             recapContainer.style.display === "none" ? "block" : "none"
     }
@@ -144,8 +141,7 @@ function createRecapButton(options) {
     button.addEventListener("click", addRecapContainerToDOM, { once: true })
 
     button.addEventListener("click", () => {
-        toggleRecapButton()
-        toggleRecapContainer()
+        toggleRecap()
     })
 
     return button
