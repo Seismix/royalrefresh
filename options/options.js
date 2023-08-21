@@ -7,9 +7,16 @@ import DEFAULTS from "../scripts/defaults.js"
 async function loadOptions() {
     const options = await browser.storage.sync.get(DEFAULTS)
 
+    // Loop through the default options and set values in form elements
     for (const key of Object.keys(DEFAULTS)) {
-        if (Object.prototype.hasOwnProperty.call(DEFAULTS, key)) {
-            setInputValue(key, options[key] || DEFAULTS[key])
+        const inputElement = document.getElementById(key)
+
+        if (inputElement instanceof HTMLInputElement) {
+            if (inputElement.type === "checkbox") {
+                inputElement.checked = options[key]
+            } else {
+                inputElement.value = options[key]
+            }
         }
     }
 }
@@ -21,17 +28,38 @@ async function loadOptions() {
 async function saveOptions(event) {
     event.preventDefault()
 
-    /** @type {{ [key: string]: string | number }} */
+    /** @type {{ [key: string]: string | number | boolean }} */
     const options = {}
-    for (const key in DEFAULTS) {
-        const element = document.getElementById(key)
-        if (element && element instanceof HTMLInputElement) {
-            options[key] = element.value || DEFAULTS[key]
-        }
+
+    for (const key of Object.keys(DEFAULTS)) {
+        const inputElement = document.getElementById(key)
+        options[key] = getInputValue(inputElement, DEFAULTS[key])
     }
 
     await browser.storage.sync.set(options)
     displayMessage("success")
+}
+
+/**
+ * Get the value from an input element based on its type.
+ * @param { HTMLElement | null } inputElement - The input element.
+ * @param {*} defaultValue - The default value to use if the input is not found.
+ * @returns {*} - The value of the input or the default value.
+ */
+function getInputValue(inputElement, defaultValue) {
+    if (!inputElement || !(inputElement instanceof HTMLInputElement)) {
+        return defaultValue
+    }
+
+    switch (inputElement.type) {
+        case "checkbox":
+            return inputElement.checked
+        case "number":
+            const value = parseInt(inputElement.value, 10)
+            return isNaN(value) ? defaultValue : value
+        default:
+            return inputElement.value
+    }
 }
 
 /**
@@ -41,18 +69,6 @@ async function restoreDefaultOptions() {
     await browser.storage.sync.set(DEFAULTS)
     await loadOptions()
     displayMessage("restore")
-}
-
-/**
- * Sets the value of an input element.
- * @param { string } elementId - The ID of the input element.
- * @param { string } value - The value to set.
- */
-function setInputValue(elementId, value) {
-    const inputElement = document.getElementById(elementId)
-    if (inputElement && inputElement instanceof HTMLInputElement) {
-        inputElement.value = value
-    }
 }
 
 /**
