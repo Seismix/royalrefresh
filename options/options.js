@@ -7,40 +7,18 @@ import DEFAULTS from "../scripts/defaults.js"
 async function loadOptions() {
     const options = await browser.storage.sync.get(DEFAULTS)
 
-    for (const key in DEFAULTS) {
-        if (DEFAULTS.hasOwnProperty(key)) {
-            const defaultValue = DEFAULTS[key]
-            const element = document.getElementById(key)
+    // Loop through the default options and set values in form elements
+    for (const key of Object.keys(DEFAULTS)) {
+        const inputElement = document.getElementById(key)
 
-            if (element instanceof HTMLInputElement) {
-                if (element.type === "number") {
-                    setInputValue(
-                        key,
-                        options[key] !== undefined
-                            ? options[key]
-                            : defaultValue,
-                    )
-                } else if (element.type === "checkbox") {
-                    element.checked =
-                        options[key] !== undefined ? options[key] : defaultValue
-                } else {
-                    setInputValue(
-                        key,
-                        options[key] !== undefined
-                            ? options[key]
-                            : defaultValue,
-                    )
-                }
+        if (inputElement instanceof HTMLInputElement) {
+            if (inputElement.type === "checkbox") {
+                inputElement.checked = options[key]
             } else {
-                setInputValue(
-                    key,
-                    options[key] !== undefined ? options[key] : defaultValue,
-                )
+                inputElement.value = options[key]
             }
         }
     }
-
-    console.log(options)
 }
 
 /**
@@ -52,26 +30,36 @@ async function saveOptions(event) {
 
     /** @type {{ [key: string]: string | number | boolean }} */
     const options = {}
-    for (const key in DEFAULTS) {
-        const element = document.getElementById(key)
-        if (element) {
-            if (element instanceof HTMLInputElement) {
-                if (element.type === "number") {
-                    options[key] = parseFloat(element.value) || DEFAULTS[key]
-                } else if (element.type === "checkbox") {
-                    options[key] = element.checked
-                } else {
-                    options[key] = element.value
-                }
-            } else {
-                options[key] = DEFAULTS[key]
-            }
-        }
+
+    for (const key of Object.keys(DEFAULTS)) {
+        const inputElement = document.getElementById(key)
+        options[key] = getInputValue(inputElement, DEFAULTS[key])
     }
 
-    console.log(options)
     await browser.storage.sync.set(options)
     displayMessage("success")
+}
+
+/**
+ * Get the value from an input element based on its type.
+ * @param { HTMLElement | null } inputElement - The input element.
+ * @param {*} defaultValue - The default value to use if the input is not found.
+ * @returns {*} - The value of the input or the default value.
+ */
+function getInputValue(inputElement, defaultValue) {
+    if (!inputElement || !(inputElement instanceof HTMLInputElement)) {
+        return defaultValue
+    }
+
+    switch (inputElement.type) {
+        case "checkbox":
+            return inputElement.checked
+        case "number":
+            const value = parseInt(inputElement.value, 10)
+            return isNaN(value) ? defaultValue : value
+        default:
+            return inputElement.value
+    }
 }
 
 /**
@@ -81,18 +69,6 @@ async function restoreDefaultOptions() {
     await browser.storage.sync.set(DEFAULTS)
     await loadOptions()
     displayMessage("restore")
-}
-
-/**
- * Sets the value of an input element.
- * @param { string } elementId - The ID of the input element.
- * @param { string } value - The value to set.
- */
-function setInputValue(elementId, value) {
-    const inputElement = document.getElementById(elementId)
-    if (inputElement && inputElement instanceof HTMLInputElement) {
-        inputElement.value = value
-    }
 }
 
 /**
