@@ -103,15 +103,21 @@ function displayMessage(messageType) {
  * @param {string} newText The new text to display temporarily
  */
 function animateButton(button, newText) {
+    const savedClassName = "saved"
+
     const originalText = button.textContent
-    button.classList.add("saved")
+
+    button.classList.add(savedClassName)
     button.textContent = newText
 
     setTimeout(() => {
         button.textContent = originalText
-        button.classList.remove("saved")
+        button.classList.remove(savedClassName)
     }, 2000)
 }
+
+/** The CSS ID of the button to restore defaults */
+const DEFAULT_BUTTON_ID = "restoreDefaults"
 
 document.addEventListener("DOMContentLoaded", function () {
     const formElement = document.querySelector("form")
@@ -119,7 +125,7 @@ document.addEventListener("DOMContentLoaded", function () {
         formElement.addEventListener("submit", saveOptions)
     }
 
-    const defaultsElement = document.getElementById("restoreDefaults")
+    const defaultsElement = document.getElementById(DEFAULT_BUTTON_ID)
     if (defaultsElement) {
         defaultsElement.addEventListener("click", restoreDefaultOptions)
     }
