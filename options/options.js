@@ -119,7 +119,7 @@ document.addEventListener("DOMContentLoaded", function () {
         formElement.addEventListener("submit", saveOptions)
     }
 
-    const defaultsElement = document.getElementById("defaults")
+    const defaultsElement = document.getElementById("restoreDefaults")
     if (defaultsElement) {
         defaultsElement.addEventListener("click", restoreDefaultOptions)
     }
