@@ -1,13 +1,13 @@
 /** @typedef {import("@royalrecap/types").DisplayMessageType} DisplayMessageType */
+/** @typedef {import("@royalrecap/types").ExtensionSettingsPossibleTypes} ExtensionSettingsPossibleTypes */
 import DEFAULTS from "../scripts/defaults.js"
 
 /**
- * Loads saved options and populates input fields.
+ * Load the extension options from the `browser.storage` and set them to the form elements in options.html
  */
 async function loadOptions() {
     const options = await browser.storage.sync.get(DEFAULTS)
 
-    // Loop through the default options and set values in form elements
     for (const key of Object.keys(DEFAULTS)) {
         const inputElement = document.getElementById(key)
 
@@ -22,7 +22,7 @@ async function loadOptions() {
 }
 
 /**
- * Saves the options entered by the user.
+ * Saves the options entered into the form in options.html
  * @param { Event } event - The submit event.
  */
 async function saveOptions(event) {
@@ -43,8 +43,8 @@ async function saveOptions(event) {
 /**
  * Get the value from an input element based on its type.
  * @param { HTMLElement | null } inputElement - The input element.
- * @param {*} defaultValue - The default value to use if the input is not found.
- * @returns {*} - The value of the input or the default value.
+ * @param {ExtensionSettingsPossibleTypes} defaultValue - The default value to use if the input is not found.
+ * @returns {ExtensionSettingsPossibleTypes} - The value of the input or the default value.
  */
 function getInputValue(inputElement, defaultValue) {
     if (!inputElement || !(inputElement instanceof HTMLInputElement)) {
@@ -72,7 +72,7 @@ async function restoreDefaultOptions() {
 }
 
 /**
- * Display a status message with customizable color
+ * Display a status message on a button and animates it
  * @param {DisplayMessageType} messageType
  */
 function displayMessage(messageType) {
@@ -116,14 +116,14 @@ function animateButton(button, newText) {
     }, 2000)
 }
 
-/** The CSS ID of the button to restore defaults */
-const DEFAULT_BUTTON_ID = "restoreDefaults"
-
 document.addEventListener("DOMContentLoaded", function () {
     const formElement = document.querySelector("form")
     if (formElement) {
         formElement.addEventListener("submit", saveOptions)
     }
+
+    /** The CSS ID of the button to restore defaults */
+    const DEFAULT_BUTTON_ID = "restoreDefaults"
 
     const defaultsElement = document.getElementById(DEFAULT_BUTTON_ID)
     if (defaultsElement) {
