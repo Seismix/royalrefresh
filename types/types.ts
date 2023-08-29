@@ -9,6 +9,10 @@ export type ExtensionSettings = {
     autoExpand: boolean
 }
 
+type ExtensionSettingsKeys = keyof ExtensionSettings
+export type ExtensionSettingsPossibleTypes =
+    ExtensionSettings[ExtensionSettingsKeys]
+
 export type RecapContainerStrings = {
     fictionTitle: string
     lastChapterName: string

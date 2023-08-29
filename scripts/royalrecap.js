@@ -4,8 +4,7 @@
  */
 
 /**
- * The object containing all extension settings need for this content-script
- * ! This needs to be edited if the options change to get full intellisense
+ * The object that gets populated with all values loaded from `browser.storage`
  * @type {ExtensionSettings}
  */
 // @ts-ignore
@@ -19,6 +18,7 @@ const DEFAULTS_FILE = "scripts/defaults.js"
 
 init()
 
+/** Initializes all necessary data and injects all extension code into the DOM, if some checks are passed */
 async function init() {
     if (isChapterURL()) {
         await loadExtensionSettings()
@@ -76,7 +76,7 @@ function addRecapButtonToDOM(button) {
     }
 }
 
-/** Changes the visibility of the recap div and the text on the recap button */
+/** Toggles the visibility of the recap div and the text on the recap button */
 function toggleRecap() {
     const toggleSpan = document.getElementById(TOGGLE_SPAN_ID)
     const recapContainer = document.getElementById(RECAP_CONTAINER_ID)
@@ -148,7 +148,7 @@ function createRecapButton(options) {
 }
 
 /**
- * Adds the recap container div to the DOM, if it doesn't already exist
+ * Creates and adds the recap container div to the DOM, if it doesn't already exist
  */
 function addRecapContainerToDOM() {
     if (document.getElementById(RECAP_CONTAINER_ID)) {
@@ -191,8 +191,8 @@ async function setRecapText() {
     }
 
     const recapContainerStrings = extractRecapContainerStrings(prevChapterHTML)
-
     const fragment = document.createDocumentFragment()
+
     appendRecapElements(fragment, recapContainerStrings)
     fragment.append(document.createElement("hr"))
 
@@ -263,8 +263,6 @@ function appendRecapElements(fragment, recapContainerStrings) {
  * @param {Node} parent The parent node to append to
  * @param {string} text The text the element contains
  * @param {string} elementType The HTML element you want to create
- * @example
- * appendTextElement(fragment, `Showing last ${RECAP_WORD_COUNT} words:`, "h4");
  */
 function appendTextElement(parent, text, elementType) {
     const element = document.createElement(elementType)
