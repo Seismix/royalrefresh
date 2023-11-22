@@ -33,6 +33,8 @@ async function init() {
             addRecapContainerToDOM()
             toggleRecap()
         }
+
+        await prettier()
     }
 }
 
@@ -321,4 +323,67 @@ function extractContent(
         .slice(-wordcount)
         .join(" ")
     return extracted
+}
+
+async function prettier() {
+    const prevChapterBtn = document.querySelector(
+        extensionSettings.prevChapterBtn.toString(),
+    )
+
+    if (!(prevChapterBtn instanceof HTMLAnchorElement)) {
+        return console.error("Could not find necessary DOM Elements")
+    }
+
+    const prevChapterURL = prevChapterBtn.href
+
+    const prevChapterHTML = await fetchChapter(prevChapterURL)
+
+    if (!prevChapterHTML) {
+        return
+    }
+
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(prevChapterHTML, "text/html")
+
+    const chapterDiv = doc.querySelector(".chapter-inner")
+
+    const paragraphs = chapterDiv?.querySelectorAll("p")
+    const selectedParagraphs = []
+
+    if (!paragraphs) {
+        return
+    }
+
+    let wordLimit = 250
+
+    for (let i = paragraphs.length - 1; i >= 0; i--) {
+        const paragraph = paragraphs[i]
+        const words = paragraph.textContent?.trim().split(/\s+/)
+        const wordCount = words?.length
+
+        if (!wordCount) {
+            return
+        }
+
+        if (wordCount > 0) {
+            const remainingWords = wordLimit - wordCount
+
+            wordLimit -= wordCount
+
+            if (remainingWords > 0) {
+                selectedParagraphs.push(paragraph)
+            } else {
+                const pSlice = words.slice(-remainingWords)
+
+                paragraph.textContent = "..." + pSlice.join(" ")
+
+                selectedParagraphs.push(paragraph)
+                break
+            }
+        }
+    }
+
+    const prettyfied = selectedParagraphs.reverse()
+
+    console.log(prettyfied)
 }
