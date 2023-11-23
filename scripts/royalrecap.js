@@ -34,8 +34,38 @@ async function init() {
             toggleRecap()
         }
 
-        await prettier()
+        await debug()
     }
+}
+
+// ! DEBUG
+async function debug() {
+    const prevChapterBtn = document.querySelector(
+        extensionSettings.prevChapterBtn.toString(),
+    )
+
+    if (!(prevChapterBtn instanceof HTMLAnchorElement)) {
+        return console.error("Could not find necessary DOM Elements")
+    }
+
+    const prevChapterURL = prevChapterBtn.href
+
+    const prevChapterHtml = await fetchChapter(prevChapterURL)
+
+    if (!prevChapterHtml) {
+        return console.error("Error fetching previous chapter")
+    }
+
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(prevChapterHtml, "text/html")
+
+    const test = {
+        fiction: extractFictionTitle(),
+        chapter: extractChapterTitle(doc),
+        content: extractChapterContent(doc),
+    }
+
+    console.log(test)
 }
 
 /**
@@ -213,6 +243,7 @@ async function setRecapText() {
  */
 function extractRecapContainerStrings(prevChapterHTML) {
     const parser = new DOMParser()
+
     const fictionTitleElement = document.querySelector(
         extensionSettings.fictionTitle,
     )
@@ -252,7 +283,7 @@ function appendRecapElements(fragment, recapContainerStrings) {
     const recapHeading = `RoyalRecap of ${recapContainerStrings.fictionTitle}`
     const recapChapter = `Previous chapter: ${recapContainerStrings.lastChapterName}`
     const recapWordsDisplay = `Showing last ${extensionSettings.wordCount} words:`
-    const recapContent = `...${recapContainerStrings.lastChapterContent}`
+    const recapContent = `${recapContainerStrings.lastChapterContent}`
 
     appendTextElement(fragment, recapHeading, "h1")
     appendTextElement(fragment, recapChapter, "h2")
@@ -325,57 +356,113 @@ function extractContent(
     return extracted
 }
 
-async function prettier() {
-    const prevChapterBtn = document.querySelector(
-        extensionSettings.prevChapterBtn.toString(),
-    )
+// async function prettier() {
+//     const prevChapterBtn = document.querySelector(
+//         extensionSettings.prevChapterBtn.toString(),
+//     )
 
-    if (!(prevChapterBtn instanceof HTMLAnchorElement)) {
-        return console.error("Could not find necessary DOM Elements")
+//     if (!(prevChapterBtn instanceof HTMLAnchorElement)) {
+//         return console.error("Could not find necessary DOM Elements")
+//     }
+
+//     const prevChapterURL = prevChapterBtn.href
+
+//     const prevChapterHTML = await fetchChapter(prevChapterURL)
+
+//     if (!prevChapterHTML) {
+//         return
+//     }
+
+//     const parser = new DOMParser()
+//     const doc = parser.parseFromString(prevChapterHTML, "text/html")
+
+//     const chapterDiv = doc.querySelector(".chapter-inner")
+
+//     const paragraphs = chapterDiv?.querySelectorAll("p")
+//     const selectedParagraphs = []
+
+//     if (!paragraphs) {
+//         return
+//     }
+
+//     let wordLimit = 250
+
+//     for (let i = paragraphs.length - 1; i >= 0; i--) {
+//         const paragraph = paragraphs[i]
+//         const words = paragraph.textContent?.trim().split(/\s+/)
+//         const wordCount = words?.length
+
+//         if (!wordCount) {
+//             return
+//         }
+
+//         if (wordCount > 0) {
+//             const remainingWords = wordLimit - wordCount
+
+//             wordLimit -= wordCount
+
+//             if (remainingWords > 0) {
+//                 selectedParagraphs.push(paragraph)
+//             } else {
+//                 const pSlice = words.slice(-remainingWords)
+
+//                 paragraph.textContent = "..." + pSlice.join(" ")
+
+//                 selectedParagraphs.push(paragraph)
+//                 break
+//             }
+//         }
+//     }
+
+//     const prettyfied = selectedParagraphs.reverse()
+
+//     console.log(selectedParagraphs)
+
+//     let contentDiv = document.createElement("div")
+
+//     contentDiv.append(...prettyfied)
+// }
+
+/**
+ * Extracts the chapter content from the PREVIOUS chapter
+ * @param {Document} doc A parsable document
+ * @param {number} [wordCount=extensionSettings.wordCount]
+ * @returns {HTMLDivElement}
+ */
+function extractChapterContent(doc, wordCount = extensionSettings.wordCount) {
+    const chapterElement = doc.querySelector(extensionSettings.chapterContent)
+
+    const contentDiv = document.createElement("div")
+
+    if (!chapterElement || chapterElement.textContent === null) {
+        contentDiv.textContent = "Error loading recap"
+        return contentDiv
     }
 
-    const prevChapterURL = prevChapterBtn.href
-
-    const prevChapterHTML = await fetchChapter(prevChapterURL)
-
-    if (!prevChapterHTML) {
-        return
-    }
-
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(prevChapterHTML, "text/html")
-
-    const chapterDiv = doc.querySelector(".chapter-inner")
-
-    const paragraphs = chapterDiv?.querySelectorAll("p")
+    const paragraphs = chapterElement.querySelectorAll("p")
     const selectedParagraphs = []
-
-    if (!paragraphs) {
-        return
-    }
-
-    let wordLimit = 250
 
     for (let i = paragraphs.length - 1; i >= 0; i--) {
         const paragraph = paragraphs[i]
         const words = paragraph.textContent?.trim().split(/\s+/)
-        const wordCount = words?.length
 
-        if (!wordCount) {
-            return
+        if (!words) {
+            break
         }
 
-        if (wordCount > 0) {
-            const remainingWords = wordLimit - wordCount
+        const wordsPerParagraph = words.length
 
-            wordLimit -= wordCount
+        if (wordsPerParagraph > 0) {
+            const remainingWords = wordCount - wordsPerParagraph
+
+            wordCount -= wordsPerParagraph
 
             if (remainingWords > 0) {
                 selectedParagraphs.push(paragraph)
             } else {
                 const pSlice = words.slice(-remainingWords)
 
-                paragraph.textContent = "..." + pSlice.join(" ")
+                paragraph.textContent = pSlice.join(" ")
 
                 selectedParagraphs.push(paragraph)
                 break
@@ -383,7 +470,48 @@ async function prettier() {
         }
     }
 
-    const prettyfied = selectedParagraphs.reverse()
+    contentDiv.append(...selectedParagraphs.reverse())
 
-    console.log(prettyfied)
+    return contentDiv
+}
+
+/**
+ * Extracts the chapter title from the PREVIOUS chapter
+ * @param {Document} doc A parsable document
+ */
+function extractChapterTitle(doc) {
+    const chapterTitleElement = doc.querySelector(
+        extensionSettings.chapterTitle,
+    )
+
+    const chapterTitleHeading = document.createElement("h2")
+
+    if (!chapterTitleElement || chapterTitleElement.textContent === null) {
+        chapterTitleHeading.textContent = "Error loading chapter title"
+        return chapterTitleHeading
+    }
+
+    chapterTitleHeading.textContent = chapterTitleElement.textContent.trim()
+
+    return chapterTitleHeading
+}
+
+/**
+ * Extracts the fiction title from the CURRENT document, since between 2 chapters the fiction title stays the same
+ */
+function extractFictionTitle() {
+    const fictionTitleElement = document.querySelector(
+        extensionSettings.fictionTitle,
+    )
+
+    const fictionHeading = document.createElement("h1")
+
+    if (!fictionTitleElement || fictionTitleElement.textContent === null) {
+        fictionHeading.textContent = "Error loading fiction title"
+        return fictionHeading
+    }
+
+    fictionHeading.textContent = fictionTitleElement.textContent.trim()
+
+    return fictionHeading
 }
