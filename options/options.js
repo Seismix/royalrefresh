@@ -82,7 +82,7 @@ function displayMessage(messageType) {
             buttonText: "Saved ✔",
         },
         restore: {
-            querySelector: "#defaults",
+            querySelector: "#restoreDefaults",
             buttonText: "Restored Defaults ✔",
         },
     }
