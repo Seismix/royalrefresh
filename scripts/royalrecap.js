@@ -20,52 +20,19 @@ init()
 
 /** Initializes all necessary data and injects all extension code into the DOM, if some checks are passed */
 async function init() {
-    if (isChapterURL()) {
+    if (documentIsChapterURL()) {
         await loadExtensionSettings()
 
         const recapButton = createRecapButton({
-            disabled: !hasPreviousChapterURL(),
+            disabled: !documentHasPreviousChapterURL(),
         })
 
         addRecapButtonToDOM(recapButton)
 
         if (extensionSettings.autoExpand) {
-            addRecapContainerToDOM()
-            toggleRecap()
+            recapButton.click()
         }
-
-        await debug()
     }
-}
-
-// ! DEBUG
-async function debug() {
-    const prevChapterBtn = document.querySelector(
-        extensionSettings.prevChapterBtn.toString(),
-    )
-
-    if (!(prevChapterBtn instanceof HTMLAnchorElement)) {
-        return console.error("Could not find necessary DOM Elements")
-    }
-
-    const prevChapterURL = prevChapterBtn.href
-
-    const prevChapterHtml = await fetchChapter(prevChapterURL)
-
-    if (!prevChapterHtml) {
-        return console.error("Error fetching previous chapter")
-    }
-
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(prevChapterHtml, "text/html")
-
-    const test = {
-        fiction: extractFictionTitle(),
-        chapter: extractChapterName(doc),
-        content: extractChapterContent(doc),
-    }
-
-    console.log(test)
 }
 
 /**
@@ -93,8 +60,7 @@ async function loadExtensionSettings() {
 }
 
 /**
- * Adds the recap button to the DOM if it doesn't already exist
- * @param {HTMLButtonElement} button
+ * @param {HTMLButtonElement} button - Button element to add
  */
 function addRecapButtonToDOM(button) {
     if (!document.getElementById(RECAP_BUTTON_ID)) {
@@ -123,18 +89,16 @@ function toggleRecap() {
 }
 
 /**
- * Checks if the current URL is a chapter URL.
  * @returns {boolean} True if `chapter` is in the URL path, otherwise false.
  */
-function isChapterURL() {
+function documentIsChapterURL() {
     return window.location.pathname.split("/").includes("chapter")
 }
 
 /**
- * Checks if the previous chapter button has a valid href attribute.
  * @returns {boolean} True if the previous chapter button has a valid href attribute, otherwise false.
  */
-function hasPreviousChapterURL() {
+function documentHasPreviousChapterURL() {
     const hasPrevChapterURL = document.querySelector(
         extensionSettings.prevChapterBtn.toString(),
     )
@@ -223,12 +187,6 @@ async function setRecapText() {
         return console.error("Error fetching previous chapter")
     }
 
-    // const recapContainerStrings = extractRecapContainerStrings(prevChapterHtml)
-    // const fragment = document.createDocumentFragment()
-    // fragment.append(document.createElement("hr"))
-
-    // appendRecapElements(fragment, recapContainerStrings)
-
     const recapFragment = createRecapFragment(prevChapterHtml)
 
     recapContainer.appendChild(recapFragment)
@@ -275,83 +233,13 @@ function createRecapFragment(prevChapterHtml) {
     return fragment
 }
 
-// /**
-//  * Extracts recap container strings from the provided HTML content.
-//  *
-//  * @param {string} prevChapterHtml - The HTML content as text of the previous chapter.
-//  * @returns {RecapContainerStrings} An object containing recap container strings.
-//  */
-// function extractRecapContainerStrings(prevChapterHtml) {
-//     const parser = new DOMParser()
-
-//     const fictionTitleElement = document.querySelector(
-//         extensionSettings.fictionTitle,
-//     )
-
-//     let fictionTitle = "No title found"
-
-//     if (
-//         fictionTitleElement &&
-//         fictionTitleElement instanceof HTMLHeadingElement &&
-//         fictionTitleElement.textContent !== null
-//     ) {
-//         fictionTitle = fictionTitleElement.textContent.trim()
-//     }
-
-//     return {
-//         fictionTitle: fictionTitle,
-//         lastChapterName: extractContent(
-//             parser,
-//             prevChapterHtml,
-//             extensionSettings.chapterTitle,
-//         ),
-//         lastChapterContent: extractContent(
-//             parser,
-//             prevChapterHtml,
-//             extensionSettings.chapterContent,
-//         ),
-//     }
-// }
-
-// /**
-//  * Appends recap elements to a fragment.
-//  *
-//  * @param {DocumentFragment} fragment - The fragment to append elements to.
-//  * @param {RecapContainerStrings} recapContainerStrings - An object containing recap container strings.
-//  */
-// function appendRecapElements(fragment, recapContainerStrings) {
-//     const recapHeading = `RoyalRecap of ${recapContainerStrings.fictionTitle}`
-//     const recapChapter = `Previous chapter: ${recapContainerStrings.lastChapterName}`
-//     const recapWordsDisplay = `Showing last ${extensionSettings.wordCount} words:`
-//     const recapContent = `${recapContainerStrings.lastChapterContent}`
-
-//     appendTextElement(fragment, recapHeading, "h1")
-//     appendTextElement(fragment, recapChapter, "h2")
-//     appendTextElement(fragment, recapWordsDisplay, "h4")
-//     appendTextElement(fragment, recapContent, "div")
-// }
-
-// /**
-//  *
-//  * @param {Node} parent The parent node to append to
-//  * @param {string} text The text the element contains
-//  * @param {string} elementType The HTML element you want to create
-//  */
-// function appendTextElement(parent, text, elementType) {
-//     const element = document.createElement(elementType)
-//     element.textContent = text
-//     parent.appendChild(element)
-// }
-
 /**
- * Fetches the previous chapter and converts the response to text.
  * @param {string | URL | Request} url
  */
 async function fetchChapter(url) {
     try {
         const response = await fetch(url)
 
-        // TODO: Solve this by displaying the error message in the recapContainer
         if (!response.ok) {
             throw new Error("Error fetching the previous chapter...")
         }
@@ -366,44 +254,18 @@ async function fetchChapter(url) {
     }
 }
 
-// /**
-//  * Parses HTML text and extracts data based on the given selector.
-//  * Takes the value from the extension settings {@link loadExtensionSettings()}
-//  * but defaults to the value of RECAP_WORD_COUNT.
-//  * @param {DOMParser} parser
-//  * @param {string} html
-//  * @param {string} selector
-//  * @param {number} wordcount default `RECAP_WORD_COUNT`
-//  */
-// function extractContent(
-//     parser,
-//     html,
-//     selector,
-//     wordcount = extensionSettings.wordCount,
-// ) {
-//     const doc = parser.parseFromString(html, "text/html")
-//     const contentElement = doc.querySelector(selector)
-
-//     if (!contentElement || contentElement.textContent === null) {
-//         return "Error loading recap"
-//     }
-
-//     // Get only the last x words, where x is wordcount
-//     const extracted = contentElement.textContent
-//         .trim()
-//         .split(/\s+/)
-//         .slice(-wordcount)
-//         .join(" ")
-//     return extracted
-// }
-
 /**
  * Extracts the chapter content from the PREVIOUS chapter
- * @param {Document} doc A parsable document
+ * @param {Document} prevChapterDoc A parsable document of the previous chapter
  * @param {number} [wordCount=extensionSettings.wordCount]
  */
-function extractChapterContent(doc, wordCount = extensionSettings.wordCount) {
-    const chapterElement = doc.querySelector(extensionSettings.chapterContent)
+function extractChapterContent(
+    prevChapterDoc,
+    wordCount = extensionSettings.wordCount,
+) {
+    const chapterElement = prevChapterDoc.querySelector(
+        extensionSettings.chapterContent,
+    )
 
     const contentDiv = document.createElement("div")
 
@@ -449,11 +311,10 @@ function extractChapterContent(doc, wordCount = extensionSettings.wordCount) {
 }
 
 /**
- * Extracts the chapter title from the PREVIOUS chapter
- * @param {Document} doc A parsable document
+ * @param {Document} prevChapterDoc A parsable document of the previous chapter
  */
-function extractChapterName(doc) {
-    const chapterTitleElement = doc.querySelector(
+function extractChapterName(prevChapterDoc) {
+    const chapterTitleElement = prevChapterDoc.querySelector(
         extensionSettings.chapterTitle,
     )
 
@@ -462,17 +323,6 @@ function extractChapterName(doc) {
     } else {
         return chapterTitleElement.textContent.trim()
     }
-
-    // const chapterTitleHeading = document.createElement("h2")
-
-    // if (!chapterTitleElement || chapterTitleElement.textContent === null) {
-    //     chapterTitleHeading.textContent = "Error loading chapter title"
-    //     return chapterTitleHeading
-    // }
-
-    // chapterTitleHeading.textContent = chapterTitleElement.textContent.trim()
-
-    // return chapterTitleHeading
 }
 
 /**
@@ -488,15 +338,4 @@ function extractFictionTitle() {
     } else {
         return fictionTitleElement.textContent.trim()
     }
-
-    // const fictionHeading = document.createElement("h1")
-
-    // if (!fictionTitleElement || fictionTitleElement.textContent === null) {
-    //     fictionHeading.textContent = "Error loading fiction title"
-    //     return fictionHeading
-    // }
-
-    // fictionHeading.textContent = fictionTitleElement.textContent.trim()
-
-    // return fictionHeading
 }
