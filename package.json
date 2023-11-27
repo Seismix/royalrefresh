@@ -7,7 +7,7 @@
     "doc": "docs"
   },
   "scripts": {
-    "dev": "web-ext run --start-url https://www.royalroad.com/fiction/63759/super-supportive/chapter/1097958/two-mistakes --start-url about:addons"
+    "dev": "web-ext run --start-url https://www.royalroad.com/fiction/63759/super-supportive/chapter/1097958/two-mistakes --start-url about:addons --start-url about:debugging"
   },
   "repository": {
     "type": "git",
