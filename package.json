@@ -7,7 +7,7 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "web-ext run --start-url https://www.royalroad.com/fiction/63759/super-supportive/chapter/1097958/two-mistakes --start-url about:addons --start-url about:debugging"
   },
   "repository": {
     "type": "git",
@@ -30,6 +30,7 @@
   "homepage": "https://github.com/Seismix/RoyalRecap#readme",
   "devDependencies": {
     "@types/firefox-webext-browser": "^111.0.1",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "web-ext": "^7.8.0"
   }
 }
