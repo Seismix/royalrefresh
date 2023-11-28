@@ -23,11 +23,11 @@ async function init() {
     if (documentIsChapterURL()) {
         await loadExtensionSettings()
 
-        const recapButton = createRecapButton({
-            disabled: !documentHasPreviousChapterURL(),
-        })
-
+        const recapButton = createRecapButton()
         addRecapButtonToDOM(recapButton)
+
+        const recapContainer = createRecapContainer()
+        addRecapContainerToDOM(recapContainer)
 
         if (extensionSettings.autoExpand) {
             recapButton.click()
@@ -35,10 +35,6 @@ async function init() {
     }
 }
 
-/**
- * Imports the default values from the "defaults.js" file.
- * @returns {Promise<ExtensionSettings>}
- */
 async function importDefaultValues() {
     const src = browser.runtime.getURL(DEFAULTS_FILE)
     const { default: defaultValues } = await import(src)
@@ -96,7 +92,7 @@ function documentIsChapterURL() {
 }
 
 /**
- * @returns {boolean} True if the previous chapter button has a valid href attribute, otherwise false.
+ * @returns {boolean} True if the previous chapter button has a valid `href` attribute, otherwise false.
  */
 function documentHasPreviousChapterURL() {
     const hasPrevChapterURL = document.querySelector(
@@ -107,18 +103,15 @@ function documentHasPreviousChapterURL() {
 }
 
 /**
- * Creates the recap button with optional disabled state.
- * @param {Object} options - Options for creating the recap button.
- * @param {boolean} options.disabled - Whether the button should be disabled.
- * @returns {HTMLButtonElement} The created recap button element.
+ * Creates the recap button (disabled if no previous chapter)
  */
-function createRecapButton(options) {
+function createRecapButton() {
     const button = document.createElement("button")
     button.id = RECAP_BUTTON_ID
     button.textContent = "Recap"
     button.classList.add("btn", "btn-primary", "btn-circle")
 
-    if (options.disabled === true) {
+    if (!documentHasPreviousChapterURL()) {
         button.disabled = true
     }
 
@@ -134,7 +127,9 @@ function createRecapButton(options) {
     button.prepend(bookIcon)
     bookIcon.append("\u00A0")
 
-    button.addEventListener("click", addRecapContainerToDOM, { once: true })
+    button.addEventListener("click", async () => {
+        await appendFetchedRecap()
+    })
 
     button.addEventListener("click", () => {
         toggleRecap()
@@ -143,56 +138,53 @@ function createRecapButton(options) {
     return button
 }
 
-/**
- * Creates and adds the recap container div to the DOM, if it doesn't already exist
- */
-function addRecapContainerToDOM() {
-    if (document.getElementById(RECAP_CONTAINER_ID)) {
-        return
-    }
+function createRecapContainer() {
     const recapContainer = document.createElement("div")
     recapContainer.classList.add("chapter-inner", "chapter-content")
     recapContainer.id = RECAP_CONTAINER_ID
     recapContainer.style.display = "none"
 
-    const chapterDiv = document.querySelector(extensionSettings.chapterContent)
-
-    if (chapterDiv) {
-        chapterDiv.prepend(recapContainer)
+    // ! This doesn't work yet for some reason
+    if (extensionSettings.smoothScroll) {
+        recapContainer.scrollIntoView({ behavior: "smooth" })
     }
 
-    setRecapText()
+    return recapContainer
 }
 
 /**
- * Fetches necessary data from the previous chapter by calling {@link fetchChapter()} and {@link extractContent()} to
- *  set the recap text inside the recap container
+ * @param {HTMLDivElement} recap
  */
-async function setRecapText() {
-    const recapContainer = document.getElementById(RECAP_CONTAINER_ID)
+function addRecapContainerToDOM(recap) {
+    if (document.getElementById(RECAP_CONTAINER_ID)) {
+        return
+    }
+
+    const chapterDiv = document.querySelector(extensionSettings.chapterContent)
+
+    if (chapterDiv) {
+        chapterDiv.prepend(recap)
+    }
+}
+
+async function appendFetchedRecap() {
     const prevChapterBtn = document.querySelector(
         extensionSettings.prevChapterBtn.toString(),
     )
+    const recapContainer = document.getElementById(RECAP_CONTAINER_ID)
 
-    if (!recapContainer || !(prevChapterBtn instanceof HTMLAnchorElement)) {
-        return console.error("Could not find necessary DOM Elements")
-    }
+    let recapFragment = document.createDocumentFragment()
 
-    const prevChapterURL = prevChapterBtn.href
+    if (prevChapterBtn instanceof HTMLAnchorElement) {
+        const prevChapterHtml = await fetchChapterHtmlText(prevChapterBtn.href)
 
-    const prevChapterHtml = await fetchChapter(prevChapterURL)
+        if (prevChapterHtml) {
+            recapFragment = createRecapFragment(prevChapterHtml)
 
-    // TODO: MAybe set the recap container error message here?
-    if (!prevChapterHtml) {
-        return console.error("Error fetching previous chapter")
-    }
-
-    const recapFragment = createRecapFragment(prevChapterHtml)
-
-    recapContainer.appendChild(recapFragment)
-
-    if (extensionSettings.smoothScroll) {
-        recapContainer.scrollIntoView({ behavior: "smooth" })
+            recapContainer?.appendChild(recapFragment)
+        }
+    } else {
+        recapContainer?.append("Error fetching chapter. Refresh.")
     }
 }
 
@@ -223,12 +215,12 @@ function createRecapFragment(prevChapterHtml) {
 
     // Fragment
     const fragment = document.createDocumentFragment()
-    fragment.append(document.createElement("hr"))
-    fragment.append(recapHeadingElement)
-    fragment.append(recapChapterNameElement)
-    fragment.append(recapWordsDisplayElement)
-    fragment.append(recapContentElement)
-    fragment.append(document.createElement("hr"))
+    fragment.appendChild(document.createElement("hr"))
+    fragment.appendChild(recapHeadingElement)
+    fragment.appendChild(recapChapterNameElement)
+    fragment.appendChild(recapWordsDisplayElement)
+    fragment.appendChild(recapContentElement)
+    fragment.appendChild(document.createElement("hr"))
 
     return fragment
 }
@@ -236,7 +228,7 @@ function createRecapFragment(prevChapterHtml) {
 /**
  * @param {string | URL | Request} url
  */
-async function fetchChapter(url) {
+async function fetchChapterHtmlText(url) {
     try {
         const response = await fetch(url)
 
