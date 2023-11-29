@@ -20,25 +20,23 @@ init()
 
 /** Initializes all necessary data and injects all extension code into the DOM, if some checks are passed */
 async function init() {
-    if (documentIsChapterURL()) {
-        await loadExtensionSettings()
+    if (!documentIsChapterURL()) {
+        return
+    }
 
-        const recapButton = createRecapButton({
-            disabled: !documentHasPreviousChapterURL(),
-        })
+    await loadExtensionSettings()
 
-        addRecapButtonToDOM(recapButton)
+    const recapButton = createRecapButton()
+    addRecapButtonToDOM(recapButton)
 
-        if (extensionSettings.autoExpand) {
-            recapButton.click()
-        }
+    const recapContainer = createRecapContainer()
+    addRecapContainerToDOM(recapContainer)
+
+    if (extensionSettings.autoExpand) {
+        recapButton.click()
     }
 }
 
-/**
- * Imports the default values from the "defaults.js" file.
- * @returns {Promise<ExtensionSettings>}
- */
 async function importDefaultValues() {
     const src = browser.runtime.getURL(DEFAULTS_FILE)
     const { default: defaultValues } = await import(src)
@@ -56,21 +54,6 @@ async function loadExtensionSettings() {
         extensionSettings = { ...defaultValues }
     } else {
         extensionSettings = { ...extensionSettings, ...storageItems }
-    }
-}
-
-/**
- * @param {HTMLButtonElement} button - Button element to add
- */
-function addRecapButtonToDOM(button) {
-    if (!document.getElementById(RECAP_BUTTON_ID)) {
-        const navButtons = document.querySelector(
-            extensionSettings.buttonPlacement,
-        )
-
-        if (navButtons) {
-            navButtons.prepend(button)
-        }
     }
 }
 
@@ -96,7 +79,7 @@ function documentIsChapterURL() {
 }
 
 /**
- * @returns {boolean} True if the previous chapter button has a valid href attribute, otherwise false.
+ * @returns {boolean} True if the previous chapter button has a valid `href` attribute, otherwise false.
  */
 function documentHasPreviousChapterURL() {
     const hasPrevChapterURL = document.querySelector(
@@ -107,18 +90,15 @@ function documentHasPreviousChapterURL() {
 }
 
 /**
- * Creates the recap button with optional disabled state.
- * @param {Object} options - Options for creating the recap button.
- * @param {boolean} options.disabled - Whether the button should be disabled.
- * @returns {HTMLButtonElement} The created recap button element.
+ * Creates the recap button (disabled if no previous chapter)
  */
-function createRecapButton(options) {
+function createRecapButton() {
     const button = document.createElement("button")
     button.id = RECAP_BUTTON_ID
     button.textContent = "Recap"
     button.classList.add("btn", "btn-primary", "btn-circle")
 
-    if (options.disabled === true) {
+    if (!documentHasPreviousChapterURL()) {
         button.disabled = true
     }
 
@@ -134,7 +114,13 @@ function createRecapButton(options) {
     button.prepend(bookIcon)
     bookIcon.append("\u00A0")
 
-    button.addEventListener("click", addRecapContainerToDOM, { once: true })
+    button.addEventListener(
+        "click",
+        async () => {
+            await appendFetchedRecap()
+        },
+        { once: true },
+    )
 
     button.addEventListener("click", () => {
         toggleRecap()
@@ -144,55 +130,41 @@ function createRecapButton(options) {
 }
 
 /**
- * Creates and adds the recap container div to the DOM, if it doesn't already exist
+ * @param {HTMLButtonElement} button - Button element to add
  */
-function addRecapContainerToDOM() {
-    if (document.getElementById(RECAP_CONTAINER_ID)) {
-        return
+function addRecapButtonToDOM(button) {
+    if (!document.getElementById(RECAP_BUTTON_ID)) {
+        const navButtons = document.querySelector(
+            extensionSettings.buttonPlacement,
+        )
+
+        if (navButtons) {
+            navButtons.prepend(button)
+        }
     }
+}
+
+function createRecapContainer() {
     const recapContainer = document.createElement("div")
     recapContainer.classList.add("chapter-inner", "chapter-content")
     recapContainer.id = RECAP_CONTAINER_ID
     recapContainer.style.display = "none"
 
-    const chapterDiv = document.querySelector(extensionSettings.chapterContent)
-
-    if (chapterDiv) {
-        chapterDiv.prepend(recapContainer)
-    }
-
-    setRecapText()
+    return recapContainer
 }
 
 /**
- * Fetches necessary data from the previous chapter by calling {@link fetchChapter()} and {@link extractContent()} to
- *  set the recap text inside the recap container
+ * @param {HTMLDivElement} recap
  */
-async function setRecapText() {
-    const recapContainer = document.getElementById(RECAP_CONTAINER_ID)
-    const prevChapterBtn = document.querySelector(
-        extensionSettings.prevChapterBtn.toString(),
-    )
+function addRecapContainerToDOM(recap) {
+    if (!document.getElementById(RECAP_CONTAINER_ID)) {
+        const chapterDiv = document.querySelector(
+            extensionSettings.chapterContent,
+        )
 
-    if (!recapContainer || !(prevChapterBtn instanceof HTMLAnchorElement)) {
-        return console.error("Could not find necessary DOM Elements")
-    }
-
-    const prevChapterURL = prevChapterBtn.href
-
-    const prevChapterHtml = await fetchChapter(prevChapterURL)
-
-    // TODO: MAybe set the recap container error message here?
-    if (!prevChapterHtml) {
-        return console.error("Error fetching previous chapter")
-    }
-
-    const recapFragment = createRecapFragment(prevChapterHtml)
-
-    recapContainer.appendChild(recapFragment)
-
-    if (extensionSettings.smoothScroll) {
-        recapContainer.scrollIntoView({ behavior: "smooth" })
+        if (chapterDiv) {
+            chapterDiv.prepend(recap)
+        }
     }
 }
 
@@ -223,32 +195,60 @@ function createRecapFragment(prevChapterHtml) {
 
     // Fragment
     const fragment = document.createDocumentFragment()
-    fragment.append(document.createElement("hr"))
-    fragment.append(recapHeadingElement)
-    fragment.append(recapChapterNameElement)
-    fragment.append(recapWordsDisplayElement)
-    fragment.append(recapContentElement)
-    fragment.append(document.createElement("hr"))
+    fragment.appendChild(document.createElement("hr"))
+    fragment.appendChild(recapHeadingElement)
+    fragment.appendChild(recapChapterNameElement)
+    fragment.appendChild(recapWordsDisplayElement)
+    fragment.appendChild(recapContentElement)
+    fragment.appendChild(document.createElement("hr"))
 
     return fragment
+}
+
+async function appendFetchedRecap() {
+    const recapContainer = document.getElementById(RECAP_CONTAINER_ID)
+    const prevChapterBtn = document.querySelector(
+        extensionSettings.prevChapterBtn.toString(),
+    )
+
+    if (!(prevChapterBtn instanceof HTMLAnchorElement)) {
+        return recapContainer?.append(
+            "Could not find previous chapter URL to fetch data.",
+        )
+    }
+
+    const prevChapterHtml = await fetchChapterHtmlText(prevChapterBtn.href)
+
+    if (!prevChapterHtml) {
+        console.error("Error fetching chapter data.")
+        return recapContainer?.append("Error fetching chapter. Refresh.")
+    }
+
+    const recapFragment = createRecapFragment(prevChapterHtml)
+
+    recapContainer?.appendChild(recapFragment)
+
+    if (extensionSettings.smoothScroll) {
+        recapContainer?.scrollIntoView({ behavior: "smooth" })
+    }
 }
 
 /**
  * @param {string | URL | Request} url
  */
-async function fetchChapter(url) {
+async function fetchChapterHtmlText(url) {
     try {
         const response = await fetch(url)
 
         if (!response.ok) {
-            throw new Error("Error fetching the previous chapter...")
+            throw new Error("No response...")
         }
 
         const text = await response.text()
 
         return text
     } catch (error) {
-        console.error("Error fetching the chapter:", error)
+        console.error("Fetching chapter failed:", error)
 
         return null
     }
@@ -281,16 +281,10 @@ function extractChapterContent(
         const paragraph = paragraphs[i]
         const words = paragraph.textContent?.trim().split(/\s+/)
 
-        if (!words) {
-            break
-        }
+        if (words && words.length > 0) {
+            const remainingWords = wordCount - words.length
 
-        const wordsPerParagraph = words.length
-
-        if (wordsPerParagraph > 0) {
-            const remainingWords = wordCount - wordsPerParagraph
-
-            wordCount -= wordsPerParagraph
+            wordCount -= words.length
 
             if (remainingWords > 0) {
                 selectedParagraphs.push(paragraph)
