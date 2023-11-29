@@ -20,18 +20,20 @@ init()
 
 /** Initializes all necessary data and injects all extension code into the DOM, if some checks are passed */
 async function init() {
-    if (documentIsChapterURL()) {
-        await loadExtensionSettings()
+    if (!documentIsChapterURL()) {
+        return
+    }
 
-        const recapButton = createRecapButton()
-        addRecapButtonToDOM(recapButton)
+    await loadExtensionSettings()
 
-        const recapContainer = createRecapContainer()
-        addRecapContainerToDOM(recapContainer)
+    const recapButton = createRecapButton()
+    addRecapButtonToDOM(recapButton)
 
-        if (extensionSettings.autoExpand) {
-            recapButton.click()
-        }
+    const recapContainer = createRecapContainer()
+    addRecapContainerToDOM(recapContainer)
+
+    if (extensionSettings.autoExpand) {
+        recapButton.click()
     }
 }
 
