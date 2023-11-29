@@ -55,21 +55,6 @@ async function loadExtensionSettings() {
     }
 }
 
-/**
- * @param {HTMLButtonElement} button - Button element to add
- */
-function addRecapButtonToDOM(button) {
-    if (!document.getElementById(RECAP_BUTTON_ID)) {
-        const navButtons = document.querySelector(
-            extensionSettings.buttonPlacement,
-        )
-
-        if (navButtons) {
-            navButtons.prepend(button)
-        }
-    }
-}
-
 /** Toggles the visibility of the recap div and the text on the recap button */
 function toggleRecap() {
     const toggleSpan = document.getElementById(TOGGLE_SPAN_ID)
@@ -127,9 +112,13 @@ function createRecapButton() {
     button.prepend(bookIcon)
     bookIcon.append("\u00A0")
 
-    button.addEventListener("click", async () => {
-        await appendFetchedRecap()
-    })
+    button.addEventListener(
+        "click",
+        async () => {
+            await appendFetchedRecap()
+        },
+        { once: true },
+    )
 
     button.addEventListener("click", () => {
         toggleRecap()
@@ -138,16 +127,26 @@ function createRecapButton() {
     return button
 }
 
+/**
+ * @param {HTMLButtonElement} button - Button element to add
+ */
+function addRecapButtonToDOM(button) {
+    if (!document.getElementById(RECAP_BUTTON_ID)) {
+        const navButtons = document.querySelector(
+            extensionSettings.buttonPlacement,
+        )
+
+        if (navButtons) {
+            navButtons.prepend(button)
+        }
+    }
+}
+
 function createRecapContainer() {
     const recapContainer = document.createElement("div")
     recapContainer.classList.add("chapter-inner", "chapter-content")
     recapContainer.id = RECAP_CONTAINER_ID
     recapContainer.style.display = "none"
-
-    // ! This doesn't work yet for some reason
-    if (extensionSettings.smoothScroll) {
-        recapContainer.scrollIntoView({ behavior: "smooth" })
-    }
 
     return recapContainer
 }
@@ -156,35 +155,14 @@ function createRecapContainer() {
  * @param {HTMLDivElement} recap
  */
 function addRecapContainerToDOM(recap) {
-    if (document.getElementById(RECAP_CONTAINER_ID)) {
-        return
-    }
+    if (!document.getElementById(RECAP_CONTAINER_ID)) {
+        const chapterDiv = document.querySelector(
+            extensionSettings.chapterContent,
+        )
 
-    const chapterDiv = document.querySelector(extensionSettings.chapterContent)
-
-    if (chapterDiv) {
-        chapterDiv.prepend(recap)
-    }
-}
-
-async function appendFetchedRecap() {
-    const prevChapterBtn = document.querySelector(
-        extensionSettings.prevChapterBtn.toString(),
-    )
-    const recapContainer = document.getElementById(RECAP_CONTAINER_ID)
-
-    let recapFragment = document.createDocumentFragment()
-
-    if (prevChapterBtn instanceof HTMLAnchorElement) {
-        const prevChapterHtml = await fetchChapterHtmlText(prevChapterBtn.href)
-
-        if (prevChapterHtml) {
-            recapFragment = createRecapFragment(prevChapterHtml)
-
-            recapContainer?.appendChild(recapFragment)
+        if (chapterDiv) {
+            chapterDiv.prepend(recap)
         }
-    } else {
-        recapContainer?.append("Error fetching chapter. Refresh.")
     }
 }
 
@@ -225,6 +203,34 @@ function createRecapFragment(prevChapterHtml) {
     return fragment
 }
 
+async function appendFetchedRecap() {
+    const recapContainer = document.getElementById(RECAP_CONTAINER_ID)
+    const prevChapterBtn = document.querySelector(
+        extensionSettings.prevChapterBtn.toString(),
+    )
+
+    if (!(prevChapterBtn instanceof HTMLAnchorElement)) {
+        return recapContainer?.append(
+            "Could not find previous chapter URL to fetch data.",
+        )
+    }
+
+    const prevChapterHtml = await fetchChapterHtmlText(prevChapterBtn.href)
+
+    if (!prevChapterHtml) {
+        console.error("Error fetching chapter data.")
+        return recapContainer?.append("Error fetching chapter. Refresh.")
+    }
+
+    const recapFragment = createRecapFragment(prevChapterHtml)
+
+    recapContainer?.appendChild(recapFragment)
+
+    if (extensionSettings.smoothScroll) {
+        recapContainer?.scrollIntoView({ behavior: "smooth" })
+    }
+}
+
 /**
  * @param {string | URL | Request} url
  */
@@ -233,14 +239,14 @@ async function fetchChapterHtmlText(url) {
         const response = await fetch(url)
 
         if (!response.ok) {
-            throw new Error("Error fetching the previous chapter...")
+            throw new Error("No response...")
         }
 
         const text = await response.text()
 
         return text
     } catch (error) {
-        console.error("Error fetching the chapter:", error)
+        console.error("Fetching chapter failed:", error)
 
         return null
     }
@@ -273,16 +279,10 @@ function extractChapterContent(
         const paragraph = paragraphs[i]
         const words = paragraph.textContent?.trim().split(/\s+/)
 
-        if (!words) {
-            break
-        }
+        if (words && words.length > 0) {
+            const remainingWords = wordCount - words.length
 
-        const wordsPerParagraph = words.length
-
-        if (wordsPerParagraph > 0) {
-            const remainingWords = wordCount - wordsPerParagraph
-
-            wordCount -= wordsPerParagraph
+            wordCount -= words.length
 
             if (remainingWords > 0) {
                 selectedParagraphs.push(paragraph)
