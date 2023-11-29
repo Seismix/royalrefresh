@@ -13,6 +13,7 @@ const DEFAULTS = {
     buttonPlacement: ".actions",
     smoothScroll: true,
     autoExpand: false,
+    blurb: ".description",
 }
 
 export default DEFAULTS

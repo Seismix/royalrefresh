@@ -14,6 +14,7 @@ let extensionSettings = {}
 const RECAP_BUTTON_ID = "recapButton"
 const RECAP_CONTAINER_ID = "recapContainer"
 const TOGGLE_SPAN_ID = "toggleSpan"
+const BLURB_BUTTON_ID = "blurbButton"
 const DEFAULTS_FILE = "scripts/defaults.js"
 
 init()
@@ -26,14 +27,16 @@ async function init() {
 
     await loadExtensionSettings()
 
-    const recapButton = createRecapButton()
-    addRecapButtonToDOM(recapButton)
+    const toggleButton = documentHasPreviousChapterURL()
+        ? createRecapButton()
+        : createBlurbButton()
+    addToggleButtonToDOM(toggleButton)
 
     const recapContainer = createRecapContainer()
     addRecapContainerToDOM(recapContainer)
 
     if (extensionSettings.autoExpand) {
-        recapButton.click()
+        toggleButton.click()
     }
 }
 
@@ -98,10 +101,6 @@ function createRecapButton() {
     button.textContent = "Recap"
     button.classList.add("btn", "btn-primary", "btn-circle")
 
-    if (!documentHasPreviousChapterURL()) {
-        button.disabled = true
-    }
-
     const toggleSpan = document.createElement("span")
     toggleSpan.id = TOGGLE_SPAN_ID
     toggleSpan.textContent = "Show "
@@ -129,11 +128,44 @@ function createRecapButton() {
     return button
 }
 
+function createBlurbButton() {
+    const button = document.createElement("button")
+    button.id = BLURB_BUTTON_ID
+    button.textContent = "Blurb"
+    button.classList.add("btn", "btn-primary", "btn-circle")
+
+    const toggleSpan = document.createElement("span")
+    toggleSpan.id = TOGGLE_SPAN_ID
+    toggleSpan.textContent = "Show "
+
+    button.prepend(toggleSpan)
+
+    const bookIcon = document.createElement("i")
+    bookIcon.classList.add("fa", "fa-info-circle")
+
+    button.prepend(bookIcon)
+    bookIcon.append("\u00A0")
+
+    button.addEventListener(
+        "click",
+        async () => {
+            await appendFetchedBlurb()
+        },
+        { once: true },
+    )
+
+    button.addEventListener("click", () => {
+        toggleRecap()
+    })
+
+    return button
+}
+
 /**
  * @param {HTMLButtonElement} button - Button element to add
  */
-function addRecapButtonToDOM(button) {
-    if (!document.getElementById(RECAP_BUTTON_ID)) {
+function addToggleButtonToDOM(button) {
+    if (!document.getElementById(button.id)) {
         const navButtons = document.querySelector(
             extensionSettings.buttonPlacement,
         )
@@ -217,7 +249,7 @@ async function appendFetchedRecap() {
         )
     }
 
-    const prevChapterHtml = await fetchChapterHtmlText(prevChapterBtn.href)
+    const prevChapterHtml = await fetchHtmlText(prevChapterBtn.href)
 
     if (!prevChapterHtml) {
         console.error("Error fetching chapter data.")
@@ -234,9 +266,58 @@ async function appendFetchedRecap() {
 }
 
 /**
+ * @param {string} overviewHtml
+ */
+function createBlurbFragment(overviewHtml) {
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(overviewHtml, "text/html")
+
+    const blurbHeading = document.createElement("h1")
+    blurbHeading.textContent = `Blurb: ${extractFictionTitle()}`
+
+    const bottomSeparator = document.createElement("hr")
+    bottomSeparator.style.marginBottom = "50px"
+
+    const blurb = extractBlurb(doc)
+
+    const fragment = document.createDocumentFragment()
+    fragment.appendChild(document.createElement("hr"))
+    fragment.appendChild(blurbHeading)
+    fragment.appendChild(blurb)
+    fragment.appendChild(bottomSeparator)
+
+    return fragment
+}
+
+async function appendFetchedBlurb() {
+    const recapContainer = document.getElementById(RECAP_CONTAINER_ID)
+    const fictionTitle = document.querySelector(extensionSettings.fictionTitle)
+
+    if (!(fictionTitle?.parentElement instanceof HTMLAnchorElement)) {
+        return
+    }
+
+    const fictionOverviewUrl = fictionTitle.parentElement.href
+    const overviewHtml = await fetchHtmlText(fictionOverviewUrl)
+
+    if (!overviewHtml) {
+        recapContainer?.append("Error fetching blurb. Refresh")
+        return
+    }
+
+    const blurb = createBlurbFragment(overviewHtml)
+
+    recapContainer?.appendChild(blurb)
+
+    if (extensionSettings.smoothScroll) {
+        recapContainer?.scrollIntoView({ behavior: "smooth" })
+    }
+}
+
+/**
  * @param {string | URL | Request} url
  */
-async function fetchChapterHtmlText(url) {
+async function fetchHtmlText(url) {
     try {
         const response = await fetch(url)
 
@@ -252,6 +333,29 @@ async function fetchChapterHtmlText(url) {
 
         return null
     }
+}
+
+/**
+ * @param {Document} overviewDoc
+ */
+function extractBlurb(overviewDoc) {
+    const blurb = overviewDoc.querySelector(extensionSettings.blurb)
+
+    if (
+        !blurb ||
+        blurb.textContent === null ||
+        !(blurb instanceof HTMLDivElement)
+    ) {
+        const error = document.createElement("div")
+        error.textContent = "Error loading story blurb"
+        return error
+    }
+
+    blurb.querySelectorAll("input, label").forEach((element) => {
+        element.remove()
+    })
+
+    return blurb
 }
 
 /**

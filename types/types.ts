@@ -7,6 +7,7 @@ export type ExtensionSettings = {
     buttonPlacement: string
     smoothScroll: boolean
     autoExpand: boolean
+    blurb: string
 }
 
 type ExtensionSettingsKeys = keyof ExtensionSettings
