@@ -17,7 +17,8 @@
         }
     },
     "scripts": {
-        "dev": "web-ext run"
+        "dev": "web-ext run",
+        "dev:verbose": "web-ext run --verbose"
     },
     "repository": {
         "type": "git",
