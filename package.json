@@ -6,8 +6,18 @@
     "directories": {
         "doc": "docs"
     },
+    "webExt": {
+        "configDiscovery": false,
+        "run": {
+            "startUrl": [
+                "https://www.royalroad.com/fiction/63759/super-supportive/chapter/1097958/two-mistakes",
+                "about:addons",
+                "about:debugging"
+            ]
+        }
+    },
     "scripts": {
-        "dev": "web-ext run --start-url https://www.royalroad.com/fiction/63759/super-supportive/chapter/1097958/two-mistakes --start-url about:addons --start-url about:debugging"
+        "dev": "web-ext run"
     },
     "repository": {
         "type": "git",
