@@ -275,10 +275,6 @@ async function appendFetchedRecap() {
     const recapFragment = createRecapFragment(prevChapterHtml)
 
     recapContainer?.appendChild(recapFragment)
-
-    if (extensionSettings.smoothScroll) {
-        recapContainer?.scrollIntoView({ behavior: "smooth" })
-    }
 }
 
 /**
