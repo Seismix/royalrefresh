@@ -11,3 +11,9 @@ browser.runtime.onInstalled.addListener((details) => {
 browser.browserAction.onClicked.addListener(() => {
     browser.runtime.openOptionsPage()
 })
+
+browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.request === "getDefaultSettings") {
+        sendResponse(DEFAULTS)
+    }
+})
