@@ -55,13 +55,14 @@ async function loadExtensionSettings() {
 }
 
 function addSettingsChangeListener() {
-    browser.storage.onChanged.addListener((changes, area) => {
+    browser.storage.onChanged.addListener(async (changes, area) => {
         if (area === "sync" && changes) {
             for (const key in changes) {
                 if (changes.hasOwnProperty(key)) {
                     extensionSettings[key] = changes[key].newValue
                 }
             }
+            await appendFetchedRecap() // Refetch and reparse
         }
     })
 }
@@ -250,8 +251,13 @@ function createRecapFragment(prevChapterHtml) {
 async function appendFetchedRecap() {
     const recapContainer = document.getElementById(RECAP_CONTAINER_ID)
     const prevChapterBtn = document.querySelector(
-        extensionSettings.prevChapterBtn.toString(),
+        extensionSettings.prevChapterBtn,
     )
+
+    // Clear the content
+    if (recapContainer) {
+        recapContainer.innerHTML = ""
+    }
 
     if (!(prevChapterBtn instanceof HTMLAnchorElement)) {
         return recapContainer?.append(
