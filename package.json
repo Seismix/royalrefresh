@@ -22,7 +22,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Seismix/RoyalRecap.git"
+        "url": "git+https://github.com/Seismix/royalrecap.git"
     },
     "keywords": [
         "royal",
@@ -36,9 +36,9 @@
     "author": "Seismix",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/Seismix/RoyalRecap/issues"
+        "url": "https://github.com/Seismix/royalrecap/issues"
     },
-    "homepage": "https://github.com/Seismix/RoyalRecap#readme",
+    "homepage": "https://github.com/Seismix/royalrecap#readme",
     "devDependencies": {
         "@types/firefox-webext-browser": "^120.0.0",
         "typescript": "^5.3.3",
