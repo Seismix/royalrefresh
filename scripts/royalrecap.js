@@ -26,6 +26,7 @@ async function init() {
     }
 
     await loadExtensionSettings()
+    addSettingsChangeListener()
 
     const toggleButton = documentHasPreviousChapterURL()
         ? createRecapButton()
@@ -40,24 +41,30 @@ async function init() {
     }
 }
 
-async function importDefaultValues() {
-    const src = browser.runtime.getURL(DEFAULTS_FILE)
-    const { default: defaultValues } = await import(src)
-    return defaultValues
+async function loadExtensionSettings() {
+    // Request default settings from the background script
+    const defaultValues = await browser.runtime.sendMessage({
+        request: "getDefaultSettings",
+    })
+
+    // Load settings, automatically falling back to default values if not set
+    const settings = await browser.storage.sync.get(defaultValues)
+
+    // Assign the retrieved settings to extensionSettings
+    extensionSettings = { ...defaultValues, ...settings }
 }
 
-/**
- * Loads the extension settings from the browser and fills the {@link extensionSettings} object with its values
- * @see {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/sync | MDN Documentation storage.sync}
- */
-async function loadExtensionSettings() {
-    const defaultValues = await importDefaultValues()
-    const storageItems = await browser.storage.sync.get(defaultValues)
-    if (Object.keys(storageItems).length === 0) {
-        extensionSettings = { ...defaultValues }
-    } else {
-        extensionSettings = { ...extensionSettings, ...storageItems }
-    }
+function addSettingsChangeListener() {
+    browser.storage.onChanged.addListener(async (changes, area) => {
+        if (area === "sync" && changes) {
+            for (const key in changes) {
+                if (changes.hasOwnProperty(key)) {
+                    extensionSettings[key] = changes[key].newValue
+                }
+            }
+            await appendFetchedRecap() // Refetch and reparse
+        }
+    })
 }
 
 /** Toggles the visibility of the recap div and the text on the recap button */
@@ -71,6 +78,10 @@ function toggleRecap() {
 
         recapContainer.style.display =
             recapContainer.style.display === "none" ? "block" : "none"
+
+        if (extensionSettings.smoothScroll) {
+            recapContainer?.scrollIntoView({ behavior: "smooth" })
+        }
     }
 }
 
@@ -240,8 +251,13 @@ function createRecapFragment(prevChapterHtml) {
 async function appendFetchedRecap() {
     const recapContainer = document.getElementById(RECAP_CONTAINER_ID)
     const prevChapterBtn = document.querySelector(
-        extensionSettings.prevChapterBtn.toString(),
+        extensionSettings.prevChapterBtn,
     )
+
+    // Clear the content
+    if (recapContainer) {
+        recapContainer.innerHTML = ""
+    }
 
     if (!(prevChapterBtn instanceof HTMLAnchorElement)) {
         return recapContainer?.append(
@@ -259,10 +275,6 @@ async function appendFetchedRecap() {
     const recapFragment = createRecapFragment(prevChapterHtml)
 
     recapContainer?.appendChild(recapFragment)
-
-    if (extensionSettings.smoothScroll) {
-        recapContainer?.scrollIntoView({ behavior: "smooth" })
-    }
 }
 
 /**

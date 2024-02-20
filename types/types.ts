@@ -1,5 +1,6 @@
 export type ExtensionSettings = {
     [key: string]: string | number | boolean
+    prevChapterBtn: string
     chapterContent: string
     chapterTitle: string
     fictionTitle: string
