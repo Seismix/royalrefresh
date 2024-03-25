@@ -68,21 +68,44 @@ function addSettingsChangeListener() {
 }
 
 /** Toggles the visibility of the recap div and the text on the recap button */
-function toggleRecap() {
+async function toggleRecap() {
     const toggleSpan = document.getElementById(TOGGLE_SPAN_ID)
     const recapContainer = document.getElementById(RECAP_CONTAINER_ID)
 
-    if (toggleSpan && recapContainer) {
-        toggleSpan.textContent =
-            recapContainer.style.display === "none" ? "Hide " : "Show "
+    if (!toggleSpan || !recapContainer) return
 
-        recapContainer.style.display =
-            recapContainer.style.display === "none" ? "block" : "none"
+    toggleSpan.textContent =
+        recapContainer.style.display === "none" ? "Hide " : "Show "
 
-        if (extensionSettings.smoothScroll) {
-            recapContainer?.scrollIntoView({ behavior: "smooth" })
-        }
+    await fetchAndDisplay(recapContainer)
+
+    recapContainer.style.display =
+        recapContainer.style.display === "none" ? "block" : "none"
+
+    if (extensionSettings.smoothScroll) {
+        recapContainer.scrollIntoView({ behavior: "smooth" })
     }
+}
+
+/**
+ * @param {HTMLElement} recapContainer
+ */
+async function fetchAndDisplay(recapContainer) {
+    if (recapContainerHasContent(recapContainer)) return
+
+    if (documentHasPreviousChapterURL()) {
+        await appendFetchedRecap()
+    } else {
+        await appendFetchedBlurb()
+    }
+}
+
+/**
+ * @param {HTMLElement} recapContainer
+ * @returns {boolean} True if the recap container has content, otherwise false.
+ */
+function recapContainerHasContent(recapContainer) {
+    return recapContainer.textContent?.trim() !== ""
 }
 
 /**
@@ -124,14 +147,6 @@ function createRecapButton() {
     button.prepend(bookIcon)
     bookIcon.append("\u00A0")
 
-    button.addEventListener(
-        "click",
-        async () => {
-            await appendFetchedRecap()
-        },
-        { once: true },
-    )
-
     button.addEventListener("click", () => {
         toggleRecap()
     })
@@ -156,14 +171,6 @@ function createBlurbButton() {
 
     button.prepend(bookIcon)
     bookIcon.append("\u00A0")
-
-    button.addEventListener(
-        "click",
-        async () => {
-            await appendFetchedBlurb()
-        },
-        { once: true },
-    )
 
     button.addEventListener("click", () => {
         toggleRecap()
