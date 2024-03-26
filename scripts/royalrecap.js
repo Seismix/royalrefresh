@@ -21,9 +21,7 @@ init()
 
 /** Initializes all necessary data and injects all extension code into the DOM, if some checks are passed */
 async function init() {
-    if (!documentIsChapterURL()) {
-        return
-    }
+    if (!documentIsChapterURL()) return
 
     await loadExtensionSettings()
     addSettingsChangeListener()
@@ -31,6 +29,7 @@ async function init() {
     const toggleButton = documentHasPreviousChapterURL()
         ? createRecapButton()
         : createBlurbButton()
+
     addToggleButtonToDOM(toggleButton)
 
     const recapContainer = createRecapContainer()
