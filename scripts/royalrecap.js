@@ -1,7 +1,5 @@
-/**
- * @typedef {import("@royalrecap/types").ExtensionSettings} ExtensionSettings
- * @typedef {import("@royalrecap/types").RecapContainerStrings} RecapContainerStrings
- */
+/** @import { ExtensionSettings } from "@royalrecap/types" */
+/** @import { RecapContainerStrings } from "@royalrecap/types" */
 
 /**
  * The object that gets populated with all values loaded from `browser.storage`
