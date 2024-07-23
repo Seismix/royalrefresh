@@ -193,7 +193,6 @@ function addToggleButtonToDOM(button) {
 
 function createRecapContainer() {
     const recapContainer = document.createElement("div")
-    recapContainer.classList.add("chapter-inner", "chapter-content")
     recapContainer.id = RECAP_CONTAINER_ID
     recapContainer.style.display = "none"
 
