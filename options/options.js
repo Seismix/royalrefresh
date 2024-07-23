@@ -1,5 +1,6 @@
-/** @typedef {import("@royalrecap/types").DisplayMessageType} DisplayMessageType */
-/** @typedef {import("@royalrecap/types").ExtensionSettingsPossibleTypes} ExtensionSettingsPossibleTypes */
+/** @import { DisplayMessageType } from "@royalrecap/types" */
+/** @import { ExtensionSettingsPossibleTypes } from "@royalrecap/types" */
+
 import DEFAULTS from "../scripts/defaults.js"
 
 /**
@@ -89,11 +90,9 @@ function displayMessage(messageType) {
 
     const config = buttonConfig[messageType]
 
-    if (config) {
-        const buttonElement = document.querySelector(config.querySelector)
-        if (buttonElement instanceof HTMLButtonElement) {
-            animateButton(buttonElement, config.buttonText)
-        }
+    const buttonElement = document.querySelector(config.querySelector)
+    if (buttonElement instanceof HTMLButtonElement) {
+        animateButton(buttonElement, config.buttonText)
     }
 }
 

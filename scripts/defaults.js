@@ -1,4 +1,4 @@
-/** @typedef {import("@royalrecap/types").ExtensionSettings} ExtensionSettings */
+/** @import { ExtensionSettings } from "@royalrecap/types" */
 
 /**
  * The object containing all default settings this extension uses
