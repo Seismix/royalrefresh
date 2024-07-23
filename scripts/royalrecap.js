@@ -393,31 +393,36 @@ function extractChapterContent(
         return contentDiv
     }
 
+    // Get all paragraph elements within the chapter content
     const paragraphs = chapterElement.querySelectorAll("p")
     const selectedParagraphs = []
+    let remainingWordCount = wordCount
 
+    // Iterate over the paragraphs in reverse order to get the last paragraphs first
     for (let i = paragraphs.length - 1; i >= 0; i--) {
         const paragraph = paragraphs[i]
-        const words = paragraph.textContent?.trim().split(/\s+/)
+        const words = (paragraph.textContent || "").trim().split(/\s+/)
 
-        if (words && words.length > 0) {
-            const remainingWords = wordCount - words.length
+        // If the paragraph contains words, process it
+        if (words.length > 0) {
+            remainingWordCount -= words.length
 
-            wordCount -= words.length
-
-            if (remainingWords > 0) {
+            if (remainingWordCount >= 0) {
                 selectedParagraphs.push(paragraph)
             } else {
-                const pSlice = words.slice(-remainingWords)
+                // Remove the excess words from the the paragraph to match the word count
+                const sliceStartIndex =
+                    Math.abs(remainingWordCount) - words.length
+                const slicedWords = words.slice(sliceStartIndex)
 
-                paragraph.textContent = "..." + pSlice.join(" ")
-
+                paragraph.textContent = "..." + slicedWords.join(" ")
                 selectedParagraphs.push(paragraph)
                 break
             }
         }
     }
 
+    // Append the selected paragraphs to the content div in the correct order
     contentDiv.append(...selectedParagraphs.reverse())
 
     return contentDiv
