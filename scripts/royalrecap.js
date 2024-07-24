@@ -231,13 +231,14 @@ function createRecapFragment(prevChapterHtml) {
     const recapChapterNameElement = document.createElement("h2")
     recapChapterNameElement.textContent = `Previous chapter: ${recapChapterName}`
 
-    // Wordcount display
-    const recapWordsAmount = extensionSettings.wordCount
-    const recapWordsDisplayElement = document.createElement("h4")
-    recapWordsDisplayElement.textContent = `Showing last ${recapWordsAmount} words:`
-
     // Recap content
     const recapContentElement = extractChapterContent(doc)
+    const recapWordCount =
+        recapContentElement.textContent?.trim().match(/\w+/g)?.length ?? 0
+
+    // Wordcount display
+    const recapWordsDisplayElement = document.createElement("h4")
+    recapWordsDisplayElement.textContent = `Showing last ${recapWordCount} words:`
 
     // Fragment
     const fragment = document.createDocumentFragment()
