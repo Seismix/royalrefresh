@@ -259,7 +259,7 @@ async function appendFetchedRecap() {
 
     // Clear the content
     if (recapContainer) {
-        recapContainer.innerHTML = ""
+        recapContainer.replaceChildren()
     }
 
     if (!(prevChapterBtn instanceof HTMLAnchorElement)) {
