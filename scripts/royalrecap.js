@@ -233,12 +233,10 @@ function createRecapFragment(prevChapterHtml) {
 
     // Recap content
     const recapContentElement = extractChapterContent(doc)
-    const recapWordCount =
-        recapContentElement.textContent?.trim().match(/\w+/g)?.length ?? 0
 
     // Wordcount display
     const recapWordsDisplayElement = document.createElement("h4")
-    recapWordsDisplayElement.textContent = `Showing last ${recapWordCount} words:`
+    recapWordsDisplayElement.textContent = `Showing last ~${extensionSettings.wordCount} words:`
 
     // Fragment
     const fragment = document.createDocumentFragment()
