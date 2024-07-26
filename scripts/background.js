@@ -7,11 +7,6 @@ browser.runtime.onInstalled.addListener((details) => {
     }
 })
 
-// Fires when a browser action is clicked, which opens the extension options page
-browser.browserAction.onClicked.addListener(() => {
-    browser.runtime.openOptionsPage()
-})
-
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.request === "getDefaultSettings") {
         sendResponse(DEFAULTS)
