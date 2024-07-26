@@ -11,6 +11,6 @@
             "@royalrecap/types": ["./types/types"]
         }
     },
-    "include": ["./types/types.ts", "./options/options.js", "scripts/*.js"],
-    "exclude": ["node_modules"]
+    "include": ["./**/*.ts", "./**/*.js"],
+    "exclude": ["node_modules", "docs"]
 }
