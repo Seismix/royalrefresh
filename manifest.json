@@ -10,7 +10,8 @@
     "content_scripts": [
         {
             "matches": ["*://*.royalroad.com/*"],
-            "js": ["scripts/royalrecap.js"]
+            "js": ["scripts/royalrecap.js"],
+            "run_at": "document_end"
         }
     ],
     "background": {
