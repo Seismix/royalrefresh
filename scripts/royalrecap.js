@@ -193,7 +193,6 @@ function addToggleButtonToDOM(button) {
 
 function createRecapContainer() {
     const recapContainer = document.createElement("div")
-    recapContainer.classList.add("chapter-inner", "chapter-content")
     recapContainer.id = RECAP_CONTAINER_ID
     recapContainer.style.display = "none"
 
@@ -232,13 +231,12 @@ function createRecapFragment(prevChapterHtml) {
     const recapChapterNameElement = document.createElement("h2")
     recapChapterNameElement.textContent = `Previous chapter: ${recapChapterName}`
 
-    // Wordcount display
-    const recapWordsAmount = extensionSettings.wordCount
-    const recapWordsDisplayElement = document.createElement("h4")
-    recapWordsDisplayElement.textContent = `Showing last ${recapWordsAmount} words:`
-
     // Recap content
     const recapContentElement = extractChapterContent(doc)
+
+    // Wordcount display
+    const recapWordsDisplayElement = document.createElement("h4")
+    recapWordsDisplayElement.textContent = `Showing last ~${extensionSettings.wordCount} words:`
 
     // Fragment
     const fragment = document.createDocumentFragment()
@@ -260,7 +258,7 @@ async function appendFetchedRecap() {
 
     // Clear the content
     if (recapContainer) {
-        recapContainer.innerHTML = ""
+        recapContainer.replaceChildren()
     }
 
     if (!(prevChapterBtn instanceof HTMLAnchorElement)) {
@@ -389,39 +387,100 @@ function extractChapterContent(
 
     const contentDiv = document.createElement("div")
 
-    if (!chapterElement || chapterElement.textContent === null) {
+    // Check if chapterElement exists and has valid text content
+    if (
+        !chapterElement ||
+        !(chapterElement.textContent && chapterElement.textContent.trim())
+    ) {
         contentDiv.textContent = "Error loading recap"
         return contentDiv
     }
 
     const paragraphs = chapterElement.querySelectorAll("p")
     const selectedParagraphs = []
+    let remainingWordCount = wordCount
 
+    // Iterate over the paragraphs in reverse order to get the last paragraphs first
     for (let i = paragraphs.length - 1; i >= 0; i--) {
         const paragraph = paragraphs[i]
-        const words = paragraph.textContent?.trim().split(/\s+/)
+        const paragraphWordCount =
+            paragraph.textContent?.trim().split(/\s+/).length ?? 0
 
-        if (words && words.length > 0) {
-            const remainingWords = wordCount - words.length
+        if (paragraphWordCount > 0) {
+            remainingWordCount -= paragraphWordCount
 
-            wordCount -= words.length
-
-            if (remainingWords > 0) {
-                selectedParagraphs.push(paragraph)
+            if (remainingWordCount > 0) {
+                selectedParagraphs.push(paragraph.cloneNode(true))
             } else {
-                const pSlice = words.slice(-remainingWords)
+                // Rebuild the paragraph with the remaining words
+                const newParagraph = buildContentFromWords(
+                    paragraph,
+                    paragraphWordCount + remainingWordCount,
+                )
 
-                paragraph.textContent = "..." + pSlice.join(" ")
-
-                selectedParagraphs.push(paragraph)
+                selectedParagraphs.push(newParagraph)
                 break
             }
         }
     }
 
+    // Append the selected paragraphs to the content div in the correct order
     contentDiv.append(...selectedParagraphs.reverse())
 
     return contentDiv
+}
+
+/**
+ * @param {ChildNode} node
+ * @param {number} count
+ */
+function buildContentFromWords(node, count) {
+    if (node.nodeType === Node.TEXT_NODE) {
+        const textWords = (node.textContent ?? "").trim().split(/\s+/)
+        const newText =
+            textWords.length > count
+                ? "..." + textWords.slice(-count).join(" ")
+                : textWords.join(" ")
+        return document.createTextNode(newText)
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = /** @type {HTMLElement} */ (node)
+        const newElement = document.createElement(element.tagName.toLowerCase())
+
+        for (const attr of element.attributes) {
+            newElement.setAttribute(attr.name, attr.value)
+        }
+
+        let remainingCount = count
+        const newChildNodes = []
+
+        for (const child of Array.from(element.childNodes)) {
+            const newChild = buildContentFromWords(child, remainingCount)
+            const newText = newChild.textContent ?? ""
+            const newTextWords = newText.trim().split(/\s+/)
+
+            if (newTextWords.length <= remainingCount) {
+                newChildNodes.push(newChild)
+                remainingCount -= newTextWords.length
+            } else {
+                const partialChild = buildContentFromWords(
+                    child,
+                    remainingCount,
+                )
+                newChildNodes.push(partialChild)
+                remainingCount = 0
+                break
+            }
+
+            if (remainingCount <= 0) {
+                break
+            }
+        }
+
+        newElement.append(...newChildNodes)
+        return newElement
+    }
+
+    return document.createTextNode("")
 }
 
 /**
