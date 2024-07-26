@@ -387,12 +387,15 @@ function extractChapterContent(
 
     const contentDiv = document.createElement("div")
 
-    if (!chapterElement || chapterElement.textContent === null) {
+    // Check if chapterElement exists and has valid text content
+    if (
+        !chapterElement ||
+        !(chapterElement.textContent && chapterElement.textContent.trim())
+    ) {
         contentDiv.textContent = "Error loading recap"
         return contentDiv
     }
 
-    // Get all paragraph elements within the chapter content
     const paragraphs = chapterElement.querySelectorAll("p")
     const selectedParagraphs = []
     let remainingWordCount = wordCount
@@ -400,22 +403,22 @@ function extractChapterContent(
     // Iterate over the paragraphs in reverse order to get the last paragraphs first
     for (let i = paragraphs.length - 1; i >= 0; i--) {
         const paragraph = paragraphs[i]
-        const words = (paragraph.textContent || "").trim().split(/\s+/)
+        const paragraphWordCount =
+            paragraph.textContent?.trim().split(/\s+/).length ?? 0
 
-        // If the paragraph contains words, process it
-        if (words.length > 0) {
-            remainingWordCount -= words.length
+        if (paragraphWordCount > 0) {
+            remainingWordCount -= paragraphWordCount
 
-            if (remainingWordCount >= 0) {
-                selectedParagraphs.push(paragraph)
+            if (remainingWordCount > 0) {
+                selectedParagraphs.push(paragraph.cloneNode(true))
             } else {
-                // Remove the excess words from the the paragraph to match the word count
-                const sliceStartIndex =
-                    Math.abs(remainingWordCount) - words.length
-                const slicedWords = words.slice(sliceStartIndex)
+                // Rebuild the paragraph with the remaining words
+                const newParagraph = buildContentFromWords(
+                    paragraph,
+                    paragraphWordCount + remainingWordCount,
+                )
 
-                paragraph.textContent = "..." + slicedWords.join(" ")
-                selectedParagraphs.push(paragraph)
+                selectedParagraphs.push(newParagraph)
                 break
             }
         }
@@ -425,6 +428,59 @@ function extractChapterContent(
     contentDiv.append(...selectedParagraphs.reverse())
 
     return contentDiv
+}
+
+/**
+ * @param {ChildNode} node
+ * @param {number} count
+ */
+function buildContentFromWords(node, count) {
+    if (node.nodeType === Node.TEXT_NODE) {
+        const textWords = (node.textContent ?? "").trim().split(/\s+/)
+        const newText =
+            textWords.length > count
+                ? "..." + textWords.slice(-count).join(" ")
+                : textWords.join(" ")
+        return document.createTextNode(newText)
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = /** @type {HTMLElement} */ (node)
+        const newElement = document.createElement(element.tagName.toLowerCase())
+
+        for (const attr of element.attributes) {
+            newElement.setAttribute(attr.name, attr.value)
+        }
+
+        let remainingCount = count
+        const newChildNodes = []
+
+        for (const child of Array.from(element.childNodes)) {
+            const newChild = buildContentFromWords(child, remainingCount)
+            const newText = newChild.textContent ?? ""
+            const newTextWords = newText.trim().split(/\s+/)
+
+            if (newTextWords.length <= remainingCount) {
+                newChildNodes.push(newChild)
+                remainingCount -= newTextWords.length
+            } else {
+                const partialChild = buildContentFromWords(
+                    child,
+                    remainingCount,
+                )
+                newChildNodes.push(partialChild)
+                remainingCount = 0
+                break
+            }
+
+            if (remainingCount <= 0) {
+                break
+            }
+        }
+
+        newElement.append(...newChildNodes)
+        return newElement
+    }
+
+    return document.createTextNode("")
 }
 
 /**
