@@ -192,8 +192,8 @@ function createSettingsButton() {
     button.style.marginRight = "auto"
     button.style.marginLeft = "0"
     button.style.display = "flex"
-    button.style.alignItems = "center";
-    button.style.gap = "0.2em";
+    button.style.alignItems = "center"
+    button.style.gap = "0.2em"
 
     const gearIcon = document.createElement("i")
     gearIcon.classList.add("fa", "fa-cog")
@@ -212,7 +212,7 @@ function createSettingsButton() {
  */
 function addSettingsButtonToDOM(settingsButton) {
     if (!settingsButton) return
-    
+
     /** @type {HTMLElement | null} */
     const settingsPlacement = document.querySelector(
         extensionSettings.settingsPlacement,
