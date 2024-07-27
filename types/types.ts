@@ -5,7 +5,8 @@ export type ExtensionSettings = {
     chapterTitle: string
     fictionTitle: string
     wordCount: number
-    buttonPlacement: string
+    togglePlacement: string
+    settingsPlacement: string
     smoothScroll: boolean
     autoExpand: boolean
     blurb: string

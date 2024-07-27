@@ -13,6 +13,7 @@ const RECAP_BUTTON_ID = "recapButton"
 const RECAP_CONTAINER_ID = "recapContainer"
 const TOGGLE_SPAN_ID = "toggleSpan"
 const BLURB_BUTTON_ID = "blurbButton"
+const SETTINGS_BUTTON_ID = "settingsButton"
 const DEFAULTS_FILE = "scripts/defaults.js"
 
 init()
@@ -24,11 +25,17 @@ async function init() {
     await loadExtensionSettings()
     addSettingsChangeListener()
 
-    const toggleButton = documentHasPreviousChapterURL()
+    const hasPrevChapterURL = documentHasPreviousChapterURL()
+
+    const toggleButton = hasPrevChapterURL
         ? createRecapButton()
         : createBlurbButton()
-
     addToggleButtonToDOM(toggleButton)
+
+    const settingsButton = createSettingsButton()
+    if (hasPrevChapterURL) {
+        addSettingsButtonToDOM(settingsButton)
+    }
 
     const recapContainer = createRecapContainer()
     addRecapContainerToDOM(recapContainer)
@@ -176,13 +183,58 @@ function createBlurbButton() {
     return button
 }
 
+function createSettingsButton() {
+    const button = document.createElement("button")
+    button.id = SETTINGS_BUTTON_ID
+    button.textContent = "Open RoyalRecap Settings"
+    button.classList.add("btn", "btn-circle", "red")
+
+    button.style.marginRight = "auto"
+    button.style.marginLeft = "0"
+    button.style.display = "flex"
+    button.style.alignItems = "center";
+    button.style.gap = "0.2em";
+
+    const gearIcon = document.createElement("i")
+    gearIcon.classList.add("fa", "fa-cog")
+
+    button.prepend(gearIcon)
+
+    button.addEventListener("click", () => {
+        browser.runtime.sendMessage({ action: "openExtensionSettings" })
+    })
+
+    return button
+}
+
+/**
+ * @param {HTMLButtonElement} settingsButton
+ */
+function addSettingsButtonToDOM(settingsButton) {
+    if (!settingsButton) return
+    
+    /** @type {HTMLElement | null} */
+    const settingsPlacement = document.querySelector(
+        extensionSettings.settingsPlacement,
+    )
+
+    if (settingsPlacement && !document.getElementById(SETTINGS_BUTTON_ID)) {
+        settingsPlacement.style.display = "flex"
+        settingsPlacement.style.justifyContent = "space-between"
+        settingsPlacement.style.alignItems = "center"
+
+        // Append the settings button to the container div
+        settingsPlacement.prepend(settingsButton)
+    }
+}
+
 /**
  * @param {HTMLButtonElement} button - Button element to add
  */
 function addToggleButtonToDOM(button) {
     if (!document.getElementById(button.id)) {
         const navButtons = document.querySelector(
-            extensionSettings.buttonPlacement,
+            extensionSettings.togglePlacement,
         )
 
         if (navButtons) {
