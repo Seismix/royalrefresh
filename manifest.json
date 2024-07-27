@@ -6,7 +6,7 @@
     "homepage_url": "https://github.com/Seismix/royalrecap",
     "browser_action": {
         "default_title": "RoyalRecap",
-        "default_popup": "options/options.html"
+        "default_popup": "ui/options.html"
     },
     "content_scripts": [
         {
@@ -20,7 +20,7 @@
         "type": "module"
     },
     "options_ui": {
-        "page": "options/options.html"
+        "page": "ui/options.html"
     },
     "permissions": ["*://*.royalroad.com/*", "storage"],
     "browser_specific_settings": {
