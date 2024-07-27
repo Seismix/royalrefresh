@@ -10,7 +10,9 @@ const DEFAULTS = {
     chapterContent: ".chapter-inner",
     chapterTitle: "h1.font-white",
     fictionTitle: "h2.font-white",
-    buttonPlacement: ".actions",
+    togglePlacement: ".actions",
+    settingsPlacement:
+        "#settings > div:nth-child(1) > div:nth-child(1) > div:nth-child(3)",
     smoothScroll: true,
     autoExpand: false,
     blurb: ".description",

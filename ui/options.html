@@ -2,6 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="stylesheet" type="text/css" href="options.css" />
         <title>RoyalRecap Options</title>
     </head>
@@ -9,9 +10,9 @@
     <body>
         <div class="container">
             <h3>RoyalRecap Settings Page</h3>
+            <p>Adjust the different values to your liking.</p>
             <p>
-                Adjust the different values to your liking. The current values
-                are displayed in the respective input fields.
+                The current values are displayed in the respective input fields.
             </p>
             <form>
                 <label for="wordCount">Word count (max 500):</label>
@@ -33,6 +34,14 @@
                 <input type="checkbox" name="autoExpand" id="autoExpand" />
                 <details>
                     <summary>Advanced options: CSS-Selectors</summary>
+                    <p class="warning-message">
+                        <strong>Warning:</strong> Please be cautious when
+                        modifying the advanced settings. Changing these values
+                        may break the functionality of the extension. If you
+                        encounter any issues, you can restore the default
+                        settings using the "Restore Default Settings" button
+                        below.
+                    </p>
                     <label for="prevChapterBtn"
                         >Previous chapter buttton:</label
                     >
@@ -40,11 +49,18 @@
                         type="text"
                         name="prevChapterBtn"
                         id="prevChapterBtn" />
-                    <label for="buttonPlacement">Recap button placement:</label>
+                    <label for="togglePlacement">Recap button placement:</label>
                     <input
                         type="text"
-                        name="buttonPlacement"
-                        id="buttonPlacement" />
+                        name="togglePlacement"
+                        id="togglePlacement" />
+                    <label for="settingsPlacement"
+                        >Settings button placement:</label
+                    >
+                    <input
+                        type="text"
+                        name="settingsPlacement"
+                        id="settingsPlacement" />
                     <label for="chapterContent">Chapter content:</label>
                     <input
                         type="text"
