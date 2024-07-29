@@ -1,3 +1,4 @@
+import browser from "webextension-polyfill"
 import DEFAULTS from "./defaults.js"
 
 // Saves the default values to the browser storage after the extension has been installed
@@ -7,9 +8,10 @@ browser.runtime.onInstalled.addListener((details) => {
     }
 })
 
-browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+browser.runtime.onMessage.addListener((message, sender) => {
     if (message.request === "getDefaultSettings") {
-        sendResponse(DEFAULTS)
+        console.log("getDefaultSettings")
+        return Promise.resolve(DEFAULTS)
     }
 })
 

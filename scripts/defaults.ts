@@ -1,10 +1,6 @@
-/** @import { ExtensionSettings } from "@royalrecap/types" */
+import { ExtensionSettings } from "@royalrecap/types"
 
-/**
- * The object containing all default settings this extension uses
- * @type {ExtensionSettings}
- */
-const DEFAULTS = {
+const DEFAULTS: ExtensionSettings = {
     wordCount: 250,
     prevChapterBtn: "div.col-md-4:nth-child(1) > a:nth-child(1)",
     chapterContent: ".chapter-inner",
