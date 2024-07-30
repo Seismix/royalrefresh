@@ -16,7 +16,7 @@
     "content_scripts": [
         {
             "matches": ["*://*.royalroad.com/*"],
-            "js": ["scripts/royalrecap.js"],
+            "js": ["scripts/royalrecap.ts"],
             "run_at": "document_end"
         }
     ],
@@ -28,7 +28,8 @@
         "type": "module"
     },
     "options_ui": {
-        "page": "ui/options.html"
+        "page": "ui/options.html",
+        "{{chrome}}.open_in_tab": false
     },
     "{{chrome}}.permissions": ["storage"],
     "{{chrome}}.host_permissions": ["*://*.royalroad.com/*"],

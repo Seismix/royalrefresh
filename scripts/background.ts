@@ -6,16 +6,19 @@ browser.runtime.onInstalled.addListener((details) => {
     if (details.reason === "install") {
         browser.storage.sync.set(DEFAULTS)
     }
+    // Only Firefox supports the "temporary" property
+    if (details.temporary) {
+        browser.tabs.reload()
+    }
 })
 
-browser.runtime.onMessage.addListener((message, sender) => {
+browser.runtime.onMessage.addListener((message) => {
     if (message.request === "getDefaultSettings") {
-        console.log("getDefaultSettings")
         return Promise.resolve(DEFAULTS)
     }
 })
 
-browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+browser.runtime.onMessage.addListener((message) => {
     if (message.action === "openExtensionSettings") {
         const manifest = browser.runtime.getManifest()
         if (manifest.browser_action) {

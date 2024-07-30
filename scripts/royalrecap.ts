@@ -1,12 +1,11 @@
-/** @import { ExtensionSettings } from "@royalrecap/types" */
-/** @import { RecapContainerStrings } from "@royalrecap/types" */
+import { ExtensionSettings } from "@royalrecap/types"
+import browser from "webextension-polyfill"
+import DEFAULTS from "./defaults"
 
 /**
  * The object that gets populated with all values loaded from `browser.storage`
- * @type {ExtensionSettings}
  */
-// @ts-ignore
-let extensionSettings = {}
+let extensionSettings: ExtensionSettings = DEFAULTS
 
 // Constants
 const RECAP_BUTTON_ID = "recapButton"
@@ -14,7 +13,6 @@ const RECAP_CONTAINER_ID = "recapContainer"
 const TOGGLE_SPAN_ID = "toggleSpan"
 const BLURB_BUTTON_ID = "blurbButton"
 const SETTINGS_BUTTON_ID = "settingsButton"
-const DEFAULTS_FILE = "scripts/defaults.js"
 
 init()
 
@@ -91,10 +89,7 @@ async function toggleRecap() {
     }
 }
 
-/**
- * @param {HTMLElement} recapContainer
- */
-async function fetchAndDisplay(recapContainer) {
+async function fetchAndDisplay(recapContainer: HTMLElement) {
     if (recapContainerHasContent(recapContainer)) return
 
     if (documentHasPreviousChapterURL()) {
@@ -105,24 +100,23 @@ async function fetchAndDisplay(recapContainer) {
 }
 
 /**
- * @param {HTMLElement} recapContainer
- * @returns {boolean} True if the recap container has content, otherwise false.
+ * True if the recap container has content, otherwise false.
  */
-function recapContainerHasContent(recapContainer) {
+function recapContainerHasContent(recapContainer: HTMLElement): boolean {
     return recapContainer.textContent?.trim() !== ""
 }
 
 /**
- * @returns {boolean} True if `chapter` is in the URL path, otherwise false.
+ * True if `chapter` is in the URL path, otherwise false.
  */
-function documentIsChapterURL() {
+function documentIsChapterURL(): boolean {
     return window.location.pathname.split("/").includes("chapter")
 }
 
 /**
- * @returns {boolean} True if the previous chapter button has a valid `href` attribute, otherwise false.
+ * True if the previous chapter button has a valid `href` attribute, otherwise false.
  */
-function documentHasPreviousChapterURL() {
+function documentHasPreviousChapterURL(): boolean {
     const hasPrevChapterURL = document.querySelector(
         extensionSettings.prevChapterBtn.toString(),
     )
@@ -207,14 +201,11 @@ function createSettingsButton() {
     return button
 }
 
-/**
- * @param {HTMLButtonElement} settingsButton
- */
-function addSettingsButtonToDOM(settingsButton) {
+function addSettingsButtonToDOM(settingsButton: HTMLButtonElement) {
     if (!settingsButton) return
 
     /** @type {HTMLElement | null} */
-    const settingsPlacement = document.querySelector(
+    const settingsPlacement: HTMLElement | null = document.querySelector(
         extensionSettings.settingsPlacement,
     )
 
@@ -228,10 +219,7 @@ function addSettingsButtonToDOM(settingsButton) {
     }
 }
 
-/**
- * @param {HTMLButtonElement} button - Button element to add
- */
-function addToggleButtonToDOM(button) {
+function addToggleButtonToDOM(button: HTMLButtonElement) {
     if (!document.getElementById(button.id)) {
         const navButtons = document.querySelector(
             extensionSettings.togglePlacement,
@@ -251,10 +239,7 @@ function createRecapContainer() {
     return recapContainer
 }
 
-/**
- * @param {HTMLDivElement} recap
- */
-function addRecapContainerToDOM(recap) {
+function addRecapContainerToDOM(recap: HTMLDivElement) {
     if (!document.getElementById(RECAP_CONTAINER_ID)) {
         const chapterDiv = document.querySelector(
             extensionSettings.chapterContent,
@@ -266,10 +251,7 @@ function addRecapContainerToDOM(recap) {
     }
 }
 
-/**
- * @param {string} prevChapterHtml
- */
-function createRecapFragment(prevChapterHtml) {
+function createRecapFragment(prevChapterHtml: string) {
     const parser = new DOMParser()
     const doc = parser.parseFromString(prevChapterHtml, "text/html")
 
@@ -331,10 +313,7 @@ async function appendFetchedRecap() {
     recapContainer?.appendChild(recapFragment)
 }
 
-/**
- * @param {string} overviewHtml
- */
-function createBlurbFragment(overviewHtml) {
+function createBlurbFragment(overviewHtml: string) {
     const parser = new DOMParser()
     const doc = parser.parseFromString(overviewHtml, "text/html")
 
@@ -380,10 +359,7 @@ async function appendFetchedBlurb() {
     }
 }
 
-/**
- * @param {string | URL | Request} url
- */
-async function fetchHtmlText(url) {
+async function fetchHtmlText(url: string | URL | Request) {
     try {
         const response = await fetch(url)
 
@@ -401,10 +377,7 @@ async function fetchHtmlText(url) {
     }
 }
 
-/**
- * @param {Document} overviewDoc
- */
-function extractBlurb(overviewDoc) {
+function extractBlurb(overviewDoc: Document) {
     const blurb = overviewDoc.querySelector(extensionSettings.blurb)
 
     if (
@@ -426,12 +399,10 @@ function extractBlurb(overviewDoc) {
 
 /**
  * Extracts the chapter content from the PREVIOUS chapter
- * @param {Document} prevChapterDoc A parsable document of the previous chapter
- * @param {number} [wordCount=extensionSettings.wordCount]
  */
 function extractChapterContent(
-    prevChapterDoc,
-    wordCount = extensionSettings.wordCount,
+    prevChapterDoc: Document,
+    wordCount: number = extensionSettings.wordCount,
 ) {
     const chapterElement = prevChapterDoc.querySelector(
         extensionSettings.chapterContent,
@@ -482,11 +453,7 @@ function extractChapterContent(
     return contentDiv
 }
 
-/**
- * @param {ChildNode} node
- * @param {number} count
- */
-function buildContentFromWords(node, count) {
+function buildContentFromWords(node: ChildNode, count: number) {
     if (node.nodeType === Node.TEXT_NODE) {
         const textWords = (node.textContent ?? "").trim().split(/\s+/)
         const newText =
@@ -495,7 +462,7 @@ function buildContentFromWords(node, count) {
                 : textWords.join(" ")
         return document.createTextNode(newText)
     } else if (node.nodeType === Node.ELEMENT_NODE) {
-        const element = /** @type {HTMLElement} */ (node)
+        const element = node
         const newElement = document.createElement(element.tagName.toLowerCase())
 
         for (const attr of element.attributes) {
@@ -538,7 +505,7 @@ function buildContentFromWords(node, count) {
 /**
  * @param {Document} prevChapterDoc A parsable document of the previous chapter
  */
-function extractChapterName(prevChapterDoc) {
+function extractChapterName(prevChapterDoc: Document) {
     const chapterTitleElement = prevChapterDoc.querySelector(
         extensionSettings.chapterTitle,
     )

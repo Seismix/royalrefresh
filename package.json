@@ -7,19 +7,10 @@
         "doc": "docs"
     },
     "type": "module",
-    "webExt": {
-        "configDiscovery": false,
-        "run": {
-            "startUrl": [
-                "https://www.royalroad.com/fiction/63759/super-supportive-slice-of-life-alien-wizards/chapter/1114911/nine-gorgon",
-                "about:addons",
-                "about:debugging#/runtime/this-firefox"
-            ]
-        }
-    },
     "scripts": {
-        "dev": "web-ext run",
-        "dev:verbose": "web-ext run --verbose",
+        "dev": "vite dev",
+        "dev:chrome": "web-ext run --s dist/firefox/ --t chromium --chromium-binary google-chrome",
+        "dev:verbose": "pnpm dev --verbose",
         "lint": "web-ext lint",
         "build": "vite build",
         "build:chrome": "TARGET=chrome vite build"
