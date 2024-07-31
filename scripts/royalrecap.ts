@@ -1,4 +1,4 @@
-import { ExtensionSettings } from "@royalrecap/types"
+import { ExtensionSettings, ExtensionSettingsKeys } from "@royalrecap/types"
 import browser from "webextension-polyfill"
 import DEFAULTS from "./defaults"
 
@@ -56,12 +56,24 @@ async function loadExtensionSettings() {
     extensionSettings = { ...defaultValues, ...settings }
 }
 
+// A function to update a specific setting in extensionSettings
+function setExtensionSetting<K extends ExtensionSettingsKeys>(
+    key: K,
+    value: ExtensionSettings[K],
+) {
+    extensionSettings[key] = value
+}
+
 function addSettingsChangeListener() {
     browser.storage.onChanged.addListener(async (changes, area) => {
         if (area === "sync" && changes) {
             for (const key in changes) {
-                if (changes.hasOwnProperty(key)) {
-                    extensionSettings[key] = changes[key].newValue
+                if (changes.hasOwnProperty(key) && key in extensionSettings) {
+                    setExtensionSetting(
+                        key as ExtensionSettingsKeys,
+                        changes[key].newValue,
+                    )
+                    console.log("updated setting:", key)
                 }
             }
             await appendFetchedRecap() // Refetch and reparse
@@ -453,7 +465,7 @@ function extractChapterContent(
     return contentDiv
 }
 
-function buildContentFromWords(node: ChildNode, count: number) {
+function buildContentFromWords(node: ChildNode, count: number): Node {
     if (node.nodeType === Node.TEXT_NODE) {
         const textWords = (node.textContent ?? "").trim().split(/\s+/)
         const newText =
@@ -462,16 +474,18 @@ function buildContentFromWords(node: ChildNode, count: number) {
                 : textWords.join(" ")
         return document.createTextNode(newText)
     } else if (node.nodeType === Node.ELEMENT_NODE) {
-        const element = node
+        const element = node as HTMLElement
         const newElement = document.createElement(element.tagName.toLowerCase())
 
+        // Copy attributes
         for (const attr of element.attributes) {
             newElement.setAttribute(attr.name, attr.value)
         }
 
         let remainingCount = count
-        const newChildNodes = []
+        const newChildNodes: Node[] = []
 
+        // Process child nodes
         for (const child of Array.from(element.childNodes)) {
             const newChild = buildContentFromWords(child, remainingCount)
             const newText = newChild.textContent ?? ""

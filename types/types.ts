@@ -11,7 +11,7 @@ export type ExtensionSettings = {
     blurb: string
 }
 
-type ExtensionSettingsKeys = keyof ExtensionSettings
+export type ExtensionSettingsKeys = keyof ExtensionSettings
 export type ExtensionSettingsPossibleTypes =
     ExtensionSettings[ExtensionSettingsKeys]
 

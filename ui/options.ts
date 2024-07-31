@@ -2,6 +2,7 @@ import browser from "webextension-polyfill"
 import DEFAULTS from "../scripts/defaults"
 import {
     DisplayMessageType,
+    ExtensionSettings,
     ExtensionSettingsPossibleTypes,
 } from "@royalrecap/types"
 
@@ -30,10 +31,9 @@ async function loadOptions() {
 async function saveOptions(event: Event) {
     event.preventDefault()
 
-    /** @type {{ [key: string]: string | number | boolean }} */
-    const options = {}
+    const options: { [key: string]: ExtensionSettingsPossibleTypes } = {}
 
-    for (const key of Object.keys(DEFAULTS)) {
+    for (const key of Object.keys(DEFAULTS) as Array<keyof ExtensionSettings>) {
         const inputElement = document.getElementById(key)
         options[key] = getInputValue(inputElement, DEFAULTS[key])
     }
