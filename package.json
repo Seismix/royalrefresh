@@ -9,7 +9,7 @@
     "type": "module",
     "scripts": {
         "dev": "vite dev",
-        "dev:chrome": "web-ext run --s dist/firefox/ --t chromium --chromium-binary google-chrome",
+        "dev:chrome": "vite build && web-ext run --s dist/firefox/ --t chromium --chromium-binary google-chrome",
         "dev:verbose": "pnpm dev --verbose",
         "lint": "web-ext lint",
         "build": "vite build",
