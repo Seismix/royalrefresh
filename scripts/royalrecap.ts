@@ -73,7 +73,6 @@ function addSettingsChangeListener() {
                         key as ExtensionSettingsKeys,
                         changes[key].newValue,
                     )
-                    console.log("updated setting:", key)
                 }
             }
             await appendFetchedRecap() // Refetch and reparse
@@ -216,7 +215,6 @@ function createSettingsButton() {
 function addSettingsButtonToDOM(settingsButton: HTMLButtonElement) {
     if (!settingsButton) return
 
-    /** @type {HTMLElement | null} */
     const settingsPlacement: HTMLElement | null = document.querySelector(
         extensionSettings.settingsPlacement,
     )
