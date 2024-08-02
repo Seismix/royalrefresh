@@ -1,24 +1,31 @@
 body {
     font-family: Arial, sans-serif;
     background-color: #f0f0f0;
-    margin: 0;
-    padding: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    width: 400px;
+    height: auto;
+    overflow-x: hidden; /* Prevent horizontal scroll on the body */
 }
 
 .container {
-    width: 400px;
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box; /* Ensure padding is included in the width */
+    overflow-x: hidden; /* Prevent overflow in the container */
+    margin: 0 auto;
 }
 
 h3 {
     margin-bottom: 10px;
+    text-align: left;
 }
 
 p {
     margin-bottom: 5px;
+    text-align: left;
 }
 
 p.warning-message {
@@ -28,7 +35,7 @@ p.warning-message {
 }
 
 form {
-    width: 400px;
+    width: 100%;
     margin: 20px auto;
 }
 
@@ -58,11 +65,15 @@ details {
     border: 1px solid #ccc;
     border-radius: 4px;
     cursor: pointer;
+    overflow-x: hidden; /* Prevent overflow when expanding */
 }
 
 details summary {
-    margin-bottom: 10px;
+    padding: 10px;
     font-weight: bold;
+    cursor: pointer;
+    position: relative;
+    box-sizing: border-box; /* Include padding in the width */
 }
 
 button {
