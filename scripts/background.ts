@@ -20,14 +20,18 @@ browser.runtime.onMessage.addListener((message) => {
 
 browser.runtime.onMessage.addListener((message) => {
     if (message.action === "openExtensionSettings") {
-        const manifest = browser.runtime.getManifest()
-        if (manifest.browser_action) {
-            const popupURL = manifest.browser_action.default_popup
-
-            // Open the extension settings URL in a new tab
-            if (popupURL) {
-                browser.tabs.create({ url: browser.runtime.getURL(popupURL) })
+        // __BROWSER__ is defined in the vite.config.ts
+        // @ts-ignore
+        if (__BROWSER__ === "firefox") {
+            const manifest = browser.runtime.getManifest()
+            if (manifest.options_ui) {
+                // Open the extension settings URL in a new tab
+                browser.tabs.create({
+                    url: browser.runtime.getURL(manifest.options_ui.page),
+                })
             }
+        } else {
+            browser.action.openPopup()
         }
     }
 })
