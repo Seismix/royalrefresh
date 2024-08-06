@@ -1,5 +1,6 @@
 import browser from "webextension-polyfill"
 import DEFAULTS from "./defaults.js"
+import { currentBrowser, BrowserType } from "./platform.js"
 
 // Saves the default values to the browser storage after the extension has been installed
 browser.runtime.onInstalled.addListener((details) => {
@@ -20,9 +21,7 @@ browser.runtime.onMessage.addListener((message) => {
 
 browser.runtime.onMessage.addListener((message) => {
     if (message.action === "openExtensionSettings") {
-        // __BROWSER__ is defined in the vite.config.ts
-        // @ts-ignore
-        if (__BROWSER__ === "firefox") {
+        if (currentBrowser === BrowserType.Firefox) {
             const manifest = browser.runtime.getManifest()
             if (manifest.options_ui) {
                 // Open the extension settings URL in a new tab

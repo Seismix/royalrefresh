@@ -5,9 +5,6 @@ import webExtension from "vite-plugin-web-extension"
 const browser = process.env.TARGET || "firefox"
 
 export default defineConfig({
-    define: {
-        __BROWSER__: JSON.stringify(browser),
-    },
     plugins: [
         webExtension({
             browser: browser,
