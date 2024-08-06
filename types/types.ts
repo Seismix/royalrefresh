@@ -9,6 +9,7 @@ export type ExtensionSettings = {
     smoothScroll: boolean
     autoExpand: boolean
     blurb: string
+    closeButtonSelector: string
 }
 
 export type ExtensionSettingsKeys = keyof ExtensionSettings

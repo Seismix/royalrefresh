@@ -12,6 +12,8 @@ const DEFAULTS: ExtensionSettings = {
     smoothScroll: true,
     autoExpand: false,
     blurb: ".description",
+    closeButtonSelector:
+        "#settings > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > button:nth-child(2)",
 }
 
 export default DEFAULTS

@@ -208,10 +208,9 @@ function createSettingsButton() {
     button.addEventListener("click", () => {
         browser.runtime.sendMessage({ action: "openExtensionSettings" })
 
-        // ! Replace hard coded selector with a default
         // Close the settings modal if it's open
         const closeButton = document.querySelector(
-            "#settings > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > button:nth-child(2)",
+            extensionSettings.closeButtonSelector,
         )
         if (closeButton && closeButton instanceof HTMLButtonElement) {
             closeButton.click()
