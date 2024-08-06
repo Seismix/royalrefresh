@@ -1,6 +1,6 @@
 import browser from "webextension-polyfill"
-import DEFAULTS from "./defaults.js"
-import { currentBrowser, BrowserType } from "./platform.js"
+import DEFAULTS from "./defaults"
+import { currentBrowser, BrowserType } from "./platform"
 
 // Saves the default values to the browser storage after the extension has been installed
 browser.runtime.onInstalled.addListener((details) => {
