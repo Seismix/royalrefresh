@@ -1,5 +1,5 @@
 node_modules
 dist
-web-ext-config.mjs
-.webextrc.json
-.webextrc
+*web-ext-config.mjs
+.webextrc*
+*wsl.localhost*
