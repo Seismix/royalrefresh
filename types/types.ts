@@ -1,5 +1,4 @@
 export type ExtensionSettings = {
-    [key: string]: string | number | boolean
     prevChapterBtn: string
     chapterContent: string
     chapterTitle: string
@@ -10,9 +9,10 @@ export type ExtensionSettings = {
     smoothScroll: boolean
     autoExpand: boolean
     blurb: string
+    closeButtonSelector: string
 }
 
-type ExtensionSettingsKeys = keyof ExtensionSettings
+export type ExtensionSettingsKeys = keyof ExtensionSettings
 export type ExtensionSettingsPossibleTypes =
     ExtensionSettings[ExtensionSettingsKeys]
 

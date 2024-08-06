@@ -1,7 +1,8 @@
 {
     "compilerOptions": {
-        "target": "es2016",
+        "target": "es2022",
         "module": "commonjs",
+        "esModuleInterop": true,
         "strict": true,
         "allowJs": true,
         "checkJs": true,
@@ -12,5 +13,5 @@
         }
     },
     "include": ["./**/*.ts", "./**/*.js"],
-    "exclude": ["node_modules", "docs"]
+    "exclude": ["node_modules", "docs", "dist"]
 }

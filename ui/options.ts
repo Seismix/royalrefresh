@@ -1,7 +1,10 @@
-/** @import { DisplayMessageType } from "@royalrecap/types" */
-/** @import { ExtensionSettingsPossibleTypes } from "@royalrecap/types" */
-
-import DEFAULTS from "../scripts/defaults.js"
+import browser from "webextension-polyfill"
+import DEFAULTS from "../scripts/defaults"
+import {
+    DisplayMessageType,
+    ExtensionSettings,
+    ExtensionSettingsPossibleTypes,
+} from "@royalrecap/types"
 
 /**
  * Load the extension options from the `browser.storage` and set them to the form elements in options.html
@@ -24,15 +27,13 @@ async function loadOptions() {
 
 /**
  * Saves the options entered into the form in options.html
- * @param { Event } event - The submit event.
  */
-async function saveOptions(event) {
+async function saveOptions(event: Event) {
     event.preventDefault()
 
-    /** @type {{ [key: string]: string | number | boolean }} */
-    const options = {}
+    const options: { [key: string]: ExtensionSettingsPossibleTypes } = {}
 
-    for (const key of Object.keys(DEFAULTS)) {
+    for (const key of Object.keys(DEFAULTS) as Array<keyof ExtensionSettings>) {
         const inputElement = document.getElementById(key)
         options[key] = getInputValue(inputElement, DEFAULTS[key])
     }
@@ -43,11 +44,11 @@ async function saveOptions(event) {
 
 /**
  * Get the value from an input element based on its type.
- * @param { HTMLElement | null } inputElement - The input element.
- * @param {ExtensionSettingsPossibleTypes} defaultValue - The default value to use if the input is not found.
- * @returns {ExtensionSettingsPossibleTypes} - The value of the input or the default value.
  */
-function getInputValue(inputElement, defaultValue) {
+function getInputValue(
+    inputElement: HTMLElement | null,
+    defaultValue: ExtensionSettingsPossibleTypes,
+) {
     if (!inputElement || !(inputElement instanceof HTMLInputElement)) {
         return defaultValue
     }
@@ -74,9 +75,8 @@ async function restoreDefaultOptions() {
 
 /**
  * Display a status message on a button and animates it
- * @param {DisplayMessageType} messageType
  */
-function displayMessage(messageType) {
+function displayMessage(messageType: DisplayMessageType) {
     const buttonConfig = {
         success: {
             querySelector: "button[type='submit']",
@@ -98,10 +98,8 @@ function displayMessage(messageType) {
 
 /**
  * Animate the button text and class
- * @param {HTMLButtonElement} button The button element to animate
- * @param {string} newText The new text to display temporarily
  */
-function animateButton(button, newText) {
+function animateButton(button: HTMLButtonElement, newText: string) {
     const savedClassName = "saved"
 
     const originalText = button.textContent

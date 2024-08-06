@@ -1,29 +1,40 @@
 {
-    "manifest_version": 2,
+    "{{chrome}}.manifest_version": 3,
+    "{{firefox}}.manifest_version": 2,
     "name": "RoyalRecap",
     "version": "1.0",
     "description": "A web extension for royalroad.com. For people who juggle multiple stories",
     "homepage_url": "https://github.com/Seismix/royalrecap",
-    "browser_action": {
+    "{{chrome}}.action": {
+        "default_title": "RoyalRecap",
+        "default_popup": "ui/options.html"
+    },
+    "{{firefox}}.browser_action": {
         "default_title": "RoyalRecap",
         "default_popup": "ui/options.html"
     },
     "content_scripts": [
         {
             "matches": ["*://*.royalroad.com/*"],
-            "js": ["scripts/royalrecap.js"],
+            "js": ["scripts/royalrecap.ts"],
             "run_at": "document_end"
         }
     ],
-    "background": {
-        "scripts": ["scripts/background.js"],
+    "{{chrome}}.background": {
+        "service_worker": "scripts/background.ts"
+    },
+    "{{firefox}}.background": {
+        "scripts": ["scripts/background.ts"],
         "type": "module"
     },
     "options_ui": {
-        "page": "ui/options.html"
+        "page": "ui/options.html",
+        "{{chrome}}.open_in_tab": false
     },
-    "permissions": ["*://*.royalroad.com/*", "storage"],
-    "browser_specific_settings": {
+    "{{chrome}}.permissions": ["storage"],
+    "{{chrome}}.host_permissions": ["*://*.royalroad.com/*"],
+    "{{firefox}}.permissions": ["*://*.royalroad.com/*", "storage"],
+    "{{firefox}}.browser_specific_settings": {
         "gecko": {
             "id": "royalrecaptestaddonemail@gmail.com"
         }

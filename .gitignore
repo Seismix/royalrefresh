@@ -1,2 +1,5 @@
-docs/flow_draft.md
 node_modules
+dist
+*web-ext-config.mjs
+.webextrc*
+*wsl.localhost*

@@ -1,10 +1,6 @@
-/** @import { ExtensionSettings } from "@royalrecap/types" */
+import { ExtensionSettings } from "@royalrecap/types"
 
-/**
- * The object containing all default settings this extension uses
- * @type {ExtensionSettings}
- */
-const DEFAULTS = {
+const DEFAULTS: ExtensionSettings = {
     wordCount: 250,
     prevChapterBtn: "div.col-md-4:nth-child(1) > a:nth-child(1)",
     chapterContent: ".chapter-inner",
@@ -16,6 +12,8 @@ const DEFAULTS = {
     smoothScroll: true,
     autoExpand: false,
     blurb: ".description",
+    closeButtonSelector:
+        "#settings > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > button:nth-child(2)",
 }
 
 export default DEFAULTS
