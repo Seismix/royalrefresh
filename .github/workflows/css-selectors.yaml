@@ -2,7 +2,7 @@ name: CSS Selectors
 
 on:
     push:
-        branches: [main, playwright]
+        branches: [main]
     pull_request:
         branches: [main]
 
