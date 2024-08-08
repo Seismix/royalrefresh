@@ -3,3 +3,7 @@ dist
 *web-ext-config.mjs
 .webextrc*
 *wsl.localhost*
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

@@ -13,7 +13,9 @@
         "dev:verbose": "pnpm dev --verbose",
         "lint": "web-ext lint --source-dir dist/firefox",
         "build": "vite build",
-        "build:chrome": "TARGET=chrome vite build"
+        "build:chrome": "TARGET=chrome vite build",
+        "test": "playwright test",
+        "test:ui": "playwright test --ui"
     },
     "repository": {
         "type": "git",
@@ -35,7 +37,9 @@
     },
     "homepage": "https://github.com/Seismix/royalrecap#readme",
     "devDependencies": {
+        "@playwright/test": "^1.46.0",
         "@types/firefox-webext-browser": "^120.0.4",
+        "@types/node": "^22.1.0",
         "@types/webextension-polyfill": "^0.10.7",
         "typescript": "^5.5.2",
         "web-ext": "^8.2.0",
