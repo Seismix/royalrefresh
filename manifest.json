@@ -25,7 +25,8 @@
     },
     "{{firefox}}.background": {
         "scripts": ["scripts/background.ts"],
-        "type": "module"
+        "type": "module",
+        "persistent": false
     },
     "options_ui": {
         "page": "ui/options.html",
