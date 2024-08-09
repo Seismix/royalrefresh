@@ -6,7 +6,7 @@
 
 import { test as base, chromium, type BrowserContext } from "@playwright/test"
 
-//? Modify the path to the extension directory if needed
+// Modify the path to the extension directory if needed
 const chromeExtensionPath = "dist/chrome"
 
 export const test = base.extend<{
