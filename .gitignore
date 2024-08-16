@@ -7,3 +7,5 @@ dist
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+web-ext-artifacts
+.env
