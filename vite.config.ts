@@ -5,6 +5,7 @@ import webExtension, { readJsonFile } from "vite-plugin-web-extension"
 const browser = process.env.TARGET || "firefox"
 
 export default defineConfig({
+    root: "src",
     plugins: [
         webExtension({
             browser: browser,

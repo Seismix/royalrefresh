@@ -9,9 +9,15 @@
         "outDir": "./dist",
         "baseUrl": "./",
         "paths": {
-            "@royalrecap/types": ["./types/types"]
+            "@royalrecap/types": ["./src/types/types"]
         }
     },
-    "include": ["./**/*.ts", "./**/*.js"],
-    "exclude": ["node_modules", "docs", "dist"]
+    "include": ["./src/**/*.ts", "./src/**/*.js"],
+    "exclude": [
+        "node_modules",
+        "docs",
+        "dist",
+        "playwright-report",
+        "test-results"
+    ]
 }
