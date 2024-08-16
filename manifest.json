@@ -42,9 +42,6 @@
     "{{firefox}}.browser_specific_settings": {
         "gecko": {
             "id": "royalrecap.extension@example.com"
-        },
-        "gecko_android": {
-            "id": "royalrecap.extension@example.com"
         }
     }
 }
