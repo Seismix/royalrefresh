@@ -31,6 +31,11 @@
         "page": "ui/options.html",
         "{{chrome}}.open_in_tab": false
     },
+    "icons": {
+        "48": "icons/royalroad_48.png",
+        "96": "icons/royalroad_96.png",
+        "128": "icons/royalroad_128.png"
+    },
     "{{chrome}}.permissions": ["storage"],
     "{{chrome}}.host_permissions": ["*://*.royalroad.com/*"],
     "{{firefox}}.permissions": ["*://*.royalroad.com/*", "storage"],
