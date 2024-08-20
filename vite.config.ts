@@ -1,13 +1,22 @@
 import path from "path"
 import { defineConfig } from "vite"
-import webExtension from "vite-plugin-web-extension"
+import webExtension, { readJsonFile } from "vite-plugin-web-extension"
 
 const browser = process.env.TARGET || "firefox"
 
 export default defineConfig({
+    root: "src",
     plugins: [
         webExtension({
             browser: browser,
+            manifest: () => {
+                const pkg = readJsonFile("package.json")
+                const template = readJsonFile("manifest.json")
+                return {
+                    ...template,
+                    version: pkg.version,
+                }
+            },
         }),
     ],
     build: {

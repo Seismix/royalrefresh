@@ -2,7 +2,6 @@
     "{{chrome}}.manifest_version": 3,
     "{{firefox}}.manifest_version": 2,
     "name": "RoyalRecap",
-    "version": "1.0",
     "description": "A web extension for royalroad.com. For people who juggle multiple stories",
     "homepage_url": "https://github.com/Seismix/royalrecap",
     "{{chrome}}.action": {
@@ -32,12 +31,17 @@
         "page": "ui/options.html",
         "{{chrome}}.open_in_tab": false
     },
+    "icons": {
+        "48": "icons/royalroad_48.png",
+        "96": "icons/royalroad_96.png",
+        "128": "icons/royalroad_128.png"
+    },
     "{{chrome}}.permissions": ["storage"],
     "{{chrome}}.host_permissions": ["*://*.royalroad.com/*"],
     "{{firefox}}.permissions": ["*://*.royalroad.com/*", "storage"],
     "{{firefox}}.browser_specific_settings": {
         "gecko": {
-            "id": "royalrecaptestaddonemail@gmail.com"
+            "id": "royalrecap.extension@example.com"
         }
     }
 }
