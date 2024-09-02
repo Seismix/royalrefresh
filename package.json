@@ -1,5 +1,5 @@
 {
-    "name": "royalrecap",
+    "name": "royalrefresh",
     "version": "1.0.0",
     "description": "A web extension for royalroad.com. For people who juggle multiple stories",
     "main": "background.js",
@@ -20,7 +20,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Seismix/royalrecap.git"
+        "url": "git+https://github.com/Seismix/royalrefresh.git"
     },
     "keywords": [
         "royal",
@@ -34,9 +34,9 @@
     "author": "Seismix",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/Seismix/royalrecap/issues"
+        "url": "https://github.com/Seismix/royalrefresh/issues"
     },
-    "homepage": "https://github.com/Seismix/royalrecap#readme",
+    "homepage": "https://github.com/Seismix/royalrefresh#readme",
     "devDependencies": {
         "@playwright/test": "^1.46.1",
         "@types/firefox-webext-browser": "^120.0.4",

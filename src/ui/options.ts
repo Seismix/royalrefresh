@@ -4,7 +4,7 @@ import {
     DisplayMessageType,
     ExtensionSettings,
     ExtensionSettingsPossibleTypes,
-} from "@royalrecap/types"
+} from "@royalrefresh/types"
 
 /**
  * Load the extension options from the `browser.storage` and set them to the form elements in options.html

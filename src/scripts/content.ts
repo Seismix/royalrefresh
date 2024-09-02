@@ -1,4 +1,4 @@
-import { ExtensionSettings, ExtensionSettingsKeys } from "@royalrecap/types"
+import { ExtensionSettings, ExtensionSettingsKeys } from "@royalrefresh/types"
 import browser from "webextension-polyfill"
 import DEFAULTS from "./defaults"
 
@@ -191,7 +191,7 @@ function createBlurbButton() {
 function createSettingsButton() {
     const button = document.createElement("button")
     button.id = SETTINGS_BUTTON_ID
-    button.textContent = "Open RoyalRecap Settings"
+    button.textContent = "Open RoyalRefresh Settings"
     button.classList.add("btn", "btn-circle", "red")
 
     button.style.marginRight = "auto"
@@ -276,7 +276,7 @@ function createRecapFragment(prevChapterHtml: string) {
     // Fiction title
     const recapHeading = extractFictionTitle()
     const recapHeadingElement = document.createElement("h1")
-    recapHeadingElement.textContent = `RoyalRecap of ${recapHeading}`
+    recapHeadingElement.textContent = `RoyalRefresh of ${recapHeading}`
 
     // Previous chapter name
     const recapChapterName = extractChapterName(doc)

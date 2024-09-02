@@ -1,4 +1,4 @@
-import { ExtensionSettings } from "@royalrecap/types"
+import { ExtensionSettings } from "@royalrefresh/types"
 
 const DEFAULTS: ExtensionSettings = {
     wordCount: 250,
