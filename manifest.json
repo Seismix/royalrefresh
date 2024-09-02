@@ -15,7 +15,7 @@
     "content_scripts": [
         {
             "matches": ["*://*.royalroad.com/*"],
-            "js": ["scripts/content_script.ts"],
+            "js": ["scripts/content.ts"],
             "run_at": "document_end"
         }
     ],
