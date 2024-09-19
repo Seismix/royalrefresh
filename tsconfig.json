@@ -9,7 +9,7 @@
         "outDir": "./dist",
         "baseUrl": "./",
         "paths": {
-            "@royalrecap/types": ["./src/types/types"]
+            "@royalrefresh/types": ["./src/types/types"]
         }
     },
     "include": ["./src/**/*.ts", "./src/**/*.js"],
