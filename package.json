@@ -14,9 +14,9 @@
         "lint": "pnpm build && web-ext lint --source-dir dist/firefox",
         "build": "vite build",
         "build:chrome": "TARGET=chrome vite build",
-        "test": "playwright test",
+        "test": "playwright test --reporter=list",
         "test:ui": "playwright test --ui",
-        "test:report": "playwright test --reporter=list"
+        "test:detailed": "playwright test"
     },
     "repository": {
         "type": "git",
@@ -38,16 +38,16 @@
     },
     "homepage": "https://github.com/Seismix/royalrefresh#readme",
     "devDependencies": {
-        "@playwright/test": "^1.46.1",
+        "@playwright/test": "^1.47.2",
         "@types/firefox-webext-browser": "^120.0.4",
-        "@types/node": "^22.5.0",
-        "@types/webextension-polyfill": "^0.12.0",
-        "typescript": "^5.5.4",
-        "web-ext": "^8.2.0",
+        "@types/node": "^22.7.4",
+        "@types/webextension-polyfill": "^0.12.1",
+        "typescript": "^5.6.2",
+        "web-ext": "^8.3.0",
         "webextension-polyfill": "^0.12.0"
     },
     "dependencies": {
-        "vite": "^5.4.2",
-        "vite-plugin-web-extension": "^4.1.6"
+        "vite": "^5.4.8",
+        "vite-plugin-web-extension": "^4.2.0"
     }
 }
