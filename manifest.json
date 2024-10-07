@@ -4,6 +4,7 @@
     "name": "RoyalRefresh",
     "description": "A web extension for royalroad.com. For people who juggle multiple stories",
     "homepage_url": "https://github.com/Seismix/royalrefresh",
+    "type": "module",
     "{{chrome}}.action": {
         "default_title": "RoyalRefresh",
         "default_popup": "ui/options.html"
@@ -41,7 +42,8 @@
     "{{firefox}}.permissions": ["*://*.royalroad.com/*", "storage"],
     "{{firefox}}.browser_specific_settings": {
         "gecko": {
-            "id": "royalrecap.extension@example.com"
-        }
+            "id": "royalrefresh.extension@example.com"
+        },
+        "gecko_android": {}
     }
 }
