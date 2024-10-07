@@ -14,13 +14,25 @@ browser.runtime.onInstalled.addListener((details) => {
 })
 
 browser.runtime.onMessage.addListener((message) => {
-    if (message.request === "getDefaultSettings") {
-        return Promise.resolve(DEFAULTS)
+    if (
+        typeof message === "object" &&
+        message !== null &&
+        "request" in message
+    ) {
+        const request = (message as { request: string }).request
+        if (request === "getDefaultSettings") {
+            return Promise.resolve(DEFAULTS)
+        }
     }
 })
 
 browser.runtime.onMessage.addListener((message) => {
-    if (message.action === "openExtensionSettings") {
+    if (
+        typeof message === "object" &&
+        message !== null &&
+        "action" in message &&
+        (message as { action: string }).action === "openExtensionSettings"
+    ) {
         if (currentBrowser === BrowserType.Firefox) {
             const manifest = browser.runtime.getManifest()
             if (manifest.options_ui) {
@@ -32,5 +44,6 @@ browser.runtime.onMessage.addListener((message) => {
         } else {
             browser.action.openPopup()
         }
+        return true // Indicate that the response will be sent asynchronously
     }
 })
