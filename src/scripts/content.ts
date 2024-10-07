@@ -45,37 +45,22 @@ async function init() {
 
 async function loadExtensionSettings() {
     // Request default settings from the background script
-    const defaultValues = await browser.runtime.sendMessage({
+    const defaultValues = (await browser.runtime.sendMessage({
         request: "getDefaultSettings",
-    })
+    })) as ExtensionSettings
 
     // Load settings, automatically falling back to default values if not set
-    const settings = await browser.storage.sync.get(defaultValues)
+    const userSettings = await browser.storage.sync.get(defaultValues)
 
     // Assign the retrieved settings to extensionSettings
-    extensionSettings = { ...defaultValues, ...settings }
-}
-
-// A function to update a specific setting in extensionSettings
-function setExtensionSetting<K extends ExtensionSettingsKeys>(
-    key: K,
-    value: ExtensionSettings[K],
-) {
-    extensionSettings[key] = value
+    extensionSettings = { ...defaultValues, ...userSettings }
 }
 
 function addSettingsChangeListener() {
     browser.storage.onChanged.addListener(async (changes, area) => {
-        if (area === "sync" && changes) {
-            for (const key in changes) {
-                if (changes.hasOwnProperty(key) && key in extensionSettings) {
-                    setExtensionSetting(
-                        key as ExtensionSettingsKeys,
-                        changes[key].newValue,
-                    )
-                }
-            }
-            await appendFetchedRecap() // Refetch and reparse
+        if (area === "sync") {
+            await loadExtensionSettings() // Reloads from `sync` storage
+            appendFetchedRecap() // Refetch and reparse
         }
     })
 }
