@@ -1,6 +1,20 @@
-# RoyalRefresh
+<h1 align="center">
+  <img src="src/public/icons/royalroad_128.png" alt="RoyalRefresh Logo" width="128" height="128">
+</h1>
 
-A web extension for [royalroad.com](https://royalroad.com). For people who juggle multiple stories.
+<h1 align="center">RoyalRefresh</h1>
+
+<p align="center">A web extension for <a href="https://royalroad.com">royalroad.com</a>.<br>For people who juggle multiple stories.</p>
+
+<h3 align="center">Install</h3>
+<p align="center">
+  <a href="https://addons.mozilla.org/en-US/firefox/addon/royalrefresh">
+    <img src="https://img.shields.io/badge/Firefox-royalrefresh-orange?logo=firefoxbrowser&style=for-the-badge" alt="Firefox Add-ons">
+  </a>
+  <a href="https://chrome.google.com/webstore/detail/royalrefresh/your-extension-id">
+    <img src="https://img.shields.io/badge/Chrome-royalrefresh-blue?logo=googlechrome&style=for-the-badge" alt="Chrome Web Store">
+  </a>
+</p>
 
 ## Why?
 
