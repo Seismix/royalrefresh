@@ -1,6 +1,27 @@
-# RoyalRefresh
+<h1 align="center">
+  <img src="src/public/icons/royalroad_128.png" alt="RoyalRefresh Logo" width="128" height="128">
+</h1>
 
-A web extension for [royalroad.com](https://royalroad.com). For people who juggle multiple stories.
+<h1 align="center">RoyalRefresh</h1>
+
+<p align="center">A web extension for <a href="https://royalroad.com">royalroad.com</a>.<br>For people who juggle multiple stories.</p>
+
+<h2 align="center">Install</h2>
+<p align="center">
+  <a href="https://addons.mozilla.org/en-US/firefox/addon/royalrefresh">
+    <img src="https://img.shields.io/badge/Firefox-royalrefresh-orange?logo=firefoxbrowser&style=flat-square" alt="Install Firefox Add-on">
+  </a>
+  <a href="https://chromewebstore.google.com/detail/royalrefresh/dfedgngibbhkdhcengnfhdolgcogmijc">
+    <img src="https://img.shields.io/badge/Chrome-royalrefresh-blue?logo=googlechrome&style=flat-square" alt="Install from Chrome Web Store">
+  </a>
+  <!-- MSFT does not allow the use of the Edge logo, so it's not in the simpleicons.org collection -->
+  <a href="https://chromewebstore.google.com/detail/royalrefresh/dfedgngibbhkdhcengnfhdolgcogmijc">
+    <img src="https://img.shields.io/badge/Edge-royalrefresh-green?&style=flat-square" alt="Install for Edge from Chrome Web Store">
+  </a>
+  <a href="https://chromewebstore.google.com/detail/royalrefresh/dfedgngibbhkdhcengnfhdolgcogmijc">
+    <img src="https://img.shields.io/badge/Opera-royalrefresh-red?logo=opera&style=flat-square" alt="Install for Opera from Chrome Web Store">
+  </a>
+</p>
 
 ## Why?
 
@@ -14,11 +35,10 @@ That's when decided on trying to implement this little idea implementing a refre
 
 ## What is it?
 
-RoyalRefresh is a browser extension for [royalroad.com](https://royalroad.com)
-that inserts a button next to RoyalRoad's "Reader Preferences" button. When clicked, the last few paragraphs of the
-previous chapter get fetched and displayed at the top of the chapter, which you can toggle on and off using the button.
-The extension defaults to showing you the last 250 words of the previous chapter (adjustable in extension settings,
-[see Settings](#settings)).
+RoyalRefresh is a browser extension for [royalroad.com](https://royalroad.com) that inserts a button next to RoyalRoad's
+"Reader Preferences" button on chapter URLs. When clicked, the last few paragraphs of the previous chapter get fetched
+and displayed at the top of the chapter, which you can toggle on and off using the button. The extension defaults to
+showing you the last 250 words of the previous chapter (adjustable in extension settings, [see Settings](#settings)).
 
 Here's an example of what it looks like:
 
@@ -34,15 +54,23 @@ There are a few ways to access the settings page:
 1. Depending on your browser, there may be alternative methods to access the extension settings,
 (such as using `about:addons` in Firefox)
 
-The settings page looks like this:
-
-![Settings page](docs/basic_settings.png)
+<details>
+  <summary>Settings page</summary>
+  
+  ![Settings page](docs/basic_settings.png)
+  
+</details>  
 
 Advanced users can take advanced of the "Advanced options" toggle to reveal more settings. In case the website gets an
 update, the user can adjust the CSS selectors to make the extension work again, until a new update of RoyalRefresh is
 released with the adjusted defaults:
 
-![Advanced settings](docs/advanced_settings.png)
+<details>
+  <summary>Advanced settings</summary>
+  
+  ![Advanced settings](docs/advanced_settings.png)
+  
+</details>
 
 ## Bug reports & Ideas
 
