@@ -18,6 +18,9 @@
   <a href="https://chromewebstore.google.com/detail/royalrefresh/dfedgngibbhkdhcengnfhdolgcogmijc">
     <img src="https://img.shields.io/badge/Edge-royalrefresh-green?&style=for-the-badge" alt="Chrome Web Store for Edge">
   </a>
+  <a href="https://chromewebstore.google.com/detail/royalrefresh/dfedgngibbhkdhcengnfhdolgcogmijc">
+    <img src="https://img.shields.io/badge/Opera-royalrefresh-red?logo=opera&style=for-the-badge" alt="Opera Add-ons">
+  </a>
 </p>
 
 ## Why?
