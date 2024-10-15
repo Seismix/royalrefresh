@@ -11,7 +11,7 @@
   <a href="https://addons.mozilla.org/en-US/firefox/addon/royalrefresh">
     <img src="https://img.shields.io/badge/Firefox-royalrefresh-orange?logo=firefoxbrowser&style=for-the-badge" alt="Firefox Add-ons">
   </a>
-  <a href="https://chrome.google.com/webstore/detail/royalrefresh/your-extension-id">
+  <a href="https://chromewebstore.google.com/detail/royalrefresh/dfedgngibbhkdhcengnfhdolgcogmijc">
     <img src="https://img.shields.io/badge/Chrome-royalrefresh-blue?logo=googlechrome&style=for-the-badge" alt="Chrome Web Store">
   </a>
 </p>
