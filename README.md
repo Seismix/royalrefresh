@@ -14,6 +14,10 @@
   <a href="https://chromewebstore.google.com/detail/royalrefresh/dfedgngibbhkdhcengnfhdolgcogmijc">
     <img src="https://img.shields.io/badge/Chrome-royalrefresh-blue?logo=googlechrome&style=for-the-badge" alt="Chrome Web Store">
   </a>
+  <!-- MSFT does not allow the use of the Edge logo -->
+  <a href="https://chromewebstore.google.com/detail/royalrefresh/dfedgngibbhkdhcengnfhdolgcogmijc">
+    <img src="https://img.shields.io/badge/Edge-royalrefresh-green?&style=for-the-badge" alt="Chrome Web Store for Edge">
+  </a>
 </p>
 
 ## Why?
