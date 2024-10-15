@@ -6,20 +6,20 @@
 
 <p align="center">A web extension for <a href="https://royalroad.com">royalroad.com</a>.<br>For people who juggle multiple stories.</p>
 
-<h3 align="center">Install</h3>
+<h2 align="center">Install</h2>
 <p align="center">
   <a href="https://addons.mozilla.org/en-US/firefox/addon/royalrefresh">
-    <img src="https://img.shields.io/badge/Firefox-royalrefresh-orange?logo=firefoxbrowser&style=for-the-badge" alt="Firefox Add-ons">
+    <img src="https://img.shields.io/badge/Firefox-royalrefresh-orange?logo=firefoxbrowser&style=for-the-badge" alt="Install Firefox Add-on">
   </a>
   <a href="https://chromewebstore.google.com/detail/royalrefresh/dfedgngibbhkdhcengnfhdolgcogmijc">
-    <img src="https://img.shields.io/badge/Chrome-royalrefresh-blue?logo=googlechrome&style=for-the-badge" alt="Chrome Web Store">
+    <img src="https://img.shields.io/badge/Chrome-royalrefresh-blue?logo=googlechrome&style=for-the-badge" alt="Install from Chrome Web Store">
   </a>
-  <!-- MSFT does not allow the use of the Edge logo -->
+  <!-- MSFT does not allow the use of the Edge logo, so it's not in the simpleicons.org collection -->
   <a href="https://chromewebstore.google.com/detail/royalrefresh/dfedgngibbhkdhcengnfhdolgcogmijc">
-    <img src="https://img.shields.io/badge/Edge-royalrefresh-green?&style=for-the-badge" alt="Chrome Web Store for Edge">
+    <img src="https://img.shields.io/badge/Edge-royalrefresh-green?&style=for-the-badge" alt="Install for Edge from Chrome Web Store">
   </a>
   <a href="https://chromewebstore.google.com/detail/royalrefresh/dfedgngibbhkdhcengnfhdolgcogmijc">
-    <img src="https://img.shields.io/badge/Opera-royalrefresh-red?logo=opera&style=for-the-badge" alt="Opera Add-ons">
+    <img src="https://img.shields.io/badge/Opera-royalrefresh-red?logo=opera&style=for-the-badge" alt="Install for Opera from Chrome Web Store">
   </a>
 </p>
 
