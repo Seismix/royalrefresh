@@ -1,6 +1,7 @@
 import { ExtensionSettings, ExtensionSettingsKeys } from "@royalrefresh/types"
 import browser from "webextension-polyfill"
-import DEFAULTS from "./defaults"
+import DEFAULTS from "../helpers/defaults"
+import StorageService from "../helpers/storageService"
 
 /**
  * The object that gets populated with all values loaded from `browser.storage`
@@ -44,16 +45,7 @@ async function init() {
 }
 
 async function loadExtensionSettings() {
-    // Request default settings from the background script
-    const defaultValues = (await browser.runtime.sendMessage({
-        request: "getDefaultSettings",
-    })) as ExtensionSettings
-
-    // Load settings, automatically falling back to default values if not set
-    const userSettings = await browser.storage.sync.get(defaultValues)
-
-    // Assign the retrieved settings to extensionSettings
-    extensionSettings = { ...defaultValues, ...userSettings }
+    extensionSettings = await StorageService.getSettings()
 }
 
 function addSettingsChangeListener() {
