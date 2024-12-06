@@ -8,6 +8,9 @@ browser.runtime.onInstalled.addListener((details) => {
     if (details.reason === "install") {
         StorageService.restoreDefaults()
     }
+    if (details.reason === "update") {
+        StorageService.updateSettings()
+    }
     // Only Firefox supports the "temporary" property
     if (details.temporary) {
         browser.tabs.reload()

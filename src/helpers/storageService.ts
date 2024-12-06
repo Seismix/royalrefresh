@@ -1,6 +1,6 @@
 import browser from "webextension-polyfill"
 import { ExtensionSettings } from "@royalrefresh/types"
-import DEFAULTS from "./defaults"
+import DEFAULTS, { DEFAULT_SELECTORS } from "./defaults"
 
 class StorageService {
     static async getSettings(): Promise<ExtensionSettings> {
@@ -15,6 +15,12 @@ class StorageService {
 
     static async restoreDefaults() {
         await browser.storage.sync.set(DEFAULTS)
+    }
+
+    static async updateSettings() {
+        const currentSettings = await this.getSettings()
+        const updatedSettings = { ...currentSettings, ...DEFAULT_SELECTORS }
+        await this.setSettings(updatedSettings)
     }
 }
 
