@@ -1,4 +1,4 @@
-import { ExtensionSettings, ExtensionSettingsKeys } from "@royalrefresh/types"
+import { ExtensionSettings } from "@royalrefresh/types"
 import browser from "webextension-polyfill"
 import DEFAULTS from "../helpers/defaults"
 import StorageService from "../helpers/storageService"

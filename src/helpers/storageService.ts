@@ -1,5 +1,5 @@
-import browser from "webextension-polyfill"
 import { ExtensionSettings } from "@royalrefresh/types"
+import browser from "webextension-polyfill"
 import DEFAULTS, { DEFAULT_SELECTORS } from "./defaults"
 
 class StorageService {

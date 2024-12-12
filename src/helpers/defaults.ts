@@ -1,4 +1,4 @@
-import { ExtensionSettings, ExtensionSelectors } from "@royalrefresh/types"
+import { ExtensionSelectors, ExtensionSettings } from "@royalrefresh/types"
 
 const DEFAULT_SELECTORS: ExtensionSelectors = {
     prevChapterBtn: "div.col-md-4:nth-child(1) > a:nth-child(1)",

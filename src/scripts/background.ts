@@ -1,6 +1,6 @@
 import browser from "webextension-polyfill"
 import DEFAULTS from "../helpers/defaults"
-import { currentBrowser, BrowserType } from "../helpers/platform"
+import { BrowserType, currentBrowser } from "../helpers/platform"
 import StorageService from "../helpers/storageService"
 
 // Saves the default values to the browser storage after the extension has been installed

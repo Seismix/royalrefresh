@@ -1,10 +1,9 @@
-import browser from "webextension-polyfill"
-import DEFAULTS from "../helpers/defaults"
 import {
     DisplayMessageType,
     ExtensionSettings,
     ExtensionSettingsPossibleTypes,
 } from "@royalrefresh/types"
+import DEFAULTS from "../helpers/defaults"
 import StorageService from "../helpers/storageService"
 
 /**
