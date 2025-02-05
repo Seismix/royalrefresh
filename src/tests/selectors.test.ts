@@ -3,10 +3,14 @@ import DEFAULTS from "../scripts/defaults"
 import { expect, test } from "./utils/fixtures"
 
 /** Helper function to check if a selector exists and is visible */
-async function checkSelector(page: Page, selector: string) {
+async function checkSelector(page: Page, selector: string, multiple = false) {
     const element = page.locator(selector)
     const count = await element.count()
-    expect(count).toBe(1)
+    if (multiple) {
+        expect(count).toBe(2)
+    } else {
+        expect(count).toBe(1)
+    }
 }
 
 test.describe("Chapter Page", () => {
@@ -28,7 +32,8 @@ test.describe("Chapter Page", () => {
         // Skip 'blurb' because it's not present on the chapter page
         if (typeof selector === "string" && key !== "blurb") {
             test(`${key} selector exists`, async () => {
-                await checkSelector(page, selector)
+                // the togglePlacement selector is present 2 times on the page so we need to check for it differently
+                await checkSelector(page, selector, key === "togglePlacement")
             })
         }
     }

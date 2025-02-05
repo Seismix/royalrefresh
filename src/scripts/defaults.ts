@@ -6,8 +6,7 @@ const DEFAULTS: ExtensionSettings = {
     chapterContent: ".chapter-inner",
     chapterTitle: "h1.font-white",
     fictionTitle: "h2.font-white",
-    togglePlacement:
-        "div.portlet:nth-child(2) > div:nth-child(1) > div:nth-child(2)",
+    togglePlacement: ".actions",
     settingsPlacement:
         "#settings > div:nth-child(1) > div:nth-child(1) > div:nth-child(3)",
     smoothScroll: true,
