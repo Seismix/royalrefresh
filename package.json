@@ -16,7 +16,9 @@
         "build:chrome": "TARGET=chrome vite build",
         "test": "playwright test --reporter=list",
         "test:ui": "playwright test --ui",
-        "test:detailed": "playwright test"
+        "test:detailed": "playwright test",
+        "format": "prettier --write src/",
+        "format:check": "prettier --check src/"
     },
     "repository": {
         "type": "git",
@@ -42,6 +44,7 @@
         "@types/firefox-webext-browser": "^120.0.4",
         "@types/node": "^22.13.1",
         "@types/webextension-polyfill": "^0.12.1",
+        "prettier": "^3.4.2",
         "typescript": "^5.7.3",
         "web-ext": "^8.3.0",
         "webextension-polyfill": "^0.12.0"

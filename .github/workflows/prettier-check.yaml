@@ -1,14 +1,16 @@
-name: CSS Selectors
+name: Prettier Check
 
 on:
-    push:
-        branches: [main]
     pull_request:
-        branches: [main]
+        branches:
+            - main
+    push:
+        branches:
+            - main
 
 jobs:
-    css-selectors:
-        runs-on: ubuntu-22.04
+    prettier:
+        runs-on: ubuntu-latest
 
         steps:
             - uses: actions/checkout@v4
@@ -18,17 +20,14 @@ jobs:
               with:
                   version: 10
 
-            - name: Setup node.js
+            - name: Setup Node.js
               uses: actions/setup-node@v4
               with:
                   node-version: lts/*
                   cache: "pnpm"
 
             - name: Install dependencies
-              run: pnpm install
+              run: pnpm install --frozen-lockfile
 
-            - name: Install Playwright Browsers
-              run: pnpm playwright install --with-deps chromium
-
-            - name: Run Playwright tests
-              run: pnpm test
+            - name: Run Prettier check
+              run: pnpm run format:check
