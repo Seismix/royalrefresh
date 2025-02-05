@@ -26,6 +26,12 @@ jobs:
                   node-version: lts/*
                   cache: "pnpm"
 
+            - name: Set PNPM store path
+              run: pnpm config set store-dir ~/.pnpm-store
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
             - name: Cache PNPM dependencies
               uses: actions/cache@v3
               with:
@@ -33,9 +39,6 @@ jobs:
                   key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
                   restore-keys: |
                       ${{ runner.os }}-pnpm-
-
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
 
             - name: Run Prettier check
               run: pnpm run format:check
