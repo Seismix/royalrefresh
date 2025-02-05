@@ -20,25 +20,14 @@ jobs:
               with:
                   version: 10
 
-            - name: Setup node.js
+            - name: Setup Node.js
               uses: actions/setup-node@v4
               with:
                   node-version: lts/*
                   cache: "pnpm"
 
-            - name: Set PNPM store path
-              run: pnpm config set store-dir ~/.pnpm-store
-
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
-
-            - name: Cache PNPM dependencies
-              uses: actions/cache@v3
-              with:
-                  path: ~/.pnpm-store
-                  key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pnpm-
 
             - name: Run Prettier check
               run: pnpm run format:check
