@@ -18,7 +18,7 @@
         "test:ui": "playwright test --ui",
         "test:detailed": "playwright test",
         "format": "prettier --write src/",
-        "check-format": "prettier --check src/"
+        "format:check": "prettier --check src/"
     },
     "repository": {
         "type": "git",
