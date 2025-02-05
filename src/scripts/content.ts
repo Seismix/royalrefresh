@@ -216,6 +216,7 @@ function addSettingsButtonToDOM(settingsButton: HTMLButtonElement) {
 
 function addToggleButtonToDOM(button: HTMLButtonElement) {
     if (!document.getElementById(button.id)) {
+        // There are 2 elements with the same class, we want the first one
         const navButtons = document.querySelector(
             extensionSettings.togglePlacement,
         )
