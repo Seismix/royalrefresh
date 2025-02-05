@@ -1,25 +1,29 @@
-import browser from "webextension-polyfill"
-import DEFAULTS from "../scripts/defaults"
 import {
     DisplayMessageType,
     ExtensionSettings,
     ExtensionSettingsPossibleTypes,
 } from "@royalrefresh/types"
+import DEFAULTS from "../helpers/defaults"
+import StorageService from "../helpers/storageService"
 
 /**
  * Load the extension options from the `browser.storage` and set them to the form elements in options.html
  */
 async function loadOptions() {
-    const options = await browser.storage.sync.get(DEFAULTS)
+    const options = await StorageService.getSettings()
 
     for (const key of Object.keys(DEFAULTS)) {
         const inputElement = document.getElementById(key)
 
         if (inputElement instanceof HTMLInputElement) {
             if (inputElement.type === "checkbox") {
-                inputElement.checked = options[key]
+                inputElement.checked = options[
+                    key as keyof ExtensionSettings
+                ] as boolean
             } else {
-                inputElement.value = options[key]
+                inputElement.value = options[
+                    key as keyof ExtensionSettings
+                ] as string
             }
         }
     }
@@ -38,7 +42,7 @@ async function saveOptions(event: Event) {
         options[key] = getInputValue(inputElement, DEFAULTS[key])
     }
 
-    await browser.storage.sync.set(options)
+    await StorageService.setSettings(options)
     displayMessage("success")
 }
 
@@ -68,9 +72,18 @@ function getInputValue(
  * Restores the default options by setting the options to default values.
  */
 async function restoreDefaultOptions() {
-    await browser.storage.sync.set(DEFAULTS)
+    await StorageService.restoreDefaults()
     await loadOptions()
     displayMessage("restore")
+}
+
+/**
+ * Restores the default selectors by setting the selectors to default values.
+ */
+async function restoreSelectors() {
+    await StorageService.restoreSelectors()
+    await loadOptions()
+    displayMessage("restoreSelectors")
 }
 
 /**
@@ -85,6 +98,10 @@ function displayMessage(messageType: DisplayMessageType) {
         restore: {
             querySelector: "#restoreDefaults",
             buttonText: "Restored Defaults ✔",
+        },
+        restoreSelectors: {
+            querySelector: "#restoreSelectors",
+            buttonText: "Restored Selectors ✔",
         },
     }
 
@@ -121,10 +138,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /** The CSS ID of the button to restore defaults */
     const DEFAULT_BUTTON_ID = "restoreDefaults"
+    const SELECTORS_BUTTON_ID = "restoreSelectors"
 
     const defaultsElement = document.getElementById(DEFAULT_BUTTON_ID)
     if (defaultsElement) {
         defaultsElement.addEventListener("click", restoreDefaultOptions)
+    }
+
+    const selectorsElement = document.getElementById(SELECTORS_BUTTON_ID)
+    if (selectorsElement) {
+        selectorsElement.addEventListener("click", restoreSelectors)
     }
 
     loadOptions()

@@ -1,11 +1,15 @@
 import browser from "webextension-polyfill"
-import DEFAULTS from "./defaults"
-import { currentBrowser, BrowserType } from "./platform"
+import DEFAULTS from "../helpers/defaults"
+import { BrowserType, currentBrowser } from "../helpers/platform"
+import StorageService from "../helpers/storageService"
 
 // Saves the default values to the browser storage after the extension has been installed
 browser.runtime.onInstalled.addListener((details) => {
     if (details.reason === "install") {
-        browser.storage.sync.set(DEFAULTS)
+        StorageService.restoreDefaults()
+    }
+    if (details.reason === "update") {
+        StorageService.updateSettings()
     }
     // Only Firefox supports the "temporary" property
     if (details.temporary) {

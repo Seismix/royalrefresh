@@ -1,16 +1,19 @@
-export type ExtensionSettings = {
+export type ExtensionSelectors = {
     prevChapterBtn: string
     chapterContent: string
     chapterTitle: string
     fictionTitle: string
-    wordCount: number
     togglePlacement: string
     settingsPlacement: string
-    smoothScroll: boolean
-    autoExpand: boolean
     blurb: string
     closeButtonSelector: string
 }
+
+export type ExtensionSettings = {
+    wordCount: number
+    smoothScroll: boolean
+    autoExpand: boolean
+} & ExtensionSelectors
 
 export type ExtensionSettingsKeys = keyof ExtensionSettings
 export type ExtensionSettingsPossibleTypes =
@@ -22,4 +25,4 @@ export type RecapContainerStrings = {
     lastChapterContent: string
 }
 
-export type DisplayMessageType = "success" | "restore"
+export type DisplayMessageType = "success" | "restore" | "restoreSelectors"
