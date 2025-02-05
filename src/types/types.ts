@@ -25,4 +25,4 @@ export type RecapContainerStrings = {
     lastChapterContent: string
 }
 
-export type DisplayMessageType = "success" | "restore"
+export type DisplayMessageType = "success" | "restore" | "restoreSelectors"

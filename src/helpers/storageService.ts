@@ -13,6 +13,10 @@ class StorageService {
         await browser.storage.sync.set(settings)
     }
 
+    static async restoreSelectors() {
+        await browser.storage.sync.set(DEFAULT_SELECTORS)
+    }
+
     static async restoreDefaults() {
         await browser.storage.sync.set(DEFAULTS)
     }

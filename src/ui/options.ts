@@ -78,6 +78,15 @@ async function restoreDefaultOptions() {
 }
 
 /**
+ * Restores the default selectors by setting the selectors to default values.
+ */
+async function restoreSelectors() {
+    await StorageService.restoreSelectors()
+    await loadOptions()
+    displayMessage("restoreSelectors")
+}
+
+/**
  * Display a status message on a button and animates it
  */
 function displayMessage(messageType: DisplayMessageType) {
@@ -89,6 +98,10 @@ function displayMessage(messageType: DisplayMessageType) {
         restore: {
             querySelector: "#restoreDefaults",
             buttonText: "Restored Defaults ✔",
+        },
+        restoreSelectors: {
+            querySelector: "#restoreSelectors",
+            buttonText: "Restored Selectors ✔",
         },
     }
 
@@ -125,10 +138,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /** The CSS ID of the button to restore defaults */
     const DEFAULT_BUTTON_ID = "restoreDefaults"
+    const SELECTORS_BUTTON_ID = "restoreSelectors"
 
     const defaultsElement = document.getElementById(DEFAULT_BUTTON_ID)
     if (defaultsElement) {
         defaultsElement.addEventListener("click", restoreDefaultOptions)
+    }
+
+    const selectorsElement = document.getElementById(SELECTORS_BUTTON_ID)
+    if (selectorsElement) {
+        selectorsElement.addEventListener("click", restoreSelectors)
     }
 
     loadOptions()

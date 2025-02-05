@@ -39,7 +39,7 @@
                         modifying the advanced settings. Changing these values
                         may break the functionality of the extension. If you
                         encounter any issues, you can restore the default
-                        settings using the "Restore Default Settings" button
+                        settings using the "Restore Default Selectors" button
                         below.
                     </p>
                     <p class="warning-message">
@@ -83,10 +83,13 @@
                         type="text"
                         name="closeButtonSelector"
                         id="closeButtonSelector" />
+                    <button type="button" id="restoreSelectors">
+                        Restore Default Selectors
+                    </button>
                 </details>
                 <button type="submit">Save</button>
                 <button type="button" id="restoreDefaults">
-                    Restore Default Settings
+                    Restore All Settings
                 </button>
             </form>
             <script type="module" src="options.ts"></script>
