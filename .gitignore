@@ -9,3 +9,4 @@ dist
 /playwright/.cache/
 web-ext-artifacts
 .env
+**repomix**.txt
