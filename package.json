@@ -1,6 +1,6 @@
 {
     "name": "royalrefresh",
-    "version": "1.0.0",
+    "version": "1.1.1",
     "description": "A web extension for royalroad.com. For people who juggle multiple stories",
     "main": "background.js",
     "directories": {
