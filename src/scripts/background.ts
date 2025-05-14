@@ -51,3 +51,38 @@ browser.runtime.onMessage.addListener((message) => {
         return true // Indicate that the response will be sent asynchronously
     }
 })
+
+// Listen for AI-summarize requests from the content script
+browser.runtime.onMessage.addListener(async (message) => {
+    if (message.action === "aiSummarize" && typeof message.text === "string") {
+        try {
+            console.debug("AI summarization request received")
+            // Initialize the model (downloads on first run)
+            await browser.trial.ml.createEngine({
+                modelHub: "huggingface",
+                taskName: "summarization",
+                modelId: "Xenova/long-t5-tglobal-base-16384-book-summary"
+            })
+            console.debug("AI summarization model initialized")
+
+            console.debug("Starting AI summarization...")
+            // Run the summarization model
+            const results = await browser.trial.ml.runEngine({
+                args: [message.text],
+            })
+            console.debug("AI summarization model run completed")
+
+            // Pull out the first result’s summary_text field
+            const summary = Array.isArray(results) && results.length > 0
+                ? (results[0] as any).summary_text
+                : undefined
+
+            console.debug("runEngine raw output:", results)
+
+            return Promise.resolve({ success: true, summary })
+        } catch (error: any) {
+            console.error("AI summarization failed:", error)
+            return Promise.resolve({ success: false, error: error.message })
+        }
+    }
+})

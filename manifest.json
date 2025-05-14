@@ -39,6 +39,7 @@
     "{{chrome}}.permissions": ["storage"],
     "{{chrome}}.host_permissions": ["*://*.royalroad.com/*"],
     "{{firefox}}.permissions": ["*://*.royalroad.com/*", "storage"],
+    "{{firefox}}.optional_permissions": ["trialML"],
     "{{firefox}}.browser_specific_settings": {
         "gecko": {
             "id": "royalrefresh.extension@example.com"

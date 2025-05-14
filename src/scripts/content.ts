@@ -42,6 +42,75 @@ async function init() {
     if (extensionSettings.autoExpand) {
         toggleButton.click()
     }
+
+    // 1) Create the AI Summary button
+    const summaryButton = createAISummaryButton()
+    addToggleButtonToDOM(summaryButton)
+}
+
+/** Creates a button that will trigger the AI summarization */
+function createAISummaryButton(): HTMLButtonElement {
+    // … comments above each block, no inline comments below …
+    const button = document.createElement("button")
+    button.id = "aiSummaryButton"
+    button.textContent = "AI Summary"
+    button.classList.add("btn", "btn-primary", "btn-circle")
+    button.addEventListener("click", () => {
+        runAISummary()
+    })
+    return button
+}
+
+/** Loads engine (downloads if needed) and summarizes the full chapter text */
+// In your src/scripts/content.ts, inside runAISummary():
+
+async function runAISummary() {
+    // 1) Grab the full chapter text
+    const el = document.querySelector(extensionSettings.chapterContent)
+    const fullText = el?.textContent?.trim() || ""
+    if (!fullText) {
+        console.warn("No chapter text found")
+        return
+    }
+
+    // 2) Send it to the background and await the summary
+    interface AISummaryResponse {
+        success: boolean;
+        summary?: string;
+        error?: string;
+    }
+
+    const response = await browser.runtime.sendMessage({
+        action: "aiSummarize",
+        text: fullText,
+    }) as AISummaryResponse;
+
+    // 3) If OK, display; otherwise, log the error
+    if (response?.success) {
+        if (response.summary) {
+            displaySummary(response.summary)
+        } else {
+            console.warn("No summary available to display")
+        }
+    } else {
+        console.error("AI Summary error:", response?.error)
+    }
+}
+
+
+/** Inserts the AI-generated summary at the top of the chapter */
+function displaySummary(summary: string) {
+    let container = document.getElementById("aiSummaryContainer")
+    if (!container) {
+        container = document.createElement("div")
+        container.id = "aiSummaryContainer"
+        const parent = document.querySelector(extensionSettings.chapterContent)
+        parent?.prepend(container)
+    }
+    container.textContent = summary
+    if (extensionSettings.smoothScroll) {
+        container.scrollIntoView({ behavior: "smooth" })
+    }
 }
 
 async function loadExtensionSettings() {
@@ -134,6 +203,8 @@ function createRecapButton() {
     bookIcon.append("\u00A0")
 
     button.addEventListener("click", () => {
+         console.log("Recap button clicked");
+         
         toggleRecap()
     })
 
