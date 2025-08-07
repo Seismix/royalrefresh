@@ -1,14 +1,14 @@
 import DEFAULTS from "~/lib/defaults"
+import { StorageService } from "~/lib/storage"
 
 export default defineBackground(() => {
     // Saves the default values to the browser storage after the extension has been installed
     browser.runtime.onInstalled.addListener(async (details) => {
         if (details.reason === "install") {
-            await storage.setItem("sync:settings", DEFAULTS)
+            await StorageService.setSettings(DEFAULTS)
         }
         if (details.reason === "update") {
-            const settings = await storage.getItem("sync:settings")
-            await storage.setItem("sync:settings", { ...DEFAULTS, ...(settings || {}) })
+            await StorageService.updateSettings()
         }
         // Only Firefox supports the "temporary" property
         if (details.temporary) {

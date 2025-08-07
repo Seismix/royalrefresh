@@ -1,5 +1,6 @@
 import type { ExtensionSettings } from "~/types/types"
 import DEFAULTS from "~/lib/defaults"
+import { StorageService } from "~/lib/storage"
 import {
     RECAP_CONTAINER_ID,
     TOGGLE_SPAN_ID,
@@ -51,14 +52,13 @@ export default defineContentScript({
         }
 
         async function loadExtensionSettings() {
-            const settings = await storage.getItem("sync:settings");
-            extensionSettings = { ...DEFAULTS, ...(settings || {}) };
+            extensionSettings = await StorageService.getSettings();
         }
 
         function addSettingsChangeListener() {
             storage.watch<ExtensionSettings>("sync:settings", (newSettings) => {
-            extensionSettings = newSettings || DEFAULTS;
-            appendFetchedRecap(extensionSettings); // Refetch and reparse
+                extensionSettings = newSettings ? { ...DEFAULTS, ...newSettings } : DEFAULTS;
+                appendFetchedRecap(extensionSettings); // Refetch and reparse
             });
         }
 

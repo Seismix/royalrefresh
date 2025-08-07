@@ -1,105 +1,133 @@
 <script lang="ts">
-    import type { ExtensionSettings } from "~/types/types";
-    import DEFAULTS from "~/lib/defaults";
+    import { createSettingsStore } from "~/lib/storage";
 
-    let settings: ExtensionSettings = DEFAULTS;
-    storage.getItem("sync:settings").then((s) => (settings = s));
+    const { settings, loading, error, save, restoreDefaults, restoreSelectors } = createSettingsStore();
+    let saveStatus = $state<string>("");
 
-    function saveSettings() {
-        storage.setItem("sync:settings", settings);
-    }
-
-    function restoreDefaults() {
-        settings = DEFAULTS;
-        saveSettings();
-    }
-
-    function restoreSelectors() {
-        const newSettings = { ...settings };
-        for (const key in DEFAULTS) {
-            if (key.endsWith("Selector") || key.endsWith("Btn") || key.endsWith("Placement") || key.endsWith("Content") || key.endsWith("Title") || key.endsWith("Blurb")) {
-                newSettings[key] = DEFAULTS[key];
-            }
+    async function saveSettings() {
+        try {
+            await save($settings);
+            showSaveStatus("Saved ✔");
+        } catch (error) {
+            console.error("Failed to save settings:", error);
+            showSaveStatus("Save failed ✗");
         }
-        settings = newSettings;
-        saveSettings();
+    }
+
+    async function handleRestoreDefaults() {
+        try {
+            await restoreDefaults();
+            showSaveStatus("Restored Defaults ✔");
+        } catch (error) {
+            console.error("Failed to restore defaults:", error);
+            showSaveStatus("Restore failed ✗");
+        }
+    }
+
+    async function handleRestoreSelectors() {
+        try {
+            await restoreSelectors();
+            showSaveStatus("Restored Selectors ✔");
+        } catch (error) {
+            console.error("Failed to restore selectors:", error);
+            showSaveStatus("Restore failed ✗");
+        }
+    }
+
+    function showSaveStatus(message: string) {
+        saveStatus = message;
+        setTimeout(() => {
+            saveStatus = "";
+        }, 2000);
     }
 </script>
 
 <main>
     <h1>RoyalRefresh Settings</h1>
 
-    <form on:submit|preventDefault={saveSettings}>
-        <label>
-            <span>Word Count (max 500)</span>
-            <input type="number" min="1" max="500" bind:value={settings.wordCount} />
-        </label>
-
-        <label>
-            <span>Enable smooth scroll after button click</span>
-            <input type="checkbox" bind:checked={settings.smoothScroll} />
-        </label>
-
-        <label>
-            <span>Enable auto expanding recap on page load</span>
-            <input type="checkbox" bind:checked={settings.autoExpand} />
-        </label>
-
-        <details>
-            <summary>Advanced options: CSS-Selectors</summary>
-            <p class="warning-message">
-                <strong>Warning:</strong> Please be cautious when modifying the advanced settings. Changing these values may break the functionality of the extension. If you encounter any issues, you can restore the default settings using the "Restore Default Selectors" button below.
-            </p>
-            <p class="warning-message">
-                Custom CSS-Selectors are overwritten if an extension update changes the default values.
-            </p>
-
+    {#if $loading}
+        <p>Loading settings...</p>
+    {:else if $error}
+        <p class="error">Error loading settings: {$error}</p>
+    {:else}
+        <form onsubmit={(e) => { e.preventDefault(); saveSettings(); }}>
             <label>
-                <span>Previous chapter buttton:</span>
-                <input type="text" bind:value={settings.prevChapterBtn} />
+                <span>Word Count (max 500)</span>
+                <input type="number" min="1" max="500" bind:value={$settings.wordCount} />
             </label>
 
             <label>
-                <span>Recap button placement:</span>
-                <input type="text" bind:value={settings.togglePlacement} />
+                <span>Enable smooth scroll after button click</span>
+                <input type="checkbox" bind:checked={$settings.smoothScroll} />
             </label>
 
             <label>
-                <span>Settings button placement:</span>
-                <input type="text" bind:value={settings.settingsPlacement} />
+                <span>Enable auto expanding recap on page load</span>
+                <input type="checkbox" bind:checked={$settings.autoExpand} />
             </label>
 
-            <label>
-                <span>Chapter content:</span>
-                <input type="text" bind:value={settings.chapterContent} />
-            </label>
+            <details>
+                <summary>Advanced options: CSS-Selectors</summary>
+                <p class="warning-message">
+                    <strong>Warning:</strong> Please be cautious when modifying the advanced settings. Changing these values may break the functionality of the extension. If you encounter any issues, you can restore the default settings using the "Restore Default Selectors" button below.
+                </p>
+                <p class="warning-message">
+                    Custom CSS-Selectors are overwritten if an extension update changes the default values.
+                </p>
 
-            <label>
-                <span>Chapter title:</span>
-                <input type="text" bind:value={settings.chapterTitle} />
-            </label>
+                <label>
+                    <span>Previous chapter buttton:</span>
+                    <input type="text" bind:value={$settings.prevChapterBtn} />
+                </label>
 
-            <label>
-                <span>Fiction title:</span>
-                <input type="text" bind:value={settings.fictionTitle} />
-            </label>
+                <label>
+                    <span>Recap button placement:</span>
+                    <input type="text" bind:value={$settings.togglePlacement} />
+                </label>
 
-            <label>
-                <span>Story blurb:</span>
-                <input type="text" bind:value={settings.blurb} />
-            </label>
+                <label>
+                    <span>Settings button placement:</span>
+                    <input type="text" bind:value={$settings.settingsPlacement} />
+                </label>
 
-            <label>
-                <span>Button to close settings modal:</span>
-                <input type="text" bind:value={settings.closeButtonSelector} />
-            </label>
+                <label>
+                    <span>Chapter content:</span>
+                    <input type="text" bind:value={$settings.chapterContent} />
+                </label>
 
-            <button type="button" on:click={restoreSelectors}>Restore Default Selectors</button>
-        </details>
+                <label>
+                    <span>Chapter title:</span>
+                    <input type="text" bind:value={$settings.chapterTitle} />
+                </label>
 
-        <button type="submit">Save</button>
-        <button type="button" on:click={restoreDefaults}>Restore All Settings</button>
-    </form>
+                <label>
+                    <span>Fiction title:</span>
+                    <input type="text" bind:value={$settings.fictionTitle} />
+                </label>
+
+                <label>
+                    <span>Story blurb:</span>
+                    <input type="text" bind:value={$settings.blurb} />
+                </label>
+
+                <label>
+                    <span>Button to close settings modal:</span>
+                    <input type="text" bind:value={$settings.closeButtonSelector} />
+                </label>
+
+                <button type="button" onclick={handleRestoreSelectors}>
+                    {saveStatus === "Restored Selectors ✔" ? saveStatus : "Restore Default Selectors"}
+                </button>
+            </details>
+
+            <button type="submit">
+                {saveStatus === "Saved ✔" ? saveStatus : "Save"}
+            </button>
+            <button type="button" onclick={handleRestoreDefaults}>
+                {saveStatus === "Restored Defaults ✔" ? saveStatus : "Restore All Settings"}
+            </button>
+        </form>
+    {/if}
 </main>
 
 <style>
@@ -116,6 +144,14 @@
     .warning-message {
         background-color: #ffdddd;
         border-left: 6px solid #f44336;
+        padding: 10px;
+        margin-bottom: 15px;
+    }
+
+    .error {
+        background-color: #ffebee;
+        border-left: 6px solid #f44336;
+        color: #c62828;
         padding: 10px;
         margin-bottom: 15px;
     }
