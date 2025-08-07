@@ -1,110 +1,23 @@
-import { ExtensionSettings } from "@royalrefresh/types"
-import browser from "webextension-polyfill"
-import DEFAULTS from "../helpers/defaults"
-import StorageService from "../helpers/storageService"
-
-/**
- * The object that gets populated with all values loaded from `browser.storage`
- */
-let extensionSettings: ExtensionSettings = DEFAULTS
+import { ExtensionSettings } from "~/types/types"
 
 // Constants
-const RECAP_BUTTON_ID = "recapButton"
-const RECAP_CONTAINER_ID = "recapContainer"
-const TOGGLE_SPAN_ID = "toggleSpan"
-const BLURB_BUTTON_ID = "blurbButton"
-const SETTINGS_BUTTON_ID = "settingsButton"
-
-init()
-
-/** Initializes all necessary data and injects all extension code into the DOM, if some checks are passed */
-async function init() {
-    if (!documentIsChapterURL()) return
-
-    await loadExtensionSettings()
-    addSettingsChangeListener()
-
-    const hasPrevChapterURL = documentHasPreviousChapterURL()
-
-    const toggleButton = hasPrevChapterURL
-        ? createRecapButton()
-        : createBlurbButton()
-    addToggleButtonToDOM(toggleButton)
-
-    const settingsButton = createSettingsButton()
-    if (hasPrevChapterURL) {
-        addSettingsButtonToDOM(settingsButton)
-    }
-
-    const recapContainer = createRecapContainer()
-    addRecapContainerToDOM(recapContainer)
-
-    if (extensionSettings.autoExpand) {
-        toggleButton.click()
-    }
-}
-
-async function loadExtensionSettings() {
-    extensionSettings = await StorageService.getSettings()
-}
-
-function addSettingsChangeListener() {
-    browser.storage.onChanged.addListener(async (changes, area) => {
-        if (area === "sync") {
-            await loadExtensionSettings() // Reloads from `sync` storage
-            appendFetchedRecap() // Refetch and reparse
-        }
-    })
-}
-
-/** Toggles the visibility of the recap div and the text on the recap button */
-async function toggleRecap() {
-    const toggleSpan = document.getElementById(TOGGLE_SPAN_ID)
-    const recapContainer = document.getElementById(RECAP_CONTAINER_ID)
-
-    if (!toggleSpan || !recapContainer) return
-
-    toggleSpan.textContent =
-        recapContainer.style.display === "none" ? "Hide " : "Show "
-
-    await fetchAndDisplay(recapContainer)
-
-    recapContainer.style.display =
-        recapContainer.style.display === "none" ? "block" : "none"
-
-    if (extensionSettings.smoothScroll) {
-        recapContainer.scrollIntoView({ behavior: "smooth" })
-    }
-}
-
-async function fetchAndDisplay(recapContainer: HTMLElement) {
-    if (recapContainerHasContent(recapContainer)) return
-
-    if (documentHasPreviousChapterURL()) {
-        await appendFetchedRecap()
-    } else {
-        await appendFetchedBlurb()
-    }
-}
-
-/**
- * True if the recap container has content, otherwise false.
- */
-function recapContainerHasContent(recapContainer: HTMLElement): boolean {
-    return recapContainer.textContent?.trim() !== ""
-}
+export const RECAP_BUTTON_ID = "recapButton"
+export const RECAP_CONTAINER_ID = "recapContainer"
+export const TOGGLE_SPAN_ID = "toggleSpan"
+export const BLURB_BUTTON_ID = "blurbButton"
+export const SETTINGS_BUTTON_ID = "settingsButton"
 
 /**
  * True if `chapter` is in the URL path, otherwise false.
  */
-function documentIsChapterURL(): boolean {
+export function documentIsChapterURL(): boolean {
     return window.location.pathname.split("/").includes("chapter")
 }
 
 /**
  * True if the previous chapter button has a valid `href` attribute, otherwise false.
  */
-function documentHasPreviousChapterURL(): boolean {
+export function documentHasPreviousChapterURL(extensionSettings: ExtensionSettings): boolean {
     const hasPrevChapterURL = document.querySelector(
         extensionSettings.prevChapterBtn.toString(),
     )
@@ -115,7 +28,7 @@ function documentHasPreviousChapterURL(): boolean {
 /**
  * Creates the recap button (disabled if no previous chapter)
  */
-function createRecapButton() {
+export function createRecapButton(toggleRecap: () => void) {
     const button = document.createElement("button")
     button.id = RECAP_BUTTON_ID
     button.textContent = "Recap"
@@ -140,7 +53,7 @@ function createRecapButton() {
     return button
 }
 
-function createBlurbButton() {
+export function createBlurbButton(toggleRecap: () => void) {
     const button = document.createElement("button")
     button.id = BLURB_BUTTON_ID
     button.textContent = "Blurb"
@@ -165,7 +78,7 @@ function createBlurbButton() {
     return button
 }
 
-function createSettingsButton() {
+export function createSettingsButton(extensionSettings: ExtensionSettings) {
     const button = document.createElement("button")
     button.id = SETTINGS_BUTTON_ID
     button.textContent = "Open RoyalRefresh Settings"
@@ -197,7 +110,7 @@ function createSettingsButton() {
     return button
 }
 
-function addSettingsButtonToDOM(settingsButton: HTMLButtonElement) {
+export function addSettingsButtonToDOM(settingsButton: HTMLButtonElement, extensionSettings: ExtensionSettings) {
     if (!settingsButton) return
 
     const settingsPlacement: HTMLElement | null = document.querySelector(
@@ -214,7 +127,7 @@ function addSettingsButtonToDOM(settingsButton: HTMLButtonElement) {
     }
 }
 
-function addToggleButtonToDOM(button: HTMLButtonElement) {
+export function addToggleButtonToDOM(button: HTMLButtonElement, extensionSettings: ExtensionSettings) {
     if (!document.getElementById(button.id)) {
         const navButtons = document.querySelector(
             extensionSettings.togglePlacement,
@@ -226,7 +139,7 @@ function addToggleButtonToDOM(button: HTMLButtonElement) {
     }
 }
 
-function createRecapContainer() {
+export function createRecapContainer() {
     const recapContainer = document.createElement("div")
     recapContainer.id = RECAP_CONTAINER_ID
     recapContainer.style.display = "none"
@@ -234,7 +147,7 @@ function createRecapContainer() {
     return recapContainer
 }
 
-function addRecapContainerToDOM(recap: HTMLDivElement) {
+export function addRecapContainerToDOM(recap: HTMLDivElement, extensionSettings: ExtensionSettings) {
     if (!document.getElementById(RECAP_CONTAINER_ID)) {
         const chapterDiv = document.querySelector(
             extensionSettings.chapterContent,
@@ -246,22 +159,22 @@ function addRecapContainerToDOM(recap: HTMLDivElement) {
     }
 }
 
-function createRecapFragment(prevChapterHtml: string) {
+export function createRecapFragment(prevChapterHtml: string, extensionSettings: ExtensionSettings) {
     const parser = new DOMParser()
     const doc = parser.parseFromString(prevChapterHtml, "text/html")
 
     // Fiction title
-    const recapHeading = extractFictionTitle()
+    const recapHeading = extractFictionTitle(extensionSettings)
     const recapHeadingElement = document.createElement("h1")
     recapHeadingElement.textContent = `RoyalRefresh of ${recapHeading}`
 
     // Previous chapter name
-    const recapChapterName = extractChapterName(doc)
+    const recapChapterName = extractChapterName(doc, extensionSettings)
     const recapChapterNameElement = document.createElement("h2")
     recapChapterNameElement.textContent = `Previous chapter: ${recapChapterName}`
 
     // Recap content
-    const recapContentElement = extractChapterContent(doc)
+    const recapContentElement = extractChapterContent(doc, extensionSettings)
 
     // Wordcount display
     const recapWordsDisplayElement = document.createElement("h4")
@@ -279,7 +192,7 @@ function createRecapFragment(prevChapterHtml: string) {
     return fragment
 }
 
-async function appendFetchedRecap() {
+export async function appendFetchedRecap(extensionSettings: ExtensionSettings) {
     const recapContainer = document.getElementById(RECAP_CONTAINER_ID)
     const prevChapterBtn = document.querySelector(
         extensionSettings.prevChapterBtn,
@@ -303,22 +216,22 @@ async function appendFetchedRecap() {
         return recapContainer?.append("Error fetching chapter. Refresh.")
     }
 
-    const recapFragment = createRecapFragment(prevChapterHtml)
+    const recapFragment = createRecapFragment(prevChapterHtml, extensionSettings)
 
     recapContainer?.appendChild(recapFragment)
 }
 
-function createBlurbFragment(overviewHtml: string) {
+export function createBlurbFragment(overviewHtml: string, extensionSettings: ExtensionSettings) {
     const parser = new DOMParser()
     const doc = parser.parseFromString(overviewHtml, "text/html")
 
     const blurbHeading = document.createElement("h1")
-    blurbHeading.textContent = `Blurb: ${extractFictionTitle()}`
+    blurbHeading.textContent = `Blurb: ${extractFictionTitle(extensionSettings)}`
 
     const bottomSeparator = document.createElement("hr")
     bottomSeparator.style.marginBottom = "50px"
 
-    const blurb = extractBlurb(doc)
+    const blurb = extractBlurb(doc, extensionSettings)
 
     const fragment = document.createDocumentFragment()
     fragment.appendChild(document.createElement("hr"))
@@ -329,7 +242,7 @@ function createBlurbFragment(overviewHtml: string) {
     return fragment
 }
 
-async function appendFetchedBlurb() {
+export async function appendFetchedBlurb(extensionSettings: ExtensionSettings) {
     const recapContainer = document.getElementById(RECAP_CONTAINER_ID)
     const fictionTitle = document.querySelector(extensionSettings.fictionTitle)
 
@@ -345,7 +258,7 @@ async function appendFetchedBlurb() {
         return
     }
 
-    const blurb = createBlurbFragment(overviewHtml)
+    const blurb = createBlurbFragment(overviewHtml, extensionSettings)
 
     recapContainer?.appendChild(blurb)
 
@@ -372,7 +285,7 @@ async function fetchHtmlText(url: string | URL | Request) {
     }
 }
 
-function extractBlurb(overviewDoc: Document) {
+function extractBlurb(overviewDoc: Document, extensionSettings: ExtensionSettings) {
     const blurb = overviewDoc.querySelector(extensionSettings.blurb)
 
     if (
@@ -397,7 +310,7 @@ function extractBlurb(overviewDoc: Document) {
  */
 function extractChapterContent(
     prevChapterDoc: Document,
-    wordCount: number = extensionSettings.wordCount,
+    extensionSettings: ExtensionSettings,
 ) {
     const chapterElement = prevChapterDoc.querySelector(
         extensionSettings.chapterContent,
@@ -416,7 +329,7 @@ function extractChapterContent(
 
     const paragraphs = chapterElement.querySelectorAll("p")
     const selectedParagraphs = []
-    let remainingWordCount = wordCount
+    let remainingWordCount = extensionSettings.wordCount
 
     // Iterate over the paragraphs in reverse order to get the last paragraphs first
     for (let i = paragraphs.length - 1; i >= 0; i--) {
@@ -502,7 +415,7 @@ function buildContentFromWords(node: ChildNode, count: number): Node {
 /**
  * @param {Document} prevChapterDoc A parsable document of the previous chapter
  */
-function extractChapterName(prevChapterDoc: Document) {
+function extractChapterName(prevChapterDoc: Document, extensionSettings: ExtensionSettings) {
     const chapterTitleElement = prevChapterDoc.querySelector(
         extensionSettings.chapterTitle,
     )
@@ -517,7 +430,7 @@ function extractChapterName(prevChapterDoc: Document) {
 /**
  * Extracts the fiction title from the CURRENT document, since between 2 chapters the fiction title stays the same
  */
-function extractFictionTitle() {
+function extractFictionTitle(extensionSettings: ExtensionSettings) {
     const fictionTitleElement = document.querySelector(
         extensionSettings.fictionTitle,
     )

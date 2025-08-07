@@ -10,3 +10,5 @@ dist
 web-ext-artifacts
 .env
 **repomix**.txt
+.wxt
+.output

@@ -1,23 +1,6 @@
 {
-    "compilerOptions": {
-        "target": "es2022",
-        "module": "commonjs",
-        "esModuleInterop": true,
-        "strict": true,
-        "allowJs": true,
-        "checkJs": true,
-        "outDir": "./dist",
-        "baseUrl": "./",
-        "paths": {
-            "@royalrefresh/types": ["./src/types/types"]
-        }
-    },
-    "include": ["./src/**/*.ts", "./src/**/*.js"],
-    "exclude": [
-        "node_modules",
-        "docs",
-        "dist",
-        "playwright-report",
-        "test-results"
-    ]
+  "extends": "./.wxt/tsconfig.json",
+  "compilerOptions": {
+    "useDefineForClassFields": true
+  }
 }
