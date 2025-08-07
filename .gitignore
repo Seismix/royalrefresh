@@ -12,3 +12,4 @@ web-ext-artifacts
 **repomix**.txt
 .wxt
 .output
+web-ext.config.ts
