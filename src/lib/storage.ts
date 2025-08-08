@@ -1,6 +1,6 @@
-import type { ExtensionSettings } from "~/types/types";
-import DEFAULTS, { DEFAULT_SELECTORS } from "~/lib/defaults";
-import { writable } from "svelte/store";
+import type { ExtensionSettings } from "~/types/types"
+import DEFAULTS, { DEFAULT_SELECTORS } from "~/lib/defaults"
+import { writable } from "svelte/store"
 
 /**
  * Storage utilities using WXT's storage API
@@ -11,23 +11,27 @@ export class StorageService {
      */
     static async getSettings(): Promise<ExtensionSettings> {
         try {
-            const storedSettings = await storage.getItem("sync:settings") as Partial<ExtensionSettings> | null;
-            return { ...DEFAULTS, ...storedSettings };
+            const storedSettings = (await storage.getItem(
+                "sync:settings",
+            )) as Partial<ExtensionSettings> | null
+            return { ...DEFAULTS, ...storedSettings }
         } catch (error) {
-            console.error("Failed to get settings:", error);
-            return DEFAULTS;
+            console.error("Failed to get settings:", error)
+            return DEFAULTS
         }
     }
 
     /**
      * Save extension settings to storage
      */
-    static async setSettings(settings: Partial<ExtensionSettings>): Promise<void> {
+    static async setSettings(
+        settings: Partial<ExtensionSettings>,
+    ): Promise<void> {
         try {
-            await storage.setItem("sync:settings", settings);
+            await storage.setItem("sync:settings", settings)
         } catch (error) {
-            console.error("Failed to save settings:", error);
-            throw error;
+            console.error("Failed to save settings:", error)
+            throw error
         }
     }
 
@@ -36,12 +40,15 @@ export class StorageService {
      */
     static async restoreSelectors(): Promise<void> {
         try {
-            const currentSettings = await this.getSettings();
-            const updatedSettings = { ...currentSettings, ...DEFAULT_SELECTORS };
-            await storage.setItem("sync:settings", updatedSettings);
+            const currentSettings = await this.getSettings()
+            const updatedSettings = {
+                ...currentSettings,
+                ...DEFAULT_SELECTORS,
+            }
+            await storage.setItem("sync:settings", updatedSettings)
         } catch (error) {
-            console.error("Failed to restore selectors:", error);
-            throw error;
+            console.error("Failed to restore selectors:", error)
+            throw error
         }
     }
 
@@ -50,10 +57,10 @@ export class StorageService {
      */
     static async restoreDefaults(): Promise<void> {
         try {
-            await storage.setItem("sync:settings", DEFAULTS);
+            await storage.setItem("sync:settings", DEFAULTS)
         } catch (error) {
-            console.error("Failed to restore defaults:", error);
-            throw error;
+            console.error("Failed to restore defaults:", error)
+            throw error
         }
     }
 
@@ -62,12 +69,15 @@ export class StorageService {
      */
     static async updateSettings(): Promise<void> {
         try {
-            const currentSettings = await this.getSettings();
-            const updatedSettings = { ...currentSettings, ...DEFAULT_SELECTORS };
-            await this.setSettings(updatedSettings);
+            const currentSettings = await this.getSettings()
+            const updatedSettings = {
+                ...currentSettings,
+                ...DEFAULT_SELECTORS,
+            }
+            await this.setSettings(updatedSettings)
         } catch (error) {
-            console.error("Failed to update settings:", error);
-            throw error;
+            console.error("Failed to update settings:", error)
+            throw error
         }
     }
 }
@@ -77,84 +87,93 @@ export class StorageService {
  * Creates reactive stores that work with Svelte's reactivity system
  */
 export function createSettingsStore() {
-    const settings = writable<ExtensionSettings>(DEFAULTS);
-    const loading = writable(true);
-    const error = writable<string | null>(null);
+    const settings = writable<ExtensionSettings>(DEFAULTS)
+    const loading = writable(true)
+    const error = writable<string | null>(null)
 
     // Load initial settings
     async function initialize() {
         try {
-            const initialSettings = await StorageService.getSettings();
-            settings.set(initialSettings);
-            loading.set(false);
+            const initialSettings = await StorageService.getSettings()
+            settings.set(initialSettings)
+            loading.set(false)
         } catch (e) {
-            error.set(e instanceof Error ? e.message : "Failed to load settings");
-            loading.set(false);
+            error.set(
+                e instanceof Error ? e.message : "Failed to load settings",
+            )
+            loading.set(false)
         }
     }
 
     // Initialize on creation
-    initialize();
+    initialize()
 
     // Watch for storage changes
     storage.watch("sync:settings", (newValue: ExtensionSettings | null) => {
         if (newValue) {
-            settings.set({ ...DEFAULTS, ...newValue });
+            settings.set({ ...DEFAULTS, ...newValue })
         }
-    });
+    })
 
     return {
         // Subscribe to the stores
         settings: {
             subscribe: settings.subscribe,
             get: () => {
-                let value: ExtensionSettings;
-                settings.subscribe(v => value = v)();
-                return value!;
-            }
+                let value: ExtensionSettings
+                settings.subscribe((v) => (value = v))()
+                return value!
+            },
         },
         loading: {
-            subscribe: loading.subscribe
+            subscribe: loading.subscribe,
         },
         error: {
-            subscribe: error.subscribe
+            subscribe: error.subscribe,
         },
-        
+
         async save(newSettings: ExtensionSettings) {
             try {
-                error.set(null);
-                await StorageService.setSettings(newSettings);
-                settings.set(newSettings);
+                error.set(null)
+                await StorageService.setSettings(newSettings)
+                settings.set(newSettings)
             } catch (e) {
-                const errorMessage = e instanceof Error ? e.message : "Failed to save settings";
-                error.set(errorMessage);
-                throw e;
+                const errorMessage =
+                    e instanceof Error ? e.message : "Failed to save settings"
+                error.set(errorMessage)
+                throw e
             }
         },
 
         async restoreDefaults() {
             try {
-                error.set(null);
-                await StorageService.restoreDefaults();
-                settings.set({ ...DEFAULTS });
+                error.set(null)
+                await StorageService.restoreDefaults()
+                settings.set({ ...DEFAULTS })
             } catch (e) {
-                const errorMessage = e instanceof Error ? e.message : "Failed to restore defaults";
-                error.set(errorMessage);
-                throw e;
+                const errorMessage =
+                    e instanceof Error
+                        ? e.message
+                        : "Failed to restore defaults"
+                error.set(errorMessage)
+                throw e
             }
         },
 
         async restoreSelectors() {
             try {
-                error.set(null);
-                await StorageService.restoreSelectors();
-                const currentSettings = await StorageService.getSettings();
-                settings.set(currentSettings);
+                error.set(null)
+                await StorageService.restoreSelectors()
+                const currentSettings = await StorageService.getSettings()
+                settings.set(currentSettings)
             } catch (e) {
-                const errorMessage = e instanceof Error ? e.message : "Failed to restore selectors";
-                error.set(errorMessage);
-                throw e;
+                const errorMessage =
+                    e instanceof Error
+                        ? e.message
+                        : "Failed to restore selectors"
+                error.set(errorMessage)
+                throw e
             }
-        }
-    };
+        },
+    }
 }

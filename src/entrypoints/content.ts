@@ -32,7 +32,8 @@ export default defineContentScript({
         await loadExtensionSettings()
         addSettingsChangeListener()
 
-        const hasPrevChapterURL = documentHasPreviousChapterURL(extensionSettings)
+        const hasPrevChapterURL =
+            documentHasPreviousChapterURL(extensionSettings)
 
         const toggleButton = hasPrevChapterURL
             ? createRecapButton(toggleRecap)
@@ -52,14 +53,16 @@ export default defineContentScript({
         }
 
         async function loadExtensionSettings() {
-            extensionSettings = await StorageService.getSettings();
+            extensionSettings = await StorageService.getSettings()
         }
 
         function addSettingsChangeListener() {
             storage.watch<ExtensionSettings>("sync:settings", (newSettings) => {
-                extensionSettings = newSettings ? { ...DEFAULTS, ...newSettings } : DEFAULTS;
-                appendFetchedRecap(extensionSettings); // Refetch and reparse
-            });
+                extensionSettings = newSettings
+                    ? { ...DEFAULTS, ...newSettings }
+                    : DEFAULTS
+                appendFetchedRecap(extensionSettings) // Refetch and reparse
+            })
         }
 
         /** Toggles the visibility of the recap div and the text on the recap button */
@@ -95,7 +98,9 @@ export default defineContentScript({
         /**
          * True if the recap container has content, otherwise false.
          */
-        function recapContainerHasContent(recapContainer: HTMLElement): boolean {
+        function recapContainerHasContent(
+            recapContainer: HTMLElement,
+        ): boolean {
             return recapContainer.textContent?.trim() !== ""
         }
     },

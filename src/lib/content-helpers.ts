@@ -17,7 +17,9 @@ export function documentIsChapterURL(): boolean {
 /**
  * True if the previous chapter button has a valid `href` attribute, otherwise false.
  */
-export function documentHasPreviousChapterURL(extensionSettings: ExtensionSettings): boolean {
+export function documentHasPreviousChapterURL(
+    extensionSettings: ExtensionSettings,
+): boolean {
     const hasPrevChapterURL = document.querySelector(
         extensionSettings.prevChapterBtn.toString(),
     )
@@ -110,7 +112,10 @@ export function createSettingsButton(extensionSettings: ExtensionSettings) {
     return button
 }
 
-export function addSettingsButtonToDOM(settingsButton: HTMLButtonElement, extensionSettings: ExtensionSettings) {
+export function addSettingsButtonToDOM(
+    settingsButton: HTMLButtonElement,
+    extensionSettings: ExtensionSettings,
+) {
     if (!settingsButton) return
 
     const settingsPlacement: HTMLElement | null = document.querySelector(
@@ -127,7 +132,10 @@ export function addSettingsButtonToDOM(settingsButton: HTMLButtonElement, extens
     }
 }
 
-export function addToggleButtonToDOM(button: HTMLButtonElement, extensionSettings: ExtensionSettings) {
+export function addToggleButtonToDOM(
+    button: HTMLButtonElement,
+    extensionSettings: ExtensionSettings,
+) {
     if (!document.getElementById(button.id)) {
         const navButtons = document.querySelector(
             extensionSettings.togglePlacement,
@@ -147,7 +155,10 @@ export function createRecapContainer() {
     return recapContainer
 }
 
-export function addRecapContainerToDOM(recap: HTMLDivElement, extensionSettings: ExtensionSettings) {
+export function addRecapContainerToDOM(
+    recap: HTMLDivElement,
+    extensionSettings: ExtensionSettings,
+) {
     if (!document.getElementById(RECAP_CONTAINER_ID)) {
         const chapterDiv = document.querySelector(
             extensionSettings.chapterContent,
@@ -159,7 +170,10 @@ export function addRecapContainerToDOM(recap: HTMLDivElement, extensionSettings:
     }
 }
 
-export function createRecapFragment(prevChapterHtml: string, extensionSettings: ExtensionSettings) {
+export function createRecapFragment(
+    prevChapterHtml: string,
+    extensionSettings: ExtensionSettings,
+) {
     const parser = new DOMParser()
     const doc = parser.parseFromString(prevChapterHtml, "text/html")
 
@@ -216,12 +230,18 @@ export async function appendFetchedRecap(extensionSettings: ExtensionSettings) {
         return recapContainer?.append("Error fetching chapter. Refresh.")
     }
 
-    const recapFragment = createRecapFragment(prevChapterHtml, extensionSettings)
+    const recapFragment = createRecapFragment(
+        prevChapterHtml,
+        extensionSettings,
+    )
 
     recapContainer?.appendChild(recapFragment)
 }
 
-export function createBlurbFragment(overviewHtml: string, extensionSettings: ExtensionSettings) {
+export function createBlurbFragment(
+    overviewHtml: string,
+    extensionSettings: ExtensionSettings,
+) {
     const parser = new DOMParser()
     const doc = parser.parseFromString(overviewHtml, "text/html")
 
@@ -285,7 +305,10 @@ async function fetchHtmlText(url: string | URL | Request) {
     }
 }
 
-function extractBlurb(overviewDoc: Document, extensionSettings: ExtensionSettings) {
+function extractBlurb(
+    overviewDoc: Document,
+    extensionSettings: ExtensionSettings,
+) {
     const blurb = overviewDoc.querySelector(extensionSettings.blurb)
 
     if (
@@ -415,7 +438,10 @@ function buildContentFromWords(node: ChildNode, count: number): Node {
 /**
  * @param {Document} prevChapterDoc A parsable document of the previous chapter
  */
-function extractChapterName(prevChapterDoc: Document, extensionSettings: ExtensionSettings) {
+function extractChapterName(
+    prevChapterDoc: Document,
+    extensionSettings: ExtensionSettings,
+) {
     const chapterTitleElement = prevChapterDoc.querySelector(
         extensionSettings.chapterTitle,
     )
