@@ -10,6 +10,7 @@
     "scripts": {
         "dev": "wxt",
         "dev:firefox": "wxt -b firefox",
+        "dev:android": "pnpm build:firefox && web-ext run --target=firefox-android --android-device=%ADB_ID% --firefox-apk=org.mozilla.fenix --source-dir ./.output/firefox-mv2",
         "build": "wxt build",
         "build:firefox": "wxt build -b firefox",
         "zip": "wxt zip",
