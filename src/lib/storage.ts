@@ -9,7 +9,7 @@ export class StorageService {
     /**
      * Get the current extension settings, merging defaults with stored values
      */
-    static async getSettings(): Promise<ExtensionSettings> {
+    static async getSettings() {
         try {
             const storedSettings = (await storage.getItem(
                 "sync:settings",
@@ -24,9 +24,7 @@ export class StorageService {
     /**
      * Save extension settings to storage
      */
-    static async setSettings(
-        settings: Partial<ExtensionSettings>,
-    ): Promise<void> {
+    static async setSettings(settings: Partial<ExtensionSettings>) {
         try {
             await storage.setItem("sync:settings", settings)
         } catch (error) {
@@ -38,7 +36,7 @@ export class StorageService {
     /**
      * Restore only the selector-related settings to defaults
      */
-    static async restoreSelectors(): Promise<void> {
+    static async restoreSelectors() {
         try {
             const currentSettings = await this.getSettings()
             const updatedSettings = {
@@ -55,7 +53,7 @@ export class StorageService {
     /**
      * Restore all settings to defaults
      */
-    static async restoreDefaults(): Promise<void> {
+    static async restoreDefaults() {
         try {
             await storage.setItem("sync:settings", DEFAULTS)
         } catch (error) {
@@ -67,7 +65,7 @@ export class StorageService {
     /**
      * Update settings by merging with default selectors (for extension updates)
      */
-    static async updateSettings(): Promise<void> {
+    static async updateSettings() {
         try {
             const currentSettings = await this.getSettings()
             const updatedSettings = {

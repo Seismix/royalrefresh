@@ -10,9 +10,7 @@ export class ContentService {
     /**
      * Fetches and displays recap content
      */
-    static async fetchRecap(
-        extensionSettings: ExtensionSettings,
-    ): Promise<void> {
+    static async fetchRecap(extensionSettings: ExtensionSettings) {
         try {
             const prevChapterBtn = document.querySelector(
                 extensionSettings.prevChapterBtn,
@@ -49,9 +47,7 @@ export class ContentService {
     /**
      * Fetches and displays blurb content
      */
-    static async fetchBlurb(
-        extensionSettings: ExtensionSettings,
-    ): Promise<void> {
+    static async fetchBlurb(extensionSettings: ExtensionSettings) {
         try {
             const fictionTitle = document.querySelector(
                 extensionSettings.fictionTitle,
@@ -87,7 +83,7 @@ export class ContentService {
     /**
      * Handles the toggle action - simply toggles visibility
      */
-    static handleToggle(): void {
+    static handleToggle() {
         recapState.toggle()
     }
 
@@ -96,9 +92,7 @@ export class ContentService {
      * Preserves visibility state while regenerating content
      * This is called automatically when settings change to update things like word count
      */
-    static async refreshCurrentContent(
-        extensionSettings: ExtensionSettings,
-    ): Promise<void> {
+    static async refreshCurrentContent(extensionSettings: ExtensionSettings) {
         if (!recapState.content || !recapState.isVisible) {
             return // No content to refresh or not visible
         }

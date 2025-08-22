@@ -3,7 +3,7 @@ import type { ExtensionSettings } from "~/types/types"
 /**
  * True if `chapter` is in the URL path, otherwise false.
  */
-export function documentIsChapterURL(): boolean {
+export function documentIsChapterURL() {
     return window.location.pathname.split("/").includes("chapter")
 }
 
@@ -12,7 +12,7 @@ export function documentIsChapterURL(): boolean {
  */
 export function documentHasPreviousChapterURL(
     extensionSettings: ExtensionSettings,
-): boolean {
+) {
     const hasPrevChapterURL = document.querySelector(
         extensionSettings.prevChapterBtn.toString(),
     )
@@ -23,9 +23,7 @@ export function documentHasPreviousChapterURL(
 /**
  * Fetches HTML content from a URL
  */
-export async function fetchHtmlText(
-    url: string | URL | Request,
-): Promise<string | null> {
+export async function fetchHtmlText(url: string | URL | Request) {
     try {
         const response = await fetch(url)
 
@@ -44,9 +42,7 @@ export async function fetchHtmlText(
 /**
  * Extracts the fiction title from the CURRENT document
  */
-export function extractFictionTitle(
-    extensionSettings: ExtensionSettings,
-): string {
+export function extractFictionTitle(extensionSettings: ExtensionSettings) {
     const fictionTitleElement = document.querySelector(
         extensionSettings.fictionTitle,
     )
@@ -64,7 +60,7 @@ export function extractFictionTitle(
 export function extractChapterName(
     doc: Document,
     extensionSettings: ExtensionSettings,
-): string {
+) {
     const chapterTitleElement = doc.querySelector(
         extensionSettings.chapterTitle,
     )
@@ -82,7 +78,7 @@ export function extractChapterName(
 export function extractBlurb(
     overviewDoc: Document,
     extensionSettings: ExtensionSettings,
-): HTMLElement {
+) {
     const blurb = overviewDoc.querySelector(extensionSettings.blurb)
 
     if (
@@ -108,7 +104,7 @@ export function extractBlurb(
 export function extractChapterContent(
     chapterDoc: Document,
     extensionSettings: ExtensionSettings,
-): HTMLElement {
+) {
     const chapterElement = chapterDoc.querySelector(
         extensionSettings.chapterContent,
     )
@@ -161,7 +157,7 @@ export function extractChapterContent(
 /**
  * Helper function to build content from words with a specific word count
  */
-function buildContentFromWords(node: ChildNode, count: number): Node {
+function buildContentFromWords(node: ChildNode, count: number) {
     if (node.nodeType === Node.TEXT_NODE) {
         const textWords = (node.textContent ?? "").trim().split(/\s+/)
         const newText =
@@ -218,7 +214,7 @@ function buildContentFromWords(node: ChildNode, count: number): Node {
 export function createRecapFragment(
     prevChapterHtml: string,
     extensionSettings: ExtensionSettings,
-): DocumentFragment {
+) {
     const parser = new DOMParser()
     const doc = parser.parseFromString(prevChapterHtml, "text/html")
 
@@ -257,7 +253,7 @@ export function createRecapFragment(
 export function createBlurbFragment(
     overviewHtml: string,
     extensionSettings: ExtensionSettings,
-): DocumentFragment {
+) {
     const parser = new DOMParser()
     const doc = parser.parseFromString(overviewHtml, "text/html")
 

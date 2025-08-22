@@ -25,7 +25,7 @@ class ExtensionState {
     /**
      * Wait for settings to be loaded from storage
      */
-    async waitForLoad(): Promise<void> {
+    async waitForLoad() {
         await this.loadPromise
     }
 
