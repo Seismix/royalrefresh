@@ -4,7 +4,6 @@ import {
     fetchHtmlText,
     createRecapFragment,
     createBlurbFragment,
-    documentHasPreviousChapterURL,
 } from "~/lib/content-utils"
 
 export class ContentService {
@@ -86,30 +85,34 @@ export class ContentService {
     }
 
     /**
-     * Handles the toggle action and fetches content if needed
+     * Handles the toggle action - simply toggles visibility
      */
-    static async handleToggle(
+    static handleToggle(): void {
+        recapState.toggle()
+    }
+
+    /**
+     * Refreshes the current content based on the current type and new settings
+     * Preserves visibility state while regenerating content
+     * This is called automatically when settings change to update things like word count
+     */
+    static async refreshCurrentContent(
         extensionSettings: ExtensionSettings,
     ): Promise<void> {
-        // If we already have content, just toggle visibility
-        if (recapState.content && recapState.visibility === "hidden") {
-            recapState.show()
-            return
+        if (!recapState.content || !recapState.isVisible) {
+            return // No content to refresh or not visible
         }
 
-        // If currently visible, hide it
-        if (recapState.visibility === "visible") {
-            recapState.hide()
-            return
-        }
-
-        // If loading state, we need to fetch content
-        if (recapState.visibility === "loading") {
-            if (documentHasPreviousChapterURL(extensionSettings)) {
-                await this.fetchRecap(extensionSettings)
+        try {
+            if (recapState.type === "recap") {
+                await ContentService.fetchRecap(extensionSettings)
             } else {
-                await this.fetchBlurb(extensionSettings)
+                await ContentService.fetchBlurb(extensionSettings)
             }
+        } catch (error) {
+            console.error("Error refreshing content:", error)
+            // Don't set error state to avoid hiding existing content
+            // Just log the error and keep the previous content visible
         }
     }
 }

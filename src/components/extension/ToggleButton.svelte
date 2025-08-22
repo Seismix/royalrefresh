@@ -10,11 +10,23 @@
     } = $props();
 
     const handleToggle = async () => {
-        recapState.toggle();
+        // If we're currently visible, just toggle to hide
+        if (recapState.visibility === "visible") {
+            recapState.toggle();
+            return;
+        }
         
-        // If we're now in loading state, fetch content
-        if (recapState.visibility === "loading") {
-            await ContentService.handleToggle(extensionState.settings);
+        // If we have content, just show it
+        if (recapState.content) {
+            recapState.toggle();
+            return;
+        }
+        
+        // If we don't have content, fetch it first then show
+        if (type === "recap") {
+            await ContentService.fetchRecap(extensionState.settings);
+        } else {
+            await ContentService.fetchBlurb(extensionState.settings);
         }
     };
 

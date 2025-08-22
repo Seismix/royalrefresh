@@ -1,4 +1,4 @@
-export type RecapState = "hidden" | "loading" | "visible"
+export type RecapState = "hidden" | "visible"
 
 /**
  * Reactive recap state using Svelte 5 runes and WXT storage
@@ -6,31 +6,23 @@ export type RecapState = "hidden" | "loading" | "visible"
 class RecapStateManager {
     visibility = $state<RecapState>("hidden")
     content = $state<string>("")
-    isLoading = $state(false)
     error = $state<string | null>(null)
     type = $state<"recap" | "blurb">("recap")
 
     toggle() {
-        if (this.visibility === "visible") {
-            this.visibility = "hidden"
-        } else {
-            this.visibility = "loading"
-            this.isLoading = true
-        }
+        this.visibility = this.visibility === "visible" ? "hidden" : "visible"
     }
 
     setContent(content: string, type: "recap" | "blurb") {
         this.content = content
         this.type = type
         this.visibility = "visible"
-        this.isLoading = false
         this.error = null
     }
 
     setError(error: string) {
         this.error = error
         this.visibility = "hidden"
-        this.isLoading = false
     }
 
     hide() {
