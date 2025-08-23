@@ -6,6 +6,7 @@ export type RecapState = "hidden" | "visible"
 class RecapStateManager {
     visibility = $state<RecapState>("hidden")
     content = $state<string>("")
+    rawHtml = $state<string>("")
     error = $state<string | null>(null)
     type = $state<"recap" | "blurb">("recap")
 
