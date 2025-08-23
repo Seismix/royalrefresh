@@ -1,14 +1,16 @@
 name: CSS Selectors
 
 on:
-    push:
-        branches: [main]
     pull_request:
+        branches: [main]
+        types: [opened, reopened, synchronize, ready_for_review]
+    push:
         branches: [main]
 
 jobs:
     css-selectors:
         runs-on: ubuntu-22.04
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.draft == false }}
 
         steps:
             - uses: actions/checkout@v4
