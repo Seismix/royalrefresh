@@ -91,10 +91,6 @@ export function extractBlurb(
         return error
     }
 
-    blurb.querySelectorAll("input, label").forEach((element) => {
-        element.remove()
-    })
-
     return blurb
 }
 

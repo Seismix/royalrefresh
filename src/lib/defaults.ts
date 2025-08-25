@@ -8,7 +8,7 @@ const DEFAULT_SELECTORS: ExtensionSelectors = {
     togglePlacement: ".chapter > div > .actions",
     settingsPlacement:
         "#settings > div:nth-child(1) > div:nth-child(1) > div:nth-child(3)",
-    blurb: ".description",
+    blurb: ".description .hidden-content",
     closeButtonSelector:
         "#settings > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > button:last-child",
 }
