@@ -59,36 +59,5 @@ export class ContentCache {
         this.recapCache.clear()
     }
 
-    /**
-     * Removes expired cache entries
-     */
-    static cleanupExpiredRecaps(): void {
-        const now = Date.now()
-        for (const [url, cached] of this.recapCache.entries()) {
-            if (now - cached.timestamp > this.CACHE_TTL) {
-                this.recapCache.delete(url)
-            }
-        }
-    }
 
-    /**
-     * Gets cache statistics for debugging
-     */
-    static getCacheStats(): {
-        recapCacheSize: number
-        oldestEntry: number | null
-    } {
-        let oldestTimestamp: number | null = null
-
-        for (const cached of this.recapCache.values()) {
-            if (oldestTimestamp === null || cached.timestamp < oldestTimestamp) {
-                oldestTimestamp = cached.timestamp
-            }
-        }
-
-        return {
-            recapCacheSize: this.recapCache.size,
-            oldestEntry: oldestTimestamp,
-        }
-    }
 }
