@@ -1,9 +1,12 @@
 <script lang="ts">
     import { recapState } from "~/lib/recap-state.svelte"
     import { extensionState } from "~/lib/extension-state.svelte"
-    import { ContentService } from "~/lib/content-service"
+    import { ContentManager } from "~/lib/content-manager"
 
     let { id = "recapContainer" }: { id?: string } = $props()
+
+    // Track previous settings to detect changes
+    let previousWordCount = $state(extensionState.settings.wordCount)
 
     // Effect: scroll into view when content becomes visible
     $effect(() => {
@@ -12,20 +15,32 @@
         }
     })
 
-    // Effect: regenerate content when settings change and recap is visible
+    // Effect: refresh content when word count changes (uses cache to avoid re-fetching)
     $effect(() => {
         if (
             recapState.isVisible &&
             recapState.content &&
-            extensionState.isLoaded
+            recapState.type === "recap" &&
+            extensionState.isLoaded &&
+            extensionState.settings.wordCount !== previousWordCount
         ) {
-            ContentService.refreshCurrentContent(extensionState.settings)
+            // Try to refresh from cache first
+            const result = ContentManager.refreshRecapFromCache(extensionState.settings)
+
+            if ('error' in result) {
+                // If cache refresh fails, the user can manually refresh
+                console.warn("Could not refresh from cache:", result.error)
+            } else {
+                recapState.setContent(result.content, result.type)
+            }
+
+            previousWordCount = extensionState.settings.wordCount
         }
     })
 </script>
 
-<div {id} style="display: {recapState.isVisible ? 'block' : 'none'}">
-    {#if recapState.error}
+<div {id} style="display: {recapState.isVisible || recapState.hasError ? 'block' : 'none'}">
+    {#if recapState.hasError}
         <div class="error">{recapState.error}</div>
     {:else if recapState.content}
         {@html recapState.content}

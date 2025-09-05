@@ -5,7 +5,7 @@ import RecapContainer from "~/components/extension/RecapContainer.svelte"
 import {
     documentIsChapterURL,
     documentHasPreviousChapterURL,
-} from "~/lib/content-utils"
+} from "~/lib/dom-utils"
 import { extensionState } from "~/lib/extension-state.svelte"
 
 export default defineContentScript({

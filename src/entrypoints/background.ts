@@ -1,15 +1,15 @@
 import DEFAULTS from "~/lib/defaults"
-import { StorageService } from "~/lib/storage"
+import { extensionState } from "~/lib/extension-state.svelte"
 import { currentBrowser, BrowserType } from "~/lib/platform"
 
 export default defineBackground(() => {
     // Saves the default values to the browser storage after the extension has been installed
     browser.runtime.onInstalled.addListener(async (details) => {
         if (details.reason === "install") {
-            await StorageService.setSettings(DEFAULTS)
+            await extensionState.setSettings(DEFAULTS)
         }
         if (details.reason === "update") {
-            await StorageService.updateSettings()
+            await extensionState.updateSettingsWithDefaults()
         }
         // Only Firefox supports the "temporary" property
         if (details.temporary) {

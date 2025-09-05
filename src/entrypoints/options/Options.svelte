@@ -1,24 +1,19 @@
 <script lang="ts">
-    import { createSettingsStore } from "~/lib/storage"
+    import { extensionState } from "~/lib/extension-state.svelte"
     import type { ExtensionSettings } from "~/types/types"
 
-    const {
-        settings,
-        loading,
-        error,
-        save,
-        restoreDefaults,
-        restoreSelectors,
-    } = createSettingsStore()
     let saveStatus = $state<string>("")
     let activeButton = $state<string>("")
 
-    // Local reactive state that syncs with the store
-    let localSettings = $state<ExtensionSettings>($settings)
+    // Wait for extension state to load
+    extensionState.waitForLoad()
 
-    // Sync local settings with store changes
+    // Local reactive state that syncs with the extension state
+    let localSettings = $state<ExtensionSettings>({ ...extensionState.settings })
+
+    // Sync local settings with extension state changes
     $effect(() => {
-        localSettings = { ...$settings }
+        localSettings = { ...extensionState.settings }
     })
 
     // Validation for word count
@@ -46,7 +41,7 @@
         }
 
         try {
-            await save(localSettings)
+            await extensionState.updateSettings(localSettings)
             showSaveStatus("Saved ✔", "save")
         } catch (error) {
             console.error("Failed to save settings:", error)
@@ -56,7 +51,7 @@
 
     async function handleRestoreDefaults() {
         try {
-            await restoreDefaults()
+            await extensionState.restoreDefaults()
             showSaveStatus("Restored Defaults ✔", "restoreDefaults")
         } catch (error) {
             console.error("Failed to restore defaults:", error)
@@ -66,7 +61,7 @@
 
     async function handleRestoreSelectors() {
         try {
-            await restoreSelectors()
+            await extensionState.restoreSelectors()
             showSaveStatus("Restored Selectors ✔", "restoreSelectors")
         } catch (error) {
             console.error("Failed to restore selectors:", error)
@@ -87,10 +82,8 @@
 <main>
     <h1>RoyalRefresh Settings</h1>
 
-    {#if $loading}
+    {#if !extensionState.isLoaded}
         <p>Loading settings...</p>
-    {:else if $error}
-        <p class="error">Error loading settings: {$error}</p>
     {:else}
         <form
             onsubmit={(e) => {
@@ -236,14 +229,6 @@
     .warning-message {
         background-color: #ffdddd;
         border-left: 6px solid #f44336;
-        padding: 10px;
-        margin-bottom: 15px;
-    }
-
-    .error {
-        background-color: #ffebee;
-        border-left: 6px solid #f44336;
-        color: #c62828;
         padding: 10px;
         margin-bottom: 15px;
     }

@@ -1,7 +1,7 @@
 <script lang="ts">
     import { recapState } from "~/lib/recap-state.svelte";
     import { extensionState } from "~/lib/extension-state.svelte";
-    import { ContentService } from "~/lib/content-service";
+    import { ContentManager } from "~/lib/content-manager";
 
     let {
         type = "recap",
@@ -12,21 +12,25 @@
     const handleToggle = async () => {
         // If we're currently visible, just toggle to hide
         if (recapState.visibility === "visible") {
-            recapState.toggle();
+            recapState.hide();
             return;
         }
-        
+
         // If we have content, just show it
         if (recapState.content) {
-            recapState.toggle();
+            recapState.show();
             return;
         }
-        
+
         // If we don't have content, fetch it first then show
-        if (type === "recap") {
-            await ContentService.fetchRecap(extensionState.settings);
+        const result = type === "recap"
+            ? await ContentManager.fetchRecap(extensionState.settings)
+            : await ContentManager.fetchBlurb(extensionState.settings);
+
+        if ('error' in result) {
+            recapState.setError(result.error);
         } else {
-            await ContentService.fetchBlurb(extensionState.settings);
+            recapState.setContent(result.content, result.type);
         }
     };
 

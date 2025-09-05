@@ -58,6 +58,61 @@ class ExtensionState {
         const newSettings = { ...this._settings, ...partialSettings }
         await this.settingsStore.setValue(newSettings)
     }
+
+    /**
+     * Save complete settings (replaces the old StorageService.setSettings)
+     */
+    async setSettings(settings: Partial<ExtensionSettings>) {
+        const newSettings = { ...DEFAULTS, ...settings }
+        await this.settingsStore.setValue(newSettings)
+    }
+
+    /**
+     * Restore all settings to defaults
+     */
+    async restoreDefaults() {
+        await this.settingsStore.setValue(DEFAULTS)
+    }
+
+    /**
+     * Restore only selector-related settings to defaults
+     */
+    async restoreSelectors() {
+        const currentSettings = this._settings
+        const updatedSettings = {
+            ...currentSettings,
+            // Import DEFAULT_SELECTORS to restore selectors
+            prevChapterBtn: DEFAULTS.prevChapterBtn,
+            chapterContent: DEFAULTS.chapterContent,
+            chapterTitle: DEFAULTS.chapterTitle,
+            fictionTitle: DEFAULTS.fictionTitle,
+            togglePlacement: DEFAULTS.togglePlacement,
+            settingsPlacement: DEFAULTS.settingsPlacement,
+            blurb: DEFAULTS.blurb,
+            closeButtonSelector: DEFAULTS.closeButtonSelector,
+        }
+        await this.settingsStore.setValue(updatedSettings)
+    }
+
+    /**
+     * Update settings by merging with default selectors (for extension updates)
+     */
+    async updateSettingsWithDefaults() {
+        const currentSettings = this._settings
+        const updatedSettings = {
+            ...currentSettings,
+            // Merge in default selectors for extension updates
+            prevChapterBtn: DEFAULTS.prevChapterBtn,
+            chapterContent: DEFAULTS.chapterContent,
+            chapterTitle: DEFAULTS.chapterTitle,
+            fictionTitle: DEFAULTS.fictionTitle,
+            togglePlacement: DEFAULTS.togglePlacement,
+            settingsPlacement: DEFAULTS.settingsPlacement,
+            blurb: DEFAULTS.blurb,
+            closeButtonSelector: DEFAULTS.closeButtonSelector,
+        }
+        await this.updateSettings(updatedSettings)
+    }
 }
 
 export const extensionState = new ExtensionState()
