@@ -5,8 +5,8 @@ import RecapContainer from "~/components/extension/RecapContainer.svelte"
 import {
     documentIsChapterURL,
     documentHasPreviousChapterURL,
-} from "~/lib/dom-utils"
-import { extensionState } from "~/lib/extension-state.svelte"
+} from "~/lib/utils/dom-utils"
+import { extensionState } from "~/lib/state/extension-state.svelte"
 
 export default defineContentScript({
     matches: ["*://*.royalroad.com/*"],

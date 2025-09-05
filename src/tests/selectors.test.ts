@@ -1,5 +1,5 @@
 import { Page } from "@playwright/test"
-import DEFAULTS from "~/lib/defaults"
+import DEFAULTS from "~/lib/config/defaults"
 import { expect, test } from "./utils/fixtures"
 
 /** Helper function to check if a selector exists and is visible */

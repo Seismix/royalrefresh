@@ -1,6 +1,6 @@
-import DEFAULTS from "~/lib/defaults"
-import { extensionState } from "~/lib/extension-state.svelte"
-import { currentBrowser, BrowserType } from "~/lib/platform"
+import DEFAULTS from "~/lib/config/defaults"
+import { extensionState } from "~/lib/state/extension-state.svelte"
+import { currentBrowser, BrowserType } from "~/lib/utils/platform"
 
 export default defineBackground(() => {
     // Saves the default values to the browser storage after the extension has been installed

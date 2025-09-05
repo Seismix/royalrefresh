@@ -1,5 +1,5 @@
 import type { ExtensionSettings } from "~/types/types"
-import { HttpClient, ContentCache, ContentProcessor } from "./services"
+import { HttpClient, ContentCache, ContentProcessor } from "./"
 
 /**
  * Content Manager Service - Orchestrates content fetching, caching, and processing

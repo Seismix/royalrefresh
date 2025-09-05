@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { recapState } from "~/lib/recap-state.svelte";
-    import { extensionState } from "~/lib/extension-state.svelte";
-    import { ContentManager } from "~/lib/content-manager";
+    import { recapState } from "~/lib/state/recap-state.svelte";
+    import { extensionState } from "~/lib/state/extension-state.svelte";
+    import { ContentManager } from "~/lib/services/content-manager";
 
     let {
         type = "recap",

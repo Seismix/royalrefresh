@@ -1,10 +1,10 @@
 <script lang="ts">
-    import { extensionState } from "~/lib/extension-state.svelte";
+    import { extensionState } from "~/lib/state/extension-state.svelte";
 
     const handleClick = () => {
         browser.runtime.sendMessage({ action: "openExtensionSettings" });
 
-        // Close the settings modal if it's open  
+        // Close the settings modal if it's open
         const closeButton = document.querySelector(
             extensionState.settings.closeButtonSelector,
         );
@@ -14,9 +14,9 @@
     };
 </script>
 
-<!-- Using inline styles for browser extension UI injection to ensure highest CSS specificity 
+<!-- Using inline styles for browser extension UI injection to ensure highest CSS specificity
      and avoid conflicts with host page styles or Svelte's scoped CSS -->
-<button 
+<button
     id="settingsButton"
     class="btn btn-primary btn-circle red"
     style="margin-right: auto; margin-left: 0px;"

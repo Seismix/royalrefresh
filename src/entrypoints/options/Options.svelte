@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { extensionState } from "~/lib/extension-state.svelte"
+    import { extensionState } from "~/lib/state/extension-state.svelte"
     import type { ExtensionSettings } from "~/types/types"
 
     let saveStatus = $state<string>("")

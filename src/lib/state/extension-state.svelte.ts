@@ -1,5 +1,5 @@
 import type { ExtensionSettings } from "~/types/types"
-import DEFAULTS, { DEFAULT_SELECTORS } from "~/lib/defaults"
+import DEFAULTS, { DEFAULT_SELECTORS } from "~/lib/config/defaults"
 import { storage } from "wxt/utils/storage"
 
 /**
