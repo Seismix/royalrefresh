@@ -1,3 +1,4 @@
+import { mount } from "svelte"
 import type { ExtensionSettings } from "~/types/types"
 
 /**
@@ -22,4 +23,41 @@ export function documentHasPreviousChapterURL(
     )
 
     return !!hasPrevChapterURL?.hasAttribute("href")
+}
+
+/**
+ * Helper function to mount a Svelte component to a target element with proper cleanup
+ */
+export function mountComponent<T extends Record<string, any>>(
+    component: any,
+    target: Element,
+    props?: T,
+    prepend = true,
+) {
+    // Create temporary container for mounting
+    const tempContainer = document.createElement("div")
+
+    // Mount component to temporary container
+    const app = mount(component, {
+        target: tempContainer,
+        props,
+    })
+
+    // Move the mounted element to the target
+    const element = tempContainer.firstElementChild
+    if (element) {
+        if (prepend) {
+            target.prepend(element)
+        } else {
+            target.appendChild(element)
+        }
+    }
+
+    // Return cleanup function
+    return () => {
+        if (app && typeof app === "object" && "$destroy" in app) {
+            ;(app as any).$destroy()
+        }
+        element?.remove()
+    }
 }
