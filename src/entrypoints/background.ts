@@ -9,7 +9,8 @@ export default defineBackground(() => {
             await extensionState.setSettings(DEFAULTS)
         }
         if (details.reason === "update") {
-            await extensionState.updateSettingsWithDefaults()
+            // Preserve user settings but update selectors to handle website changes
+            await extensionState.restoreSelectors()
         }
         // Only Firefox supports the "temporary" property
         if (details.temporary) {

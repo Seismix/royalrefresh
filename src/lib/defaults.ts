@@ -1,6 +1,6 @@
 import { ExtensionSelectors, ExtensionSettings } from "~/types/types"
 
-const DEFAULT_SELECTORS: ExtensionSelectors = {
+export const DEFAULT_SELECTORS: ExtensionSelectors = {
     prevChapterBtn: "div.col-md-4:nth-child(1) > a:nth-child(1)",
     chapterContent: ".chapter-inner",
     chapterTitle: "h1.font-white",
@@ -20,5 +20,4 @@ const DEFAULTS: ExtensionSettings = {
     ...DEFAULT_SELECTORS,
 }
 
-export { DEFAULT_SELECTORS }
 export default DEFAULTS

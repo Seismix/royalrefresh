@@ -47,15 +47,6 @@ class RecapStateManager {
         }
     }
 
-    /**
-     * Clears all content and errors
-     */
-    clear() {
-        this.content = ""
-        this.error = null
-        this.visibility = "hidden"
-    }
-
     // Computed properties
     get toggleText() {
         return this.visibility === "visible" ? "Hide " : "Show "
@@ -67,10 +58,6 @@ class RecapStateManager {
 
     get hasError() {
         return this.visibility === "error" && this.error !== null
-    }
-
-    get hasContent() {
-        return this.content.length > 0
     }
 }
 

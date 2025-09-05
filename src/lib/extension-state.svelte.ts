@@ -1,5 +1,5 @@
 import type { ExtensionSettings } from "~/types/types"
-import DEFAULTS from "~/lib/defaults"
+import DEFAULTS, { DEFAULT_SELECTORS } from "~/lib/defaults"
 import { storage } from "wxt/utils/storage"
 
 /**
@@ -81,37 +81,10 @@ class ExtensionState {
         const currentSettings = this._settings
         const updatedSettings = {
             ...currentSettings,
-            // Import DEFAULT_SELECTORS to restore selectors
-            prevChapterBtn: DEFAULTS.prevChapterBtn,
-            chapterContent: DEFAULTS.chapterContent,
-            chapterTitle: DEFAULTS.chapterTitle,
-            fictionTitle: DEFAULTS.fictionTitle,
-            togglePlacement: DEFAULTS.togglePlacement,
-            settingsPlacement: DEFAULTS.settingsPlacement,
-            blurb: DEFAULTS.blurb,
-            closeButtonSelector: DEFAULTS.closeButtonSelector,
+            // Restore all selector-related settings to defaults
+            ...DEFAULT_SELECTORS,
         }
         await this.settingsStore.setValue(updatedSettings)
-    }
-
-    /**
-     * Update settings by merging with default selectors (for extension updates)
-     */
-    async updateSettingsWithDefaults() {
-        const currentSettings = this._settings
-        const updatedSettings = {
-            ...currentSettings,
-            // Merge in default selectors for extension updates
-            prevChapterBtn: DEFAULTS.prevChapterBtn,
-            chapterContent: DEFAULTS.chapterContent,
-            chapterTitle: DEFAULTS.chapterTitle,
-            fictionTitle: DEFAULTS.fictionTitle,
-            togglePlacement: DEFAULTS.togglePlacement,
-            settingsPlacement: DEFAULTS.settingsPlacement,
-            blurb: DEFAULTS.blurb,
-            closeButtonSelector: DEFAULTS.closeButtonSelector,
-        }
-        await this.updateSettings(updatedSettings)
     }
 }
 

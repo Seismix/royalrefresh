@@ -4,7 +4,7 @@ export enum BrowserType {
     AndroidFirefox = "android-firefox",
 }
 
-export const isAndroid =
+const isAndroid =
     navigator.userAgent.includes("Mobile") ||
     navigator.userAgent.includes("Android")
 
