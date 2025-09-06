@@ -1,5 +1,8 @@
 <script lang="ts">
+    import { onMount } from "svelte";
     import { extensionState } from "~/lib/state/extension-state.svelte";
+
+    let buttonElement: HTMLButtonElement;
 
     const handleClick = () => {
         browser.runtime.sendMessage({ action: "openExtensionSettings" });
@@ -12,11 +15,22 @@
             closeButton.click();
         }
     };
+
+    onMount(() => {
+        // Style the parent container to properly display the settings button
+        const parent = buttonElement?.parentElement;
+        if (parent && parent instanceof HTMLElement) {
+            parent.style.display = "flex";
+            parent.style.justifyContent = "space-between";
+            parent.style.alignItems = "center";
+        }
+    });
 </script>
 
 <!-- Using inline styles for browser extension UI injection to ensure highest CSS specificity
      and avoid conflicts with host page styles or Svelte's scoped CSS -->
 <button
+    bind:this={buttonElement}
     id="settingsButton"
     class="btn btn-primary btn-circle red"
     style="margin-right: auto; margin-left: 0px;"

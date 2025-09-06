@@ -37,11 +37,7 @@ export default defineContentScript({
             const settingsPlacement = document.querySelector(
                 settings.settingsPlacement,
             )
-            if (settingsPlacement && settingsPlacement instanceof HTMLElement) {
-                settingsPlacement.style.display = "flex"
-                settingsPlacement.style.justifyContent = "space-between"
-                settingsPlacement.style.alignItems = "center"
-
+            if (settingsPlacement) {
                 const cleanup = mountComponent(
                     SettingsButton,
                     settingsPlacement,
