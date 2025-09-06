@@ -1,4 +1,3 @@
-import { mount } from "svelte"
 import ToggleButton from "~/components/extension/ToggleButton.svelte"
 import SettingsButton from "~/components/extension/SettingsButton.svelte"
 import RecapContainer from "~/components/extension/RecapContainer.svelte"
@@ -30,6 +29,15 @@ export default defineContentScript({
                 type: hasPrevChapter ? "recap" : "blurb",
             })
             ctx.onInvalidated(cleanup)
+
+            if (settings.autoExpand) {
+                const buttonId = hasPrevChapter ? "recapButton" : "blurbButton"
+                // ensure DOM is ready
+                requestAnimationFrame(() => {
+                    const btn = document.getElementById(buttonId)
+                    if (btn) btn.click()
+                })
+            }
         }
 
         // Create settings button (only if has previous chapter)
@@ -56,5 +64,3 @@ export default defineContentScript({
         }
     },
 })
-
-
