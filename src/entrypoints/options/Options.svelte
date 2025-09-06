@@ -16,23 +16,28 @@
         localSettings = { ...extensionState.settings }
     })
 
-    // Validation for word count
-    const isWordCountValid = $derived(
-        !isNaN(localSettings.wordCount) &&
-            localSettings.wordCount !== null &&
-            localSettings.wordCount >= 1 &&
-            localSettings.wordCount <= 500,
-    )
+    // Validation for word count using result object pattern
+    const wordCountValidation = $derived.by(() => {
+        const value = localSettings.wordCount
 
-    const wordCountError = $derived(
-        isNaN(localSettings.wordCount) || localSettings.wordCount === null
-            ? "Please enter a valid number"
-            : localSettings.wordCount > 500
-              ? "Word count cannot exceed 500"
-              : localSettings.wordCount < 1
-                ? "Word count must be at least 1"
-                : "",
-    )
+        if (isNaN(value) || value === null) {
+            return { isValid: false, error: "Please enter a valid number" }
+        }
+
+        if (value < 1) {
+            return { isValid: false, error: "Word count must be at least 1" }
+        }
+
+        if (value > 500) {
+            return { isValid: false, error: "Word count cannot exceed 500" }
+        }
+
+        return { isValid: true, error: "" }
+    })
+
+    // Convenience accessors for cleaner template usage
+    const isWordCountValid = $derived(wordCountValidation.isValid)
+    const wordCountError = $derived(wordCountValidation.error)
 
     async function saveSettings() {
         if (!isWordCountValid) {
