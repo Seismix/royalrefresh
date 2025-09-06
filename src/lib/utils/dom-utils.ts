@@ -1,4 +1,4 @@
-import { mount } from "svelte"
+import { Component, mount } from "svelte"
 import type { ExtensionSettings } from "~/types/types"
 
 /**
@@ -29,7 +29,7 @@ export function documentHasPreviousChapterURL(
  * Helper function to mount a Svelte component to a target element with proper cleanup
  */
 export function mountComponent<T extends Record<string, any>>(
-    component: any,
+    component: Component,
     target: Element,
     props?: T,
     prepend = true,
