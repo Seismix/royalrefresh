@@ -34,9 +34,9 @@
         }
     };
 
-    const buttonText = $derived(type === "recap" ? "Recap" : "Blurb");
-    const iconName = $derived(type === "recap" ? "book" : "info-circle");
-    const buttonId = $derived(type === "recap" ? "recapButton" : "blurbButton");
+    const buttonText = type === "recap" ? "Recap" : "Blurb";
+    const iconName = type === "recap" ? "book" : "info-circle";
+    const buttonId = type === "recap" ? "recapButton" : "blurbButton";
 </script>
 
 <button class="btn btn-primary btn-circle" onclick={handleToggle} id={buttonId}>
