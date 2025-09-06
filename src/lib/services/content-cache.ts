@@ -2,14 +2,15 @@
  * Content Cache Service - Manages caching of fetched HTML content
  * Provides separate caching strategies for different content types
  */
+import { CACHE_TTL_MS } from "~/lib/config/defaults"
+
 export class ContentCache {
     private static recapCache = new Map<
         string,
         { html: string; timestamp: number }
     >()
 
-    // Cache TTL (Time To Live) in milliseconds - 30 minutes
-    private static readonly CACHE_TTL = 30 * 60 * 1000
+    private static readonly CACHE_TTL = CACHE_TTL_MS
 
     /**
      * Gets cached recap content by URL
