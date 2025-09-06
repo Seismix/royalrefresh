@@ -36,21 +36,23 @@ class ExtensionState {
 
     private async loadSettings() {
         try {
-            const settings = await this.settingsStore.getValue()
-            this._settings = { ...DEFAULTS, ...settings }
-            this.isLoaded = true
+            // .getValue() will return the fallback if no value is stored
+            // or merge the stored value with the fallback.
+            this._settings = await this.settingsStore.getValue()
         } catch (error) {
             console.error("Failed to load extension settings:", error)
+            // If getValue fails, explicitly set to DEFAULTS
             this._settings = DEFAULTS
+        } finally {
             this.isLoaded = true
         }
     }
 
     private watchSettings() {
         this.settingsStore.watch((newSettings) => {
-            this._settings = newSettings
-                ? { ...DEFAULTS, ...newSettings }
-                : DEFAULTS
+            // newSettings is already merged with the fallback by wxt/storage.
+            // We just need to handle the case where the value is removed.
+            this._settings = newSettings ?? DEFAULTS
         })
     }
 

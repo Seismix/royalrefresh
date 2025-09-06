@@ -47,18 +47,10 @@ class RecapStateManager {
         }
     }
 
-    // Computed properties
-    get toggleText() {
-        return this.visibility === "visible" ? "Hide " : "Show "
-    }
-
-    get isVisible() {
-        return this.visibility === "visible"
-    }
-
-    get hasError() {
-        return this.visibility === "error" && this.error !== null
-    }
+    // Computed properties using $derived
+    toggleText = $derived(this.visibility === "visible" ? "Hide " : "Show ")
+    isVisible = $derived(this.visibility === "visible")
+    hasError = $derived(this.visibility === "error" && this.error !== null)
 }
 
 // Singleton instance
