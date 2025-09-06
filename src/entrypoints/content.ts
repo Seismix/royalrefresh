@@ -40,18 +40,12 @@ export default defineContentScript({
             }
         }
 
-        // Create settings button (only if has previous chapter)
-        if (hasPrevChapter) {
-            const settingsPlacement = document.querySelector(
-                settings.settingsPlacement,
-            )
-            if (settingsPlacement) {
-                const cleanup = mountComponent(
-                    SettingsButton,
-                    settingsPlacement,
-                )
-                ctx.onInvalidated(cleanup)
-            }
+        const settingsPlacement = document.querySelector(
+            settings.settingsPlacement,
+        )
+        if (settingsPlacement) {
+            const cleanup = mountComponent(SettingsButton, settingsPlacement)
+            ctx.onInvalidated(cleanup)
         }
 
         // Create content container
