@@ -20,20 +20,21 @@ export class ContentProcessor {
             const doc = parser.parseFromString(html, "text/html")
 
             // Extract fiction title from current document
-            const fictionTitle = this.extractFictionTitleFromCurrentDocument(settings)
-            if ('error' in fictionTitle) {
+            const fictionTitle =
+                this.extractFictionTitleFromCurrentDocument(settings)
+            if ("error" in fictionTitle) {
                 return fictionTitle
             }
 
             // Extract chapter name from parsed document
             const chapterName = this.extractChapterName(doc, settings)
-            if ('error' in chapterName) {
+            if ("error" in chapterName) {
                 return chapterName
             }
 
             // Extract and process chapter content
             const chapterContent = this.extractChapterContent(doc, settings)
-            if ('error' in chapterContent) {
+            if ("error" in chapterContent) {
                 return chapterContent
             }
 
@@ -52,9 +53,10 @@ export class ContentProcessor {
             return { content: tempDiv.innerHTML }
         } catch (error) {
             return {
-                error: error instanceof Error
-                    ? `Failed to process recap: ${error.message}`
-                    : "Failed to process recap content"
+                error:
+                    error instanceof Error
+                        ? `Failed to process recap: ${error.message}`
+                        : "Failed to process recap content",
             }
         }
     }
@@ -74,19 +76,23 @@ export class ContentProcessor {
             const doc = parser.parseFromString(html, "text/html")
 
             // Extract fiction title from current document
-            const fictionTitle = this.extractFictionTitleFromCurrentDocument(settings)
-            if ('error' in fictionTitle) {
+            const fictionTitle =
+                this.extractFictionTitleFromCurrentDocument(settings)
+            if ("error" in fictionTitle) {
                 return fictionTitle
             }
 
             // Extract blurb content from overview document
             const blurbContent = this.extractBlurb(doc, settings)
-            if ('error' in blurbContent) {
+            if ("error" in blurbContent) {
                 return blurbContent
             }
 
             // Create blurb fragment
-            const fragment = this.createBlurbFragment(fictionTitle.data, blurbContent.data)
+            const fragment = this.createBlurbFragment(
+                fictionTitle.data,
+                blurbContent.data,
+            )
 
             // Convert fragment to HTML string
             const tempDiv = document.createElement("div")
@@ -95,9 +101,10 @@ export class ContentProcessor {
             return { content: tempDiv.innerHTML }
         } catch (error) {
             return {
-                error: error instanceof Error
-                    ? `Failed to process blurb: ${error.message}`
-                    : "Failed to process blurb content"
+                error:
+                    error instanceof Error
+                        ? `Failed to process blurb: ${error.message}`
+                        : "Failed to process blurb content",
             }
         }
     }
@@ -108,7 +115,9 @@ export class ContentProcessor {
     private static extractFictionTitleFromCurrentDocument(
         settings: ExtensionSettings,
     ): { data: string } | { error: string } {
-        const fictionTitleElement = document.querySelector(settings.fictionTitle)
+        const fictionTitleElement = document.querySelector(
+            settings.fictionTitle,
+        )
 
         if (!fictionTitleElement || !fictionTitleElement.textContent) {
             return { error: "Could not find fiction title on current page" }
@@ -221,7 +230,9 @@ export class ContentProcessor {
             return document.createTextNode(newText)
         } else if (node.nodeType === Node.ELEMENT_NODE) {
             const element = node as HTMLElement
-            const newElement = document.createElement(element.tagName.toLowerCase())
+            const newElement = document.createElement(
+                element.tagName.toLowerCase(),
+            )
 
             // Copy attributes
             for (const attr of element.attributes) {
@@ -233,7 +244,10 @@ export class ContentProcessor {
 
             // Process child nodes
             for (const child of Array.from(element.childNodes)) {
-                const newChild = this.buildContentFromWords(child, remainingCount)
+                const newChild = this.buildContentFromWords(
+                    child,
+                    remainingCount,
+                )
                 const newText = newChild.textContent ?? ""
                 const newTextWords = newText.trim().split(/\s+/)
 

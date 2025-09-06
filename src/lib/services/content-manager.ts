@@ -27,7 +27,10 @@ export class ContentManager {
         const cachedHtml = ContentCache.getRecap(prevChapterUrl)
         if (cachedHtml) {
             // Use cached content
-            const processResult = ContentProcessor.createRecap(cachedHtml, settings)
+            const processResult = ContentProcessor.createRecap(
+                cachedHtml,
+                settings,
+            )
             if ("error" in processResult) {
                 return processResult
             }
@@ -37,14 +40,19 @@ export class ContentManager {
         // 3. Fetch from network
         const fetchResult = await HttpClient.fetchHtml(prevChapterUrl)
         if ("error" in fetchResult) {
-            return { error: `Failed to fetch previous chapter: ${fetchResult.error}` }
+            return {
+                error: `Failed to fetch previous chapter: ${fetchResult.error}`,
+            }
         }
 
         // 4. Cache the raw HTML
         ContentCache.setRecap(prevChapterUrl, fetchResult.data)
 
         // 5. Process the content
-        const processResult = ContentProcessor.createRecap(fetchResult.data, settings)
+        const processResult = ContentProcessor.createRecap(
+            fetchResult.data,
+            settings,
+        )
         if ("error" in processResult) {
             return processResult
         }
@@ -72,11 +80,16 @@ export class ContentManager {
         // 2. Fetch from network (no caching for blurb)
         const fetchResult = await HttpClient.fetchHtml(overviewUrl)
         if ("error" in fetchResult) {
-            return { error: `Failed to fetch story overview: ${fetchResult.error}` }
+            return {
+                error: `Failed to fetch story overview: ${fetchResult.error}`,
+            }
         }
 
         // 3. Process the content
-        const processResult = ContentProcessor.createBlurb(fetchResult.data, settings)
+        const processResult = ContentProcessor.createBlurb(
+            fetchResult.data,
+            settings,
+        )
         if ("error" in processResult) {
             return processResult
         }
@@ -104,7 +117,9 @@ export class ContentManager {
         // 2. Get cached HTML
         const cachedHtml = ContentCache.getRecap(prevChapterUrl)
         if (!cachedHtml) {
-            return { error: "No cached content available. Please refresh to fetch new content." }
+            return {
+                error: "No cached content available. Please refresh to fetch new content.",
+            }
         }
 
         // 3. Process with new settings
@@ -166,7 +181,9 @@ export class ContentManager {
     private static findFictionOverviewUrl(
         settings: ExtensionSettings,
     ): { data: string } | { error: string } {
-        const fictionTitleElement = document.querySelector(settings.fictionTitle)
+        const fictionTitleElement = document.querySelector(
+            settings.fictionTitle,
+        )
 
         if (!fictionTitleElement) {
             return {

@@ -59,6 +59,4 @@ export class ContentCache {
     static clearRecapCache(): void {
         this.recapCache.clear()
     }
-
-
 }
