@@ -19,25 +19,13 @@ export default defineBackground(() => {
     })
 
     browser.runtime.onMessage.addListener((message) => {
-        if (
-            typeof message === "object" &&
-            message !== null &&
-            "request" in message
-        ) {
-            const request = (message as { request: string }).request
-            if (request === "getDefaultSettings") {
-                return Promise.resolve(DEFAULTS)
-            }
-        }
-    })
+        if (typeof message !== "object" || message === null) return
 
-    browser.runtime.onMessage.addListener((message) => {
-        if (
-            typeof message === "object" &&
-            message !== null &&
-            "action" in message &&
-            (message as { action: string }).action === "openExtensionSettings"
-        ) {
+        if ("request" in message && message.request === "getDefaultSettings") {
+            return Promise.resolve(DEFAULTS)
+        }
+
+        if ("action" in message && message.action === "openExtensionSettings") {
             // Platform-specific options page handling
             switch (currentBrowser) {
                 case BrowserType.AndroidFirefox:
