@@ -1,6 +1,6 @@
 <script lang="ts">
     import { recapState } from "~/lib/state/recap-state.svelte";
-    import { extensionState } from "~/lib/state/extension-state.svelte";
+    import { getSettings } from "~/lib/utils/storage-utils";
     import { ContentManager } from "~/lib/services/content-manager";
 
     let {
@@ -23,9 +23,10 @@
         }
 
         // If we don't have content, fetch it first then show
+        const settings = await getSettings()
         const result = type === "recap"
-            ? await ContentManager.fetchRecap(extensionState.settings)
-            : await ContentManager.fetchBlurb(extensionState.settings);
+            ? await ContentManager.fetchRecap(settings)
+            : await ContentManager.fetchBlurb(settings);
 
         if ('error' in result) {
             recapState.setError(result.error);

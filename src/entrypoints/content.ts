@@ -6,7 +6,7 @@ import {
     documentHasPreviousChapterURL,
     mountComponent,
 } from "~/lib/utils/dom-utils"
-import { extensionState } from "~/lib/state/extension-state.svelte"
+import { getSettings } from "~/lib/utils/storage-utils"
 
 export default defineContentScript({
     matches: ["*://*.royalroad.com/*"],
@@ -16,10 +16,8 @@ export default defineContentScript({
     main: async (ctx) => {
         if (!documentIsChapterURL()) return
 
-        // Wait for settings to load
-        await extensionState.waitForLoad()
-
-        const settings = extensionState.settings
+        // Get settings from storage
+        const settings = await getSettings()
         const hasPrevChapter = documentHasPreviousChapterURL(settings)
 
         // Create toggle button

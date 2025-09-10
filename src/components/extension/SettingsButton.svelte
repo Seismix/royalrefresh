@@ -1,15 +1,16 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { extensionState } from "~/lib/state/extension-state.svelte";
+    import { getSettings } from "~/lib/utils/storage-utils";
 
     let buttonElement: HTMLButtonElement;
 
-    const handleClick = () => {
+    const handleClick = async () => {
         browser.runtime.sendMessage({ action: "openExtensionSettings" });
 
         // Close the settings modal if it's open
+        const settings = await getSettings()
         const closeButton = document.querySelector(
-            extensionState.settings.closeButtonSelector,
+            settings.closeButtonSelector,
         );
         if (closeButton && closeButton instanceof HTMLButtonElement) {
             closeButton.click();

@@ -1,23 +1,39 @@
 <script lang="ts">
-    import { extensionState } from "~/lib/state/extension-state.svelte"
     import type { ExtensionSettings } from "~/types/types"
+    import DEFAULTS from "~/lib/config/defaults"
+    import { settingsStore, updateSettings, restoreDefaults, restoreSelectors, watchSettings } from "~/lib/utils/storage-utils"
 
     let saveStatus = $state<string>("")
     let activeButton = $state<string>("")
+    let localSettings = $state<ExtensionSettings | null>(null)
 
-    // Wait for extension state to load
-    extensionState.waitForLoad()
-
-    // Local reactive state that syncs with the extension state
-    let localSettings = $state<ExtensionSettings>({ ...extensionState.settings })
-
-    // Sync local settings with extension state changes
+    // Load initial settings and set up watching
     $effect(() => {
-        localSettings = { ...extensionState.settings }
+        const loadSettings = async () => {
+            try {
+                localSettings = await settingsStore.getValue()
+
+                // Watch for external changes (from other tabs/popups)
+                return watchSettings((newValue) => {
+                    if (newValue) {
+                        localSettings = newValue
+                    }
+                })
+            } catch (error) {
+                console.error("Failed to load settings:", error)
+                localSettings = DEFAULTS
+            }
+        }
+
+        loadSettings()
     })
 
     // Validation for word count using result object pattern
     const wordCountValidation = $derived.by(() => {
+        if (!localSettings) {
+            return { isValid: true, error: "" }
+        }
+
         const value = localSettings.wordCount
 
         if (isNaN(value) || value === null) {
@@ -40,13 +56,13 @@
     const wordCountError = $derived(wordCountValidation.error)
 
     async function saveSettings() {
-        if (!isWordCountValid) {
+        if (!isWordCountValid || !localSettings) {
             showSaveStatus("Invalid word count ✗", "save")
             return
         }
 
         try {
-            await extensionState.updateSettings(localSettings)
+            await updateSettings(localSettings)
             showSaveStatus("Saved ✔", "save")
         } catch (error) {
             console.error("Failed to save settings:", error)
@@ -56,7 +72,7 @@
 
     async function handleRestoreDefaults() {
         try {
-            await extensionState.restoreDefaults()
+            await restoreDefaults()
             showSaveStatus("Restored Defaults ✔", "restoreDefaults")
         } catch (error) {
             console.error("Failed to restore defaults:", error)
@@ -66,7 +82,7 @@
 
     async function handleRestoreSelectors() {
         try {
-            await extensionState.restoreSelectors()
+            await restoreSelectors()
             showSaveStatus("Restored Selectors ✔", "restoreSelectors")
         } catch (error) {
             console.error("Failed to restore selectors:", error)
@@ -87,7 +103,7 @@
 <main>
     <h1>RoyalRefresh Settings</h1>
 
-    {#if !extensionState.isLoaded}
+    {#if !localSettings}
         <p>Loading settings...</p>
     {:else}
         <form

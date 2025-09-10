@@ -1,16 +1,39 @@
 <script lang="ts">
     import { recapState } from "~/lib/state/recap-state.svelte"
-    import { extensionState } from "~/lib/state/extension-state.svelte"
+    import { getSettings, watchSettings } from "~/lib/utils/storage-utils"
     import { ContentManager } from "~/lib/services/content-manager"
+    import DEFAULTS from "~/lib/config/defaults"
 
     let { id = "recapContainer" }: { id?: string } = $props()
 
     // Track previous settings to detect changes
-    let previousWordCount = $state(extensionState.settings.wordCount)
+    let previousWordCount = $state<number>(DEFAULTS.wordCount)
+    let currentSettings = $state<any>(null)
+
+    // Load initial settings and watch for changes
+    $effect(() => {
+        const loadSettings = async () => {
+            try {
+                currentSettings = await getSettings()
+                previousWordCount = currentSettings.wordCount
+
+                // Watch for settings changes
+                return watchSettings((newSettings) => {
+                    if (newSettings) {
+                        currentSettings = newSettings
+                    }
+                })
+            } catch (error) {
+                console.error("Failed to load settings:", error)
+            }
+        }
+
+        loadSettings()
+    })
 
     // Effect: scroll into view when content becomes visible
     $effect(() => {
-        if (recapState.isVisible && extensionState.settings.smoothScroll) {
+        if (recapState.isVisible && currentSettings?.smoothScroll) {
             document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })
         }
     })
@@ -21,11 +44,11 @@
             recapState.isVisible &&
             recapState.content &&
             recapState.type === "recap" &&
-            extensionState.isLoaded &&
-            extensionState.settings.wordCount !== previousWordCount
+            currentSettings &&
+            currentSettings.wordCount !== previousWordCount
         ) {
             // Try to refresh from cache first
-            const result = ContentManager.refreshRecapFromCache(extensionState.settings)
+            const result = ContentManager.refreshRecapFromCache(currentSettings)
 
             if ('error' in result) {
                 // If cache refresh fails, the user can manually refresh
@@ -34,7 +57,7 @@
                 recapState.setContent(result.content, result.type)
             }
 
-            previousWordCount = extensionState.settings.wordCount
+            previousWordCount = currentSettings.wordCount
         }
     })
 </script>
