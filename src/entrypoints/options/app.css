@@ -1,13 +1,18 @@
+/* Light mode (default) */
 body {
     font-family: Arial, sans-serif;
     background-color: #f0f0f0;
+    color: #333333;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     width: 400px;
     height: auto;
-    overflow-x: hidden; /* Prevent horizontal scroll on the body */
+    overflow-x: hidden;
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease;
 }
 
 .container {
@@ -53,10 +58,24 @@ input[type="number"] {
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
+    background-color: #ffffff;
+    color: #333333;
+    transition:
+        background-color 0.3s ease,
+        border-color 0.3s ease,
+        color 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
 input[type="checkbox"] {
     margin-bottom: 10px;
+    accent-color: #007bff;
 }
 
 details {
@@ -66,6 +85,10 @@ details {
     border-radius: 4px;
     cursor: pointer;
     overflow-x: hidden; /* Prevent overflow when expanding */
+    background-color: #ffffff;
+    transition:
+        background-color 0.3s ease,
+        border-color 0.3s ease;
 }
 
 details summary {
@@ -87,20 +110,130 @@ button {
     text-align: center;
     cursor: pointer;
     font-size: 16px;
+    transition:
+        background-color 0.2s ease-in-out,
+        transform 0.1s ease;
+}
+
+button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button:active {
+    transform: translateY(0);
 }
 
 button[type="submit"] {
     background-color: #007bff;
-    transition: background-color 0.2s ease-in-out;
+}
+
+button[type="submit"]:hover {
+    background-color: #0056b3;
 }
 
 button[type="button"] {
     background-color: crimson;
-    transition: background-color 0.2s ease-in-out;
+}
+
+button[type="button"]:hover {
+    background-color: #c82333;
 }
 
 button.saved {
     background-color: #00cc00;
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #1a1a1a;
+        color: #e0e0e0;
+    }
+
+    h1,
+    h3 {
+        color: #e0e0e0;
+    }
+
+    p {
+        color: #e0e0e0;
+    }
+
+    p.warning-message {
+        color: #ff6b6b;
+    }
+
+    label {
+        color: #e0e0e0;
+    }
+
+    label span {
+        color: #e0e0e0;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+        background-color: #2d2d2d;
+        border-color: #555555;
+        color: #e0e0e0;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus {
+        border-color: #4dabf7;
+        box-shadow: 0 0 0 2px rgba(77, 171, 247, 0.25);
+    }
+
+    input[type="text"]::placeholder,
+    input[type="number"]::placeholder {
+        color: #888888;
+    }
+
+    input[type="checkbox"] {
+        accent-color: #4dabf7;
+    }
+
+    details {
+        background-color: #2d2d2d;
+        border-color: #555555;
+    }
+
+    details summary {
+        color: #e0e0e0;
+    }
+
+    details summary:hover {
+        color: #4dabf7;
+    }
+
+    button[type="submit"] {
+        background-color: #4dabf7;
+    }
+
+    button[type="submit"]:hover {
+        background-color: #339af0;
+    }
+
+    button[type="button"] {
+        background-color: #fa5252;
+    }
+
+    button[type="button"]:hover {
+        background-color: #e03131;
+    }
+
+    button.saved {
+        background-color: #51cf66;
+    }
+
+    button.saved:hover {
+        background-color: #40c057;
+    }
+
+    button:hover {
+        box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+    }
 }
 
 /* Responsive design */
@@ -116,5 +249,13 @@ button.saved {
     input[type="text"],
     input[type="number"] {
         padding: 10px;
+    }
+}
+
+/* Dark mode responsive adjustments */
+@media (max-width: 600px) and (prefers-color-scheme: dark) {
+    /* Additional dark mode responsive styles if needed */
+    body {
+        background-color: #1a1a1a;
     }
 }

@@ -252,6 +252,7 @@
         border-left: 6px solid #f44336;
         padding: 10px;
         margin-bottom: 15px;
+        color: #721c24;
     }
 
     .validation-error {
@@ -264,5 +265,24 @@
     input.invalid {
         border-color: #f44336;
         background-color: #ffebee;
+    }
+
+    /* Dark mode styles */
+    @media (prefers-color-scheme: dark) {
+        .warning-message {
+            background-color: #4a1a1a;
+            border-left-color: #e57373;
+            color: #ffcdd2;
+        }
+
+        .validation-error {
+            color: #ef5350;
+        }
+
+        input.invalid {
+            border-color: #e57373;
+            background-color: #2d1b1b;
+            color: #ffcdd2;
+        }
     }
 </style>
