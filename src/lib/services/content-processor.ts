@@ -175,7 +175,7 @@ export class ContentProcessor {
             return { error: "Could not find chapter content in fetched page" }
         }
 
-        if (!chapterElement.textContent || !chapterElement.textContent.trim()) {
+        if (!chapterElement.textContent?.trim()) {
             return { error: "Chapter content appears to be empty" }
         }
 
@@ -184,96 +184,153 @@ export class ContentProcessor {
             return { error: "No paragraphs found in chapter content" }
         }
 
+        return this.selectParagraphsByWordCount(paragraphs, settings.wordCount)
+    }
+
+    /**
+     * Selects paragraphs from the end, respecting word count limit
+     */
+    private static selectParagraphsByWordCount(
+        paragraphs: NodeListOf<Element>,
+        maxWordCount: number,
+    ): { data: HTMLElement } {
         const contentDiv = document.createElement("div")
         const selectedParagraphs: Node[] = []
-        let remainingWordCount = settings.wordCount
+        let remainingWords = maxWordCount
 
-        // Iterate over paragraphs in reverse order to get the last paragraphs first
+        // Process paragraphs in reverse (from end of chapter)
         for (let i = paragraphs.length - 1; i >= 0; i--) {
             const paragraph = paragraphs[i]
-            const paragraphWordCount =
-                paragraph.textContent?.trim().split(/\s+/).length ?? 0
+            const wordCount = this.countWordsInNode(paragraph)
 
-            if (paragraphWordCount > 0) {
-                remainingWordCount -= paragraphWordCount
+            if (wordCount === 0) continue
 
-                if (remainingWordCount > 0) {
-                    selectedParagraphs.push(paragraph.cloneNode(true))
-                } else {
-                    // Build paragraph with remaining words
-                    const truncatedParagraph = this.buildContentFromWords(
-                        paragraph,
-                        paragraphWordCount + remainingWordCount,
-                    )
-                    selectedParagraphs.push(truncatedParagraph)
-                    break
-                }
+            const wordsAfterAddition = remainingWords - wordCount
+
+            if (wordsAfterAddition >= 0) {
+                // Include entire paragraph
+                selectedParagraphs.push(paragraph.cloneNode(true))
+                remainingWords = wordsAfterAddition
+            } else {
+                // Truncate paragraph to fit remaining word limit
+                const truncatedParagraph = this.buildContentFromWords(
+                    paragraph,
+                    remainingWords,
+                )
+                selectedParagraphs.push(truncatedParagraph)
+                break
             }
         }
 
-        // Append selected paragraphs in correct order
+        // Append in correct chronological order
         contentDiv.append(...selectedParagraphs.reverse())
-
         return { data: contentDiv }
+    }
+
+    /**
+     * Counts words in a node's text content
+     */
+    private static countWordsInNode(node: Node): number {
+        const text = node.textContent?.trim()
+        return text ? text.split(/\s+/).length : 0
     }
 
     /**
      * Helper function to build content from words with a specific word count
      */
     private static buildContentFromWords(node: ChildNode, count: number): Node {
-        if (node.nodeType === Node.TEXT_NODE) {
-            const textWords = (node.textContent ?? "").trim().split(/\s+/)
-            const newText =
-                textWords.length > count
-                    ? "..." + textWords.slice(-count).join(" ")
-                    : textWords.join(" ")
-            return document.createTextNode(newText)
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-            const element = node as HTMLElement
-            const newElement = document.createElement(
-                element.tagName.toLowerCase(),
-            )
-
-            // Copy attributes
-            for (const attr of element.attributes) {
-                newElement.setAttribute(attr.name, attr.value)
-            }
-
-            let remainingCount = count
-            const newChildNodes: Node[] = []
-
-            // Process child nodes
-            for (const child of Array.from(element.childNodes)) {
-                const newChild = this.buildContentFromWords(
-                    child,
-                    remainingCount,
-                )
-                const newText = newChild.textContent ?? ""
-                const newTextWords = newText.trim().split(/\s+/)
-
-                if (newTextWords.length <= remainingCount) {
-                    newChildNodes.push(newChild)
-                    remainingCount -= newTextWords.length
-                } else {
-                    const partialChild = this.buildContentFromWords(
-                        child,
-                        remainingCount,
-                    )
-                    newChildNodes.push(partialChild)
-                    remainingCount = 0
-                    break
-                }
-
-                if (remainingCount <= 0) {
-                    break
-                }
-            }
-
-            newElement.append(...newChildNodes)
-            return newElement
+        if (count <= 0) {
+            return document.createTextNode("")
         }
 
-        return document.createTextNode("")
+        switch (node.nodeType) {
+            case Node.TEXT_NODE:
+                return this.truncateTextNode(node, count)
+
+            case Node.ELEMENT_NODE:
+                return this.truncateElementNode(node as HTMLElement, count)
+
+            default:
+                return document.createTextNode("")
+        }
+    }
+
+    /**
+     * Truncates a text node to the specified word count
+     */
+    private static truncateTextNode(node: ChildNode, count: number): Node {
+        const text = node.textContent ?? ""
+        const words = text.trim().split(/\s+/)
+
+        if (words.length <= count) {
+            return document.createTextNode(text)
+        }
+
+        const truncatedText = "..." + words.slice(-count).join(" ")
+        return document.createTextNode(truncatedText)
+    }
+
+    /**
+     * Truncates an element node and its children to the specified word count
+     */
+    private static truncateElementNode(
+        element: HTMLElement,
+        count: number,
+    ): Node {
+        const newElement = document.createElement(element.tagName.toLowerCase())
+
+        // Copy all attributes efficiently
+        this.copyAttributes(element, newElement)
+
+        // Process children until word limit is reached
+        const children = this.processChildrenWithWordLimit(
+            element.childNodes,
+            count,
+        )
+
+        newElement.append(...children)
+        return newElement
+    }
+
+    /**
+     * Copies all attributes from source to target element
+     */
+    private static copyAttributes(source: Element, target: Element): void {
+        for (const { name, value } of source.attributes) {
+            target.setAttribute(name, value)
+        }
+    }
+
+    /**
+     * Processes child nodes until word limit is reached
+     */
+    private static processChildrenWithWordLimit(
+        childNodes: NodeListOf<ChildNode>,
+        maxWords: number,
+    ): Node[] {
+        const children: Node[] = []
+        let wordsUsed = 0
+
+        for (const child of childNodes) {
+            if (wordsUsed >= maxWords) break
+
+            const remainingWords = maxWords - wordsUsed
+            const processedChild = this.buildContentFromWords(
+                child,
+                remainingWords,
+            )
+            const childWordCount = this.countWordsInNode(processedChild)
+
+            children.push(processedChild)
+            wordsUsed += childWordCount
+
+            // If we used all remaining words, we're done
+            if (childWordCount >= remainingWords) {
+                break
+            }
+        }
+
+        return children
     }
 
     /**
