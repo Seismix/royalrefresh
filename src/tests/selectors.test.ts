@@ -25,8 +25,12 @@ test.describe("Chapter Page", () => {
     })
 
     for (const [key, selector] of Object.entries(DEFAULTS)) {
-        // Skip 'blurb' because it's not present on the chapter page
-        if (typeof selector === "string" && key !== "blurb") {
+        // Skip 'blurb' and 'blurbLabels' because they're not present on the chapter page
+        if (
+            typeof selector === "string" &&
+            key !== "blurb" &&
+            key !== "blurbLabels"
+        ) {
             test(`${key} selector exists`, async () => {
                 await checkSelector(page, selector)
             })
@@ -40,5 +44,12 @@ test.describe("Fiction Page", () => {
             "https://www.royalroad.com/fiction/63759/super-supportive",
         )
         await checkSelector(page, DEFAULTS.blurb)
+    })
+
+    test("blurbLabels selector exists", async ({ page }) => {
+        await page.goto(
+            "https://www.royalroad.com/fiction/63759/super-supportive",
+        )
+        await checkSelector(page, DEFAULTS.blurbLabels)
     })
 })

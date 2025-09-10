@@ -9,6 +9,7 @@ export const DEFAULT_SELECTORS: ExtensionSelectors = {
     settingsPlacement:
         "#settings > div:nth-child(1) > div:nth-child(1) > div:nth-child(3)",
     blurb: ".description .hidden-content",
+    blurbLabels: ".portlet .text-center.font-red-sunglo",
     closeButtonSelector:
         "#settings > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > button:last-child",
 }

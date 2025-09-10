@@ -200,6 +200,11 @@
                 </label>
 
                 <label>
+                    <span>Story blurb labels:</span>
+                    <input type="text" bind:value={localSettings.blurbLabels} />
+                </label>
+
+                <label>
                     <span>Button to close settings modal:</span>
                     <input
                         type="text"

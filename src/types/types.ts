@@ -6,6 +6,7 @@ export type ExtensionSelectors = {
     togglePlacement: string
     settingsPlacement: string
     blurb: string
+    blurbLabels: string
     closeButtonSelector: string
 }
 

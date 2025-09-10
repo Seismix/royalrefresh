@@ -149,6 +149,18 @@ export class ContentProcessor {
         overviewDoc: Document,
         settings: ExtensionSettings,
     ): { data: HTMLElement } | { error: string } {
+        const fragment = document.createElement("div")
+
+        // Extract blurb labels first (appears above)
+        const labelsElement = overviewDoc.querySelector(settings.blurbLabels)
+        if (
+            labelsElement instanceof HTMLElement &&
+            labelsElement.textContent?.trim()
+        ) {
+            fragment.appendChild(labelsElement.cloneNode(true) as HTMLElement)
+        }
+
+        // Extract main blurb content
         const blurbElement = overviewDoc.querySelector(settings.blurb)
 
         if (!blurbElement || !(blurbElement instanceof HTMLElement)) {
@@ -159,7 +171,9 @@ export class ContentProcessor {
             return { error: "Story blurb appears to be empty" }
         }
 
-        return { data: blurbElement.cloneNode(true) as HTMLElement }
+        fragment.appendChild(blurbElement.cloneNode(true) as HTMLElement)
+
+        return { data: fragment }
     }
 
     /**
