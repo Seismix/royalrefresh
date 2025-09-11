@@ -1,13 +1,12 @@
 import { ExtensionSelectors, ExtensionSettings } from "~/types/types"
 
 export const DEFAULT_SELECTORS: ExtensionSelectors = {
-    prevChapterBtn: "div.col-md-4:nth-child(1) > a:nth-child(1)",
+    prevChapterBtn: "a[href*='/chapter/']:has(> i.fa-chevron-double-left)",
     chapterContent: ".chapter-inner",
     chapterTitle: "h1.font-white",
     fictionTitle: "h2.font-white",
     togglePlacement: ".chapter > div > .actions",
-    settingsPlacement:
-        "#settings > div:nth-child(1) > div:nth-child(1) > div:nth-child(3)",
+    settingsPlacement: "#settings div.modal-footer",
     blurb: ".description .hidden-content",
     blurbLabels: ".portlet .text-center.font-red-sunglo",
     closeButtonSelector:
