@@ -244,7 +244,7 @@ export class ContentProcessor {
     /**
      * Counts words in a node's text content
      */
-    private static countWordsInNode(node: Node): number {
+    private static countWordsInNode(node: Node) {
         const text = node.textContent?.trim()
         return text ? text.split(/\s+/).length : 0
     }
@@ -252,7 +252,7 @@ export class ContentProcessor {
     /**
      * Helper function to build content from words with a specific word count
      */
-    private static buildContentFromWords(node: ChildNode, count: number): Node {
+    private static buildContentFromWords(node: ChildNode, count: number) {
         if (count <= 0) {
             return document.createTextNode("")
         }
@@ -272,7 +272,7 @@ export class ContentProcessor {
     /**
      * Truncates a text node to the specified word count
      */
-    private static truncateTextNode(node: ChildNode, count: number): Node {
+    private static truncateTextNode(node: ChildNode, count: number) {
         const text = node.textContent ?? ""
         const words = text.trim().split(/\s+/)
 
@@ -290,7 +290,7 @@ export class ContentProcessor {
     private static truncateElementNode(
         element: HTMLElement,
         count: number,
-    ): Node {
+    ) {
         const newElement = document.createElement(element.tagName.toLowerCase())
 
         // Copy all attributes efficiently
@@ -309,7 +309,7 @@ export class ContentProcessor {
     /**
      * Copies all attributes from source to target element
      */
-    private static copyAttributes(source: Element, target: Element): void {
+    private static copyAttributes(source: Element, target: Element) {
         for (const { name, value } of source.attributes) {
             target.setAttribute(name, value)
         }
@@ -321,7 +321,7 @@ export class ContentProcessor {
     private static processChildrenWithWordLimit(
         childNodes: NodeListOf<ChildNode>,
         maxWords: number,
-    ): Node[] {
+    ) {
         const children: Node[] = []
         let wordsUsed = 0
 
@@ -355,7 +355,7 @@ export class ContentProcessor {
         chapterName: string,
         chapterContent: HTMLElement,
         wordCount: number,
-    ): DocumentFragment {
+    ) {
         // Recap heading
         const recapHeadingElement = document.createElement("h1")
         recapHeadingElement.textContent = `RoyalRefresh of ${fictionTitle}`
@@ -386,7 +386,7 @@ export class ContentProcessor {
     private static createBlurbFragment(
         fictionTitle: string,
         blurbContent: HTMLElement,
-    ): DocumentFragment {
+    ) {
         const blurbHeading = document.createElement("h1")
         blurbHeading.textContent = `Blurb: ${fictionTitle}`
 

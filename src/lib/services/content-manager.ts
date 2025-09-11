@@ -19,7 +19,7 @@ export class ContentManager {
      */
     static async fetchRecap(
         settings: ExtensionSettings,
-    ): Promise<{ content: string; type: "recap" } | { error: string }> {
+    ) {
         // 1. Find previous chapter URL from DOM
         const prevChapterUrlResult = findPreviousChapterUrl(settings)
         if ("error" in prevChapterUrlResult) {
@@ -73,7 +73,7 @@ export class ContentManager {
      */
     static async fetchBlurb(
         settings: ExtensionSettings,
-    ): Promise<{ content: string; type: "blurb" } | { error: string }> {
+    ) {
         // 1. Find fiction overview URL from DOM
         const overviewUrlResult = findFictionOverviewUrl(settings)
         if ("error" in overviewUrlResult) {
@@ -141,7 +141,7 @@ export class ContentManager {
      * @param settings - Extension settings
      * @returns True if content is cached
      */
-    static hasRecapInCache(settings: ExtensionSettings): boolean {
+    static hasRecapInCache(settings: ExtensionSettings) {
         const prevChapterUrlResult = findPreviousChapterUrl(settings)
         if ("error" in prevChapterUrlResult) {
             return false
@@ -153,7 +153,7 @@ export class ContentManager {
     /**
      * Clears all cached content
      */
-    static clearCache(): void {
+    static clearCache() {
         ContentCache.clearRecapCache()
     }
 }

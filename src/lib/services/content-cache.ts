@@ -17,7 +17,7 @@ export class ContentCache {
      * @param url - The URL to look up in cache
      * @returns Cached HTML content or null if not found/expired
      */
-    static getRecap(url: string): string | null {
+    static getRecap(url: string) {
         const cached = this.recapCache.get(url)
         if (!cached) {
             return null

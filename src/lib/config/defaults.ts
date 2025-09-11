@@ -25,7 +25,7 @@ const DEFAULTS: ExtensionSettings = {
  * Get defaults with prefers-reduced-motion detection
  * Falls back to static DEFAULTS if window is not available
  */
-export function getDefaults(): ExtensionSettings {
+export function getDefaults() {
     try {
         if (typeof window !== "undefined" && window.matchMedia) {
             const prefersReducedMotion = window.matchMedia(
@@ -45,7 +45,7 @@ export function getDefaults(): ExtensionSettings {
 /**
  * Get selectors that should be present on chapter pages
  */
-export function getChapterPageSelectors(): Record<string, string> {
+export function getChapterPageSelectors() {
     return {
         prevChapterBtn: DEFAULT_SELECTORS.prevChapterBtn,
         chapterContent: DEFAULT_SELECTORS.chapterContent,
@@ -60,7 +60,7 @@ export function getChapterPageSelectors(): Record<string, string> {
 /**
  * Get selectors that should be present on fiction/story pages
  */
-export function getFictionPageSelectors(): Record<string, string> {
+export function getFictionPageSelectors() {
     return {
         blurb: DEFAULT_SELECTORS.blurb,
         blurbLabels: DEFAULT_SELECTORS.blurbLabels,

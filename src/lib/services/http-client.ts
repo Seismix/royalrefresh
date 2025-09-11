@@ -5,7 +5,7 @@
  */
 export async function fetchHtml(
     url: string | URL | Request,
-): Promise<{ data: string } | { error: string }> {
+) {
     try {
         const response = await fetch(url)
 

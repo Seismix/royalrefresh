@@ -41,7 +41,7 @@ export const settingsStore = storage.defineItem<ExtensionSettings>(
 /**
  * Get current settings from storage
  */
-export async function getSettings(): Promise<ExtensionSettings> {
+export async function getSettings() {
     return await settingsStore.getValue()
 }
 
@@ -50,7 +50,7 @@ export async function getSettings(): Promise<ExtensionSettings> {
  */
 export async function updateSettings(
     partialSettings: Partial<ExtensionSettings>,
-): Promise<void> {
+) {
     const currentSettings = await getSettings()
     const newSettings = { ...currentSettings, ...partialSettings }
     await settingsStore.setValue(newSettings)
@@ -61,7 +61,7 @@ export async function updateSettings(
  */
 export async function setSettings(
     settings: Partial<ExtensionSettings>,
-): Promise<void> {
+) {
     const newSettings = { ...getDefaults(), ...settings }
     await settingsStore.setValue(newSettings)
 }
@@ -69,14 +69,14 @@ export async function setSettings(
 /**
  * Restore all settings to defaults
  */
-export async function restoreDefaults(): Promise<void> {
+export async function restoreDefaults() {
     await settingsStore.setValue(getDefaults())
 }
 
 /**
  * Restore only selector-related settings to defaults
  */
-export async function restoreSelectors(): Promise<void> {
+export async function restoreSelectors() {
     const currentSettings = await getSettings()
     const updatedSettings = {
         ...currentSettings,

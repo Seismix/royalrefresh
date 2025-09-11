@@ -8,7 +8,7 @@ import type { ExtensionSettings } from "~/types/types"
 /**
  * True if `chapter` is in the URL path, otherwise false.
  */
-export function documentIsChapterURL(): boolean {
+export function documentIsChapterURL() {
     return window.location.pathname.split("/").includes("chapter")
 }
 
@@ -17,7 +17,7 @@ export function documentIsChapterURL(): boolean {
  */
 export function documentHasPreviousChapterURL(
     extensionSettings: ExtensionSettings,
-): boolean {
+) {
     const hasPrevChapterURL = document.querySelector(
         extensionSettings.prevChapterBtn,
     )
