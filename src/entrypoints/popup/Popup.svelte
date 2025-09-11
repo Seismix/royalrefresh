@@ -5,11 +5,9 @@
         settingsStore,
         updateSettings,
         restoreDefaults,
-        restoreSelectors,
         watchSettings,
     } from "~/lib/utils/storage-utils"
     import BasicSettings from "~/components/settings/BasicSettings.svelte"
-    import AdvancedSettings from "~/components/settings/AdvancedSettings.svelte"
 
     let saveStatus = $state<string>("")
     let activeButton = $state<string>("")
@@ -66,27 +64,6 @@
         }
     }
 
-    async function handleRestoreSelectors() {
-        try {
-            await restoreSelectors()
-            showSaveStatus("Restored Selectors ✔", "restoreSelectors")
-        } catch (error) {
-            console.error("Failed to restore selectors:", error)
-            showSaveStatus("Restore failed ✗", "restoreSelectors")
-        }
-    }
-
-    async function handleRestoreAll() {
-        try {
-            await restoreDefaults()
-            await restoreSelectors()
-            showSaveStatus("Restored All ✔", "restoreAll")
-        } catch (error) {
-            console.error("Failed to restore all:", error)
-            showSaveStatus("Restore failed ✗", "restoreAll")
-        }
-    }
-
     function showSaveStatus(message: string, buttonType: string) {
         saveStatus = message
         activeButton = buttonType
@@ -98,6 +75,8 @@
 </script>
 
 <main>
+    <h1>RoyalRefresh Settings</h1>
+
     {#if !localSettings}
         <p>Loading settings...</p>
     {:else}
@@ -109,41 +88,11 @@
             <BasicSettings
                 bind:settings={localSettings}
                 onValidationChange={handleValidationChange}
-                showButtons={false} />
-
-            <AdvancedSettings
-                bind:settings={localSettings}
-                showButtons={false} />
-
-            <div class="button-controls">
-                <button
-                    type="submit"
-                    class:saved={activeButton === "save" && saveStatus.includes("✔")}>
-                    {saveStatus === "Saved ✔" ? saveStatus : "Save"}
-                </button>
-                <button
-                    type="button"
-                    class:saved={activeButton === "restoreAll" &&
-                        saveStatus.includes("✔")}
-                    onclick={handleRestoreAll}>
-                    {saveStatus === "Restored All ✔"
-                        ? saveStatus
-                        : "Restore All"}
-                </button>
-            </div>
-
+                onSave={handleSave}
+                onRestoreDefaults={handleRestoreDefaults}
+                {saveStatus}
+                {activeButton}
+                showButtons={true} />
         </form>
     {/if}
 </main>
-
-<style>
-    .button-controls {
-        display: flex;
-        gap: 10px;
-        margin-top: 20px;
-    }
-
-    .button-controls button {
-        flex: 1;
-    }
-</style>
