@@ -8,6 +8,7 @@
 
     let localSettings = $state<ExtensionSettings | null>(null)
     let isValid = $state<boolean>(true)
+    let isFirefox = $state(import.meta.env.FIREFOX)
 
     // Load initial settings and set up watching
     $effect(() => {
@@ -35,7 +36,7 @@
     }
 </script>
 
-<main>
+<main class={isFirefox ? 'firefox' : ''}>
     {#if !localSettings}
         <p>Loading settings...</p>
     {:else}
@@ -51,3 +52,9 @@
             showRestoreSelectors={true} />
     {/if}
 </main>
+
+<style>
+    .firefox {
+        padding-left: 20px;
+    }
+</style>
