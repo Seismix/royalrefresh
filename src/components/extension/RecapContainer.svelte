@@ -3,7 +3,7 @@
     import { getSettings, watchSettings } from "~/lib/utils/storage-utils"
     import { ContentManager } from "~/lib/services/content-manager"
     import { getDefaults } from "~/lib/config/defaults"
-    import { ExtensionSettings } from "~/types/types"
+    import type { ExtensionSettings } from "~/types/types"
 
     let { id = "recapContainer" }: { id?: string } = $props()
 
