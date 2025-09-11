@@ -6,12 +6,14 @@ export type ExtensionSelectors = {
     togglePlacement: string
     settingsPlacement: string
     blurb: string
+    blurbLabels: string
     closeButtonSelector: string
 }
 
 export type ExtensionSettings = {
     wordCount: number
-    smoothScroll: boolean
+    enableJump: boolean
+    scrollBehavior: ScrollBehavior
     autoExpand: boolean
 } & ExtensionSelectors
 

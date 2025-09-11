@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="src/public/icons/royalroad_128.png" alt="RoyalRefresh Logo" width="128" height="128">
+  <img src="public/icons/royalroad_128.png" alt="RoyalRefresh Logo" width="128" height="128">
 </h1>
 
 <h1 align="center">RoyalRefresh</h1>
@@ -8,19 +8,18 @@
 
 <h2 align="center">Install</h2>
 <p align="center">
-  <a href="https://addons.mozilla.org/en-US/firefox/addon/royalrefresh">
-    <img src="https://img.shields.io/badge/Firefox-royalrefresh-orange?logo=firefoxbrowser&style=flat-square" alt="Install Firefox Add-on">
-  </a>
-  <a href="https://chromewebstore.google.com/detail/royalrefresh/dfedgngibbhkdhcengnfhdolgcogmijc">
-    <img src="https://img.shields.io/badge/Chrome-royalrefresh-blue?logo=googlechrome&style=flat-square" alt="Install from Chrome Web Store">
-  </a>
-  <!-- MSFT does not allow the use of the Edge logo, so it's not in the simpleicons.org collection -->
-  <a href="https://chromewebstore.google.com/detail/royalrefresh/dfedgngibbhkdhcengnfhdolgcogmijc">
-    <img src="https://img.shields.io/badge/Edge-royalrefresh-green?&style=flat-square" alt="Install for Edge from Chrome Web Store">
-  </a>
-  <a href="https://chromewebstore.google.com/detail/royalrefresh/dfedgngibbhkdhcengnfhdolgcogmijc">
-    <img src="https://img.shields.io/badge/Opera-royalrefresh-red?logo=opera&style=flat-square" alt="Install for Opera from Chrome Web Store">
-  </a>
+    <a href="https://addons.mozilla.org/en-US/firefox/addon/royalrefresh">
+        <img src="https://img.shields.io/badge/Firefox-royalrefresh-orange?logo=firefoxbrowser&style=flat-square" alt="Install Firefox Add-on" style="margin-right: 4px;">
+    </a>
+    <a href="https://chromewebstore.google.com/detail/royalrefresh/dfedgngibbhkdhcengnfhdolgcogmijc">
+        <img src="https://img.shields.io/badge/Chrome-royalrefresh-blue?logo=googlechrome&style=flat-square" alt="Install from Chrome Web Store" style="margin-right: 4px;">
+    </a>
+    <a href="https://chromewebstore.google.com/detail/royalrefresh/dfedgngibbhkdhcengnfhdolgcogmijc">
+        <img src="https://img.shields.io/badge/Edge-royalrefresh-green?&style=flat-square" alt="Install for Edge from Chrome Web Store" style="margin-right: 4px;">
+    </a>
+    <a href="https://chromewebstore.google.com/detail/royalrefresh/dfedgngibbhkdhcengnfhdolgcogmijc">
+        <img src="https://img.shields.io/badge/Opera-royalrefresh-red?logo=opera&style=flat-square" alt="Install for Opera from Chrome Web Store">
+    </a>
 </p>
 
 ## Why?

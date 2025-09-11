@@ -1,5 +1,8 @@
 import { Page } from "@playwright/test"
-import DEFAULTS from "../helpers/defaults"
+import {
+    getChapterPageSelectors,
+    getFictionPageSelectors,
+} from "~/lib/config/defaults"
 import { expect, test } from "./utils/fixtures"
 
 /** Helper function to check if a selector exists and is visible */
@@ -24,21 +27,20 @@ test.describe("Chapter Page", () => {
         await page.close()
     })
 
-    for (const [key, selector] of Object.entries(DEFAULTS)) {
-        // Skip 'blurb' because it's not present on the chapter page
-        if (typeof selector === "string" && key !== "blurb") {
-            test(`${key} selector exists`, async () => {
-                await checkSelector(page, selector)
-            })
-        }
+    for (const [key, selector] of Object.entries(getChapterPageSelectors())) {
+        test(`${key} selector exists`, async () => {
+            await checkSelector(page, selector)
+        })
     }
 })
 
 test.describe("Fiction Page", () => {
-    test("blurb selector exists", async ({ page }) => {
-        await page.goto(
-            "https://www.royalroad.com/fiction/63759/super-supportive",
-        )
-        await checkSelector(page, DEFAULTS.blurb)
-    })
+    for (const [key, selector] of Object.entries(getFictionPageSelectors())) {
+        test(`${key} selector exists`, async ({ page }) => {
+            await page.goto(
+                "https://www.royalroad.com/fiction/63759/super-supportive",
+            )
+            await checkSelector(page, selector)
+        })
+    }
 })
