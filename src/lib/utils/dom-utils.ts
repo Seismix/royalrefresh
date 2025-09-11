@@ -61,3 +61,59 @@ export function mountComponent<T extends Record<string, any>>(
         element?.remove()
     }
 }
+
+/**
+ * Finds the previous chapter URL from the current page DOM
+ * @param settings - Extension settings containing selectors
+ * @returns Previous chapter URL or error message
+ */
+export function findPreviousChapterUrl(
+    settings: ExtensionSettings,
+): { data: string } | { error: string } {
+    const prevChapterBtn = document.querySelector(settings.prevChapterBtn)
+
+    if (!(prevChapterBtn instanceof HTMLAnchorElement)) {
+        return {
+            error: "Could not find previous chapter button. Make sure you're on a chapter page with a previous chapter.",
+        }
+    }
+
+    if (!prevChapterBtn.href) {
+        return {
+            error: "Previous chapter button found but has no link. This might be the first chapter.",
+        }
+    }
+
+    return { data: prevChapterBtn.href }
+}
+
+/**
+ * Finds the fiction overview URL from the current page DOM
+ * @param settings - Extension settings containing selectors
+ * @returns Fiction overview URL or error message
+ */
+export function findFictionOverviewUrl(
+    settings: ExtensionSettings,
+): { data: string } | { error: string } {
+    const fictionTitleElement = document.querySelector(settings.fictionTitle)
+
+    if (!fictionTitleElement) {
+        return {
+            error: "Could not find fiction title on current page.",
+        }
+    }
+
+    if (!(fictionTitleElement.parentElement instanceof HTMLAnchorElement)) {
+        return {
+            error: "Fiction title found but is not linked to overview page.",
+        }
+    }
+
+    if (!fictionTitleElement.parentElement.href) {
+        return {
+            error: "Fiction title link found but has no URL.",
+        }
+    }
+
+    return { data: fictionTitleElement.parentElement.href }
+}

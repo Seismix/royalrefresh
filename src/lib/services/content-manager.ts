@@ -1,5 +1,10 @@
 import type { ExtensionSettings } from "~/types/types"
-import { HttpClient, ContentCache, ContentProcessor } from "./"
+import { fetchHtml } from "./"
+import { ContentCache, ContentProcessor } from "./"
+import {
+    findPreviousChapterUrl,
+    findFictionOverviewUrl,
+} from "~/lib/utils/dom-utils"
 
 /**
  * Content Manager Service - Orchestrates content fetching, caching, and processing
@@ -16,7 +21,7 @@ export class ContentManager {
         settings: ExtensionSettings,
     ): Promise<{ content: string; type: "recap" } | { error: string }> {
         // 1. Find previous chapter URL from DOM
-        const prevChapterUrlResult = this.findPreviousChapterUrl(settings)
+        const prevChapterUrlResult = findPreviousChapterUrl(settings)
         if ("error" in prevChapterUrlResult) {
             return prevChapterUrlResult
         }
@@ -38,7 +43,7 @@ export class ContentManager {
         }
 
         // 3. Fetch from network
-        const fetchResult = await HttpClient.fetchHtml(prevChapterUrl)
+        const fetchResult = await fetchHtml(prevChapterUrl)
         if ("error" in fetchResult) {
             return {
                 error: `Failed to fetch previous chapter: ${fetchResult.error}`,
@@ -70,7 +75,7 @@ export class ContentManager {
         settings: ExtensionSettings,
     ): Promise<{ content: string; type: "blurb" } | { error: string }> {
         // 1. Find fiction overview URL from DOM
-        const overviewUrlResult = this.findFictionOverviewUrl(settings)
+        const overviewUrlResult = findFictionOverviewUrl(settings)
         if ("error" in overviewUrlResult) {
             return overviewUrlResult
         }
@@ -78,7 +83,7 @@ export class ContentManager {
         const overviewUrl = overviewUrlResult.data
 
         // 2. Fetch from network (no caching for blurb)
-        const fetchResult = await HttpClient.fetchHtml(overviewUrl)
+        const fetchResult = await fetchHtml(overviewUrl)
         if ("error" in fetchResult) {
             return {
                 error: `Failed to fetch story overview: ${fetchResult.error}`,
@@ -107,7 +112,7 @@ export class ContentManager {
         settings: ExtensionSettings,
     ): { content: string; type: "recap" } | { error: string } {
         // 1. Find previous chapter URL
-        const prevChapterUrlResult = this.findPreviousChapterUrl(settings)
+        const prevChapterUrlResult = findPreviousChapterUrl(settings)
         if ("error" in prevChapterUrlResult) {
             return prevChapterUrlResult
         }
@@ -137,7 +142,7 @@ export class ContentManager {
      * @returns True if content is cached
      */
     static hasRecapInCache(settings: ExtensionSettings): boolean {
-        const prevChapterUrlResult = this.findPreviousChapterUrl(settings)
+        const prevChapterUrlResult = findPreviousChapterUrl(settings)
         if ("error" in prevChapterUrlResult) {
             return false
         }
@@ -150,59 +155,5 @@ export class ContentManager {
      */
     static clearCache(): void {
         ContentCache.clearRecapCache()
-    }
-
-    /**
-     * Finds the previous chapter URL from the current page DOM
-     */
-    private static findPreviousChapterUrl(
-        settings: ExtensionSettings,
-    ): { data: string } | { error: string } {
-        const prevChapterBtn = document.querySelector(settings.prevChapterBtn)
-
-        if (!(prevChapterBtn instanceof HTMLAnchorElement)) {
-            return {
-                error: "Could not find previous chapter button. Make sure you're on a chapter page with a previous chapter.",
-            }
-        }
-
-        if (!prevChapterBtn.href) {
-            return {
-                error: "Previous chapter button found but has no link. This might be the first chapter.",
-            }
-        }
-
-        return { data: prevChapterBtn.href }
-    }
-
-    /**
-     * Finds the fiction overview URL from the current page DOM
-     */
-    private static findFictionOverviewUrl(
-        settings: ExtensionSettings,
-    ): { data: string } | { error: string } {
-        const fictionTitleElement = document.querySelector(
-            settings.fictionTitle,
-        )
-
-        if (!fictionTitleElement) {
-            return {
-                error: "Could not find fiction title on current page.",
-            }
-        }
-
-        if (!(fictionTitleElement.parentElement instanceof HTMLAnchorElement)) {
-            return {
-                error: "Fiction title found but is not linked to overview page.",
-            }
-        }
-
-        if (!fictionTitleElement.parentElement.href) {
-            return {
-                error: "Fiction title link found but has no URL.",
-            }
-        }
-
-        return { data: fictionTitleElement.parentElement.href }
     }
 }
