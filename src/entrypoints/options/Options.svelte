@@ -36,7 +36,7 @@
     }
 </script>
 
-<main class={isFirefox ? 'firefox' : ''}>
+<main class={isFirefox ? "firefox" : ""}>
     {#if !localSettings}
         <p>Loading settings...</p>
     {:else}
