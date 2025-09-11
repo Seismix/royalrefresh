@@ -24,7 +24,9 @@ export async function getSettings(): Promise<ExtensionSettings> {
 /**
  * Update settings with partial changes
  */
-export async function updateSettings(partialSettings: Partial<ExtensionSettings>): Promise<void> {
+export async function updateSettings(
+    partialSettings: Partial<ExtensionSettings>,
+): Promise<void> {
     const currentSettings = await getSettings()
     const newSettings = { ...currentSettings, ...partialSettings }
     await settingsStore.setValue(newSettings)
@@ -33,7 +35,9 @@ export async function updateSettings(partialSettings: Partial<ExtensionSettings>
 /**
  * Set complete settings (replaces old settings entirely)
  */
-export async function setSettings(settings: Partial<ExtensionSettings>): Promise<void> {
+export async function setSettings(
+    settings: Partial<ExtensionSettings>,
+): Promise<void> {
     const newSettings = { ...DEFAULTS, ...settings }
     await settingsStore.setValue(newSettings)
 }
@@ -61,6 +65,8 @@ export async function restoreSelectors(): Promise<void> {
 /**
  * Watch for settings changes
  */
-export function watchSettings(callback: (newSettings: ExtensionSettings | null) => void) {
+export function watchSettings(
+    callback: (newSettings: ExtensionSettings | null) => void,
+) {
     return settingsStore.watch(callback)
 }

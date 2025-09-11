@@ -50,7 +50,7 @@
             // Try to refresh from cache first
             const result = ContentManager.refreshRecapFromCache(currentSettings)
 
-            if ('error' in result) {
+            if ("error" in result) {
                 // If cache refresh fails, the user can manually refresh
                 console.warn("Could not refresh from cache:", result.error)
             } else {
@@ -62,7 +62,11 @@
     })
 </script>
 
-<div {id} style="display: {recapState.isVisible || recapState.hasError ? 'block' : 'none'}">
+<div
+    {id}
+    style="display: {recapState.isVisible || recapState.hasError
+        ? 'block'
+        : 'none'}">
     {#if recapState.hasError}
         <div class="error">{recapState.error}</div>
     {:else if recapState.content}
