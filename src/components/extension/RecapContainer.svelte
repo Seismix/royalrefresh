@@ -3,12 +3,13 @@
     import { getSettings, watchSettings } from "~/lib/utils/storage-utils"
     import { ContentManager } from "~/lib/services/content-manager"
     import { getDefaults } from "~/lib/config/defaults"
+    import { ExtensionSettings } from "@/types/types"
 
     let { id = "recapContainer" }: { id?: string } = $props()
 
     // Track previous settings to detect changes
     let previousWordCount = $state<number>(getDefaults().wordCount)
-    let currentSettings = $state<any>(null)
+    let currentSettings = $state<ExtensionSettings | null>(null)
 
     // Load initial settings and watch for changes
     $effect(() => {
