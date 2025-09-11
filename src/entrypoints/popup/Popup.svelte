@@ -1,16 +1,10 @@
 <script lang="ts">
     import type { ExtensionSettings } from "~/types/types"
     import DEFAULTS from "~/lib/config/defaults"
-    import {
-        settingsStore,
-        updateSettings,
-        restoreDefaults,
-        watchSettings,
-    } from "~/lib/utils/storage-utils"
+    import { settingsStore, watchSettings } from "~/lib/utils/storage-utils"
     import BasicSettings from "~/components/settings/BasicSettings.svelte"
+    import ActionButtons from "~/components/common/ActionButtons.svelte"
 
-    let saveStatus = $state<string>("")
-    let activeButton = $state<string>("")
     let localSettings = $state<ExtensionSettings | null>(null)
     let isValid = $state<boolean>(true)
 
@@ -35,42 +29,8 @@
         loadSettings()
     })
 
-    function handleValidationChange(valid: boolean, error: string) {
+    function handleValidationChange(valid: boolean) {
         isValid = valid
-    }
-
-    async function handleSave() {
-        if (!isValid || !localSettings) {
-            showSaveStatus("Invalid word count ✗", "save")
-            return
-        }
-
-        try {
-            await updateSettings(localSettings)
-            showSaveStatus("Saved ✔", "save")
-        } catch (error) {
-            console.error("Failed to save settings:", error)
-            showSaveStatus("Save failed ✗", "save")
-        }
-    }
-
-    async function handleRestoreDefaults() {
-        try {
-            await restoreDefaults()
-            showSaveStatus("Restored Defaults ✔", "restoreDefaults")
-        } catch (error) {
-            console.error("Failed to restore defaults:", error)
-            showSaveStatus("Restore failed ✗", "restoreDefaults")
-        }
-    }
-
-    function showSaveStatus(message: string, buttonType: string) {
-        saveStatus = message
-        activeButton = buttonType
-        setTimeout(() => {
-            saveStatus = ""
-            activeButton = ""
-        }, 1000)
     }
 </script>
 
@@ -80,19 +40,10 @@
     {#if !localSettings}
         <p>Loading settings...</p>
     {:else}
-        <form
-            onsubmit={(e) => {
-                e.preventDefault()
-                handleSave()
-            }}>
-            <BasicSettings
-                bind:settings={localSettings}
-                onValidationChange={handleValidationChange}
-                onSave={handleSave}
-                onRestoreDefaults={handleRestoreDefaults}
-                {saveStatus}
-                {activeButton}
-                showButtons={true} />
-        </form>
+        <BasicSettings
+            bind:settings={localSettings}
+            onValidationChange={handleValidationChange} />
+
+        <ActionButtons settings={localSettings} {isValid} />
     {/if}
 </main>

@@ -3,18 +3,8 @@
 
     let {
         settings = $bindable(),
-        onRestoreSelectors,
-        onSave,
-        saveStatus = "",
-        activeButton = "",
-        showButtons = false,
     }: {
         settings: ExtensionSettings
-        onRestoreSelectors?: () => Promise<void>
-        onSave?: () => Promise<void>
-        saveStatus?: string
-        activeButton?: string
-        showButtons?: boolean
     } = $props()
 </script>
 
@@ -80,25 +70,6 @@
     <span>Button to close settings modal:</span>
     <input type="text" bind:value={settings.closeButtonSelector} />
 </label>
-
-{#if showButtons}
-    <button
-        type="button"
-        class:saved={activeButton === "save" && saveStatus.includes("✔")}
-        onclick={onSave}>
-        {saveStatus === "Saved ✔" ? saveStatus : "Save CSS Selectors"}
-    </button>
-
-    <button
-        type="button"
-        class:saved={activeButton === "restoreSelectors" &&
-            saveStatus.includes("✔")}
-        onclick={onRestoreSelectors}>
-        {saveStatus === "Restored Selectors ✔"
-            ? saveStatus
-            : "Restore Default Selectors"}
-    </button>
-{/if}
 
 <style>
     .info-message {

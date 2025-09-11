@@ -4,19 +4,9 @@
     let {
         settings = $bindable(),
         onValidationChange,
-        onSave,
-        onRestoreDefaults,
-        saveStatus = "",
-        activeButton = "",
-        showButtons = false,
     }: {
         settings: ExtensionSettings
-        onValidationChange?: (isValid: boolean, error: string) => void
-        onSave?: () => Promise<void>
-        onRestoreDefaults?: () => Promise<void>
-        saveStatus?: string
-        activeButton?: string
-        showButtons?: boolean
+        onValidationChange?: (isValid: boolean) => void
     } = $props()
 
     // Validation for word count using result object pattern
@@ -49,10 +39,7 @@
     // Notify parent of validation changes
     $effect(() => {
         if (onValidationChange) {
-            onValidationChange(
-                wordCountValidation.isValid,
-                wordCountValidation.error,
-            )
+            onValidationChange(wordCountValidation.isValid)
         }
     })
 </script>
@@ -82,25 +69,6 @@
     <input type="checkbox" bind:checked={settings.autoExpand} />
 </label>
 
-{#if showButtons}
-<div class="button-controls">
-    <button
-        type="submit"
-        class:saved={activeButton === "save" && saveStatus.includes("✔")}>
-        {saveStatus === "Saved ✔" ? saveStatus : "Save"}
-    </button>
-    <button
-        type="button"
-        class:saved={activeButton === "restoreDefaults" &&
-            saveStatus.includes("✔")}
-        onclick={onRestoreDefaults}>
-        {saveStatus === "Restored Defaults ✔"
-            ? saveStatus
-            : "Restore All Settings"}
-    </button>
-</div>
-{/if}
-
 <style>
     .validation-error {
         color: #c62828;
@@ -112,16 +80,6 @@
     input.invalid {
         border-color: #f44336;
         background-color: #ffebee;
-    }
-
-    .button-controls {
-        display: flex;
-        gap: 10px;
-        margin-top: 20px;
-    }
-
-    .button-controls button {
-        flex: 1;
     }
 
     /* Dark mode styles */
