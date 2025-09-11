@@ -69,7 +69,7 @@
         <span>Scroll behavior</span>
         <select bind:value={settings.scrollBehavior}>
             <option value="smooth">Smooth (animated scroll)</option>
-            <option value="immediate">Immediate (instant jump)</option>
+            <option value="instant">Immediate (instant jump)</option>
         </select>
     </label>
 {/if}
