@@ -128,6 +128,15 @@
         background-color: white;
         color: #333;
         margin-left: 8px;
+        transition: border-color 0.2s ease;
+    }
+
+    select:disabled {
+        background-color: #f5f5f5;
+        color: #999;
+        border-color: #ddd;
+        cursor: not-allowed;
+        opacity: 0.6;
     }
 
     .info-message {
@@ -157,8 +166,14 @@
             border-color: #555;
         }
 
-        select:hover {
+        select:hover:not(:disabled) {
             border-color: #777;
+        }
+
+        select:disabled {
+            background-color: #1a1a1a;
+            color: #666;
+            border-color: #444;
         }
 
         .info-message {
