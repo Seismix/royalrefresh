@@ -1,10 +1,5 @@
 import DEFAULTS, { getDefaults } from "~/lib/config/defaults"
-import {
-    setSettings,
-    restoreSelectors,
-    getSettings,
-    updateSettings,
-} from "~/lib/utils/storage-utils"
+import { setSettings, restoreSelectors } from "~/lib/utils/storage-utils"
 import { currentBrowser, BrowserType } from "~/lib/utils/platform"
 
 export default defineBackground(() => {
@@ -15,24 +10,10 @@ export default defineBackground(() => {
         }
 
         if (details.reason === "update") {
-            const settings = await getSettings()
-
-            // Migration: smoothScroll -> enableJump & scrollBehavior
-            if ("smoothScroll" in settings) {
-                const migrated = {
-                    ...settings,
-                    enableJump: (settings as any).smoothScroll === true,
-                    scrollBehavior: (settings as any).smoothScroll
-                        ? ("smooth" as const)
-                        : ("auto" as const),
-                } as any
-                delete migrated.smoothScroll
-                await updateSettings(migrated)
-            }
-
-            // Preserve user settings but update selectors to handle website changes
+            // WXT handles storage migrations automatically via settingsStore versioning
             await restoreSelectors()
         }
+
         // Only Firefox supports the "temporary" property
         if (details.temporary) {
             browser.tabs.reload()

@@ -3,7 +3,7 @@ import { DEFAULT_SELECTORS, getDefaults } from "~/lib/config/defaults"
 import type { ExtensionSettings } from "~/types/types"
 
 /**
- * WXT storage utilities for extension settings
+ * WXT storage utilities for extension settings with migration support
  * Replaces the ExtensionState class with direct storage access
  */
 
@@ -11,6 +11,30 @@ export const settingsStore = storage.defineItem<ExtensionSettings>(
     "sync:settings",
     {
         fallback: getDefaults(),
+        version: 2,
+        migrations: {
+            2: (oldSettings: any) => {
+                // Migration from v1 to v2: smoothScroll -> enableJump & scrollBehavior
+                if ("smoothScroll" in oldSettings) {
+                    const migrated = {
+                        ...oldSettings,
+                        enableJump: oldSettings.smoothScroll === true,
+                        scrollBehavior: oldSettings.smoothScroll ? "smooth" : "auto",
+                    } as ExtensionSettings
+
+                    // Remove the old property
+                    delete (migrated as any).smoothScroll
+
+                    console.log("WXT Migration v1→v2: smoothScroll ->", {
+                        enableJump: migrated.enableJump,
+                        scrollBehavior: migrated.scrollBehavior
+                    })
+
+                    return migrated
+                }
+                return oldSettings as ExtensionSettings
+            }
+        }
     },
 )
 
