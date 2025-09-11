@@ -9,6 +9,25 @@
         onValidationChange?: (isValid: boolean) => void
     } = $props()
 
+    // Detect prefers-reduced-motion
+    const prefersReducedMotion = $derived.by(() => {
+        if (typeof window !== "undefined" && window.matchMedia) {
+            return window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        }
+        return false
+    })
+
+    // Auto-adjust scroll behavior when reduced motion is preferred
+    $effect(() => {
+        if (
+            prefersReducedMotion &&
+            settings.enableJump &&
+            settings.scrollBehavior === "smooth"
+        ) {
+            settings.scrollBehavior = "instant"
+        }
+    })
+
     // Validation for word count using result object pattern
     const wordCountValidation = $derived.by(() => {
         if (!settings) {
@@ -60,18 +79,27 @@
 </label>
 
 <label>
-    <span>Jump to recap</span>
+    <span>Enable jump to recap</span>
     <input type="checkbox" bind:checked={settings.enableJump} />
 </label>
 
 {#if settings.enableJump}
-    <label>
-        <span>Scroll behavior</span>
-        <select bind:value={settings.scrollBehavior}>
-            <option value="smooth">Smooth (animated scroll)</option>
-            <option value="instant">Immediate (instant jump)</option>
-        </select>
-    </label>
+    <span class="label-text" class:reduced-motion={prefersReducedMotion}
+        >Scroll behavior</span>
+    <select
+        bind:value={settings.scrollBehavior}
+        disabled={prefersReducedMotion}>
+        <option value="smooth">Smooth (animated scroll)</option>
+        <option value="instant">Immediate (instant jump)</option>
+    </select>
+
+    {#if prefersReducedMotion}
+        <p class="info-message">
+            You cannot select smooth scrolling behavior<br />
+            because "<em>prefers-reduced-motion</em>" is enabled <br />
+            in your operating system settings.
+        </p>
+    {/if}
 {/if}
 
 <label>
@@ -102,6 +130,15 @@
         margin-left: 8px;
     }
 
+    .info-message {
+        border-radius: 4px;
+        padding: 12px;
+        margin-bottom: 16px;
+        background-color: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        font-size: smaller;
+    }
+
     /* Dark mode styles */
     @media (prefers-color-scheme: dark) {
         .validation-error {
@@ -122,6 +159,11 @@
 
         select:hover {
             border-color: #777;
+        }
+
+        .info-message {
+            background-color: #1a2332;
+            border-left-color: #64b5f6;
         }
     }
 </style>

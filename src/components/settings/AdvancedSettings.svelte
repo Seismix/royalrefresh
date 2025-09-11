@@ -16,12 +16,12 @@
     you can modify these selectors as a temporary workaround.
 </p>
 
-<p class="warning-message">
+<p class="message warning-message">
     Changing these values may break the functionality of the extension. If you
     encounter any issues, you can restore the default settings using the
     "Restore Default Selectors" button below.
 </p>
-<p class="info-message">
+<p class="message info-message">
     Custom CSS-Selectors are overwritten if an extension update changes the
     default values.
 </p>
@@ -72,20 +72,20 @@
 </label>
 
 <style>
+    .message {
+        border-radius: 4px;
+        padding: 12px;
+        margin-bottom: 16px;
+    }
+
     .info-message {
         background-color: #e3f2fd;
         border-left: 4px solid #2196f3;
-        padding: 12px;
-        margin-bottom: 16px;
-        border-radius: 4px;
     }
 
     .warning-message {
         background-color: #fff8e1;
         border-left: 6px solid #eed202;
-        padding: 10px;
-        margin-bottom: 15px;
-        color: #8b6f00;
     }
 
     /* Dark mode styles */

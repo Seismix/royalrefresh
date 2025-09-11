@@ -33,12 +33,6 @@ p {
     text-align: left;
 }
 
-p.warning-message {
-    color: crimson;
-    font-weight: bold;
-    margin-bottom: 1.5em;
-}
-
 label {
     display: block;
     margin-bottom: 5px;
