@@ -60,9 +60,19 @@
 </label>
 
 <label>
-    <span>Enable smooth scroll after button click</span>
-    <input type="checkbox" bind:checked={settings.smoothScroll} />
+    <span>Jump to recap</span>
+    <input type="checkbox" bind:checked={settings.enableJump} />
 </label>
+
+{#if settings.enableJump}
+    <label>
+        <span>Scroll behavior</span>
+        <select bind:value={settings.scrollBehavior}>
+            <option value="smooth">Smooth (animated scroll)</option>
+            <option value="immediate">Immediate (instant jump)</option>
+        </select>
+    </label>
+{/if}
 
 <label>
     <span>Enable auto expanding recap on page load</span>
@@ -82,6 +92,16 @@
         background-color: #ffebee;
     }
 
+    select {
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+        background-color: white;
+        color: #333;
+        margin-left: 8px;
+    }
+
     /* Dark mode styles */
     @media (prefers-color-scheme: dark) {
         .validation-error {
@@ -92,6 +112,16 @@
             border-color: #e57373;
             background-color: #2d1b1b;
             color: #ffcdd2;
+        }
+
+        select {
+            background-color: #2d2d2d;
+            color: #e0e0e0;
+            border-color: #555;
+        }
+
+        select:hover {
+            border-color: #777;
         }
     }
 </style>

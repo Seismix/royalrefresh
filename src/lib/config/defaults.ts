@@ -15,9 +15,56 @@ export const DEFAULT_SELECTORS: ExtensionSelectors = {
 
 const DEFAULTS: ExtensionSettings = {
     wordCount: 250,
-    smoothScroll: true,
+    enableJump: true,
+    scrollBehavior: "smooth",
     autoExpand: false,
     ...DEFAULT_SELECTORS,
+}
+
+/**
+ * Get defaults with prefers-reduced-motion detection
+ * Falls back to static DEFAULTS if window is not available
+ */
+export function getDefaults(): ExtensionSettings {
+    try {
+        if (typeof window !== "undefined" && window.matchMedia) {
+            const prefersReducedMotion = window.matchMedia(
+                "(prefers-reduced-motion: reduce)",
+            ).matches
+            return {
+                ...DEFAULTS,
+                enableJump: !prefersReducedMotion,
+            }
+        }
+    } catch (error) {
+        // Ignore errors in case matchMedia is not available
+    }
+    return DEFAULTS
+}
+
+/**
+ * Get selectors that should be present on chapter pages
+ */
+export function getChapterPageSelectors(): Record<string, string> {
+    return {
+        prevChapterBtn: DEFAULT_SELECTORS.prevChapterBtn,
+        chapterContent: DEFAULT_SELECTORS.chapterContent,
+        chapterTitle: DEFAULT_SELECTORS.chapterTitle,
+        fictionTitle: DEFAULT_SELECTORS.fictionTitle,
+        togglePlacement: DEFAULT_SELECTORS.togglePlacement,
+        settingsPlacement: DEFAULT_SELECTORS.settingsPlacement,
+        closeButtonSelector: DEFAULT_SELECTORS.closeButtonSelector,
+    }
+}
+
+/**
+ * Get selectors that should be present on fiction/story pages
+ */
+export function getFictionPageSelectors(): Record<string, string> {
+    return {
+        blurb: DEFAULT_SELECTORS.blurb,
+        blurbLabels: DEFAULT_SELECTORS.blurbLabels,
+    }
 }
 
 export const CACHE_TTL_MS = 30 * 60 * 1000

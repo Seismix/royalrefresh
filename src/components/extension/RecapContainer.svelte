@@ -2,12 +2,12 @@
     import { recapState } from "~/lib/state/recap-state.svelte"
     import { getSettings, watchSettings } from "~/lib/utils/storage-utils"
     import { ContentManager } from "~/lib/services/content-manager"
-    import DEFAULTS from "~/lib/config/defaults"
+    import { getDefaults } from "~/lib/config/defaults"
 
     let { id = "recapContainer" }: { id?: string } = $props()
 
     // Track previous settings to detect changes
-    let previousWordCount = $state<number>(DEFAULTS.wordCount)
+    let previousWordCount = $state<number>(getDefaults().wordCount)
     let currentSettings = $state<any>(null)
 
     // Load initial settings and watch for changes
@@ -33,8 +33,10 @@
 
     // Effect: scroll into view when content becomes visible
     $effect(() => {
-        if (recapState.isVisible && currentSettings?.smoothScroll) {
-            document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })
+        if (recapState.isVisible && currentSettings?.enableJump) {
+            document
+                .getElementById(id)
+                ?.scrollIntoView({ behavior: currentSettings.scrollBehavior })
         }
     })
 

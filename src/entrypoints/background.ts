@@ -1,14 +1,35 @@
-import DEFAULTS from "~/lib/config/defaults"
-import { setSettings, restoreSelectors } from "~/lib/utils/storage-utils"
+import DEFAULTS, { getDefaults } from "~/lib/config/defaults"
+import {
+    setSettings,
+    restoreSelectors,
+    getSettings,
+    updateSettings,
+} from "~/lib/utils/storage-utils"
 import { currentBrowser, BrowserType } from "~/lib/utils/platform"
 
 export default defineBackground(() => {
     // Saves the default values to the browser storage after the extension has been installed
     browser.runtime.onInstalled.addListener(async (details) => {
         if (details.reason === "install") {
-            await setSettings(DEFAULTS)
+            await setSettings(getDefaults())
         }
+
         if (details.reason === "update") {
+            const settings = await getSettings()
+
+            // Migration: smoothScroll -> enableJump & scrollBehavior
+            if ("smoothScroll" in settings) {
+                const migrated = {
+                    ...settings,
+                    enableJump: (settings as any).smoothScroll === true,
+                    scrollBehavior: (settings as any).smoothScroll
+                        ? ("smooth" as const)
+                        : ("auto" as const),
+                } as any
+                delete migrated.smoothScroll
+                await updateSettings(migrated)
+            }
+
             // Preserve user settings but update selectors to handle website changes
             await restoreSelectors()
         }
@@ -22,7 +43,7 @@ export default defineBackground(() => {
         if (typeof message !== "object" || message === null) return
 
         if ("request" in message && message.request === "getDefaultSettings") {
-            return Promise.resolve(DEFAULTS)
+            return Promise.resolve(getDefaults())
         }
 
         if ("action" in message && message.action === "openExtensionSettings") {

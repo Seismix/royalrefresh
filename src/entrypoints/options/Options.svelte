@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { ExtensionSettings } from "~/types/types"
-    import DEFAULTS from "~/lib/config/defaults"
+    import { getDefaults } from "~/lib/config/defaults"
     import { settingsStore, watchSettings } from "~/lib/utils/storage-utils"
     import BasicSettings from "~/components/settings/BasicSettings.svelte"
     import AdvancedSettings from "~/components/settings/AdvancedSettings.svelte"
@@ -23,7 +23,7 @@
                 })
             } catch (error) {
                 console.error("Failed to load settings:", error)
-                localSettings = DEFAULTS
+                localSettings = getDefaults()
             }
         }
 

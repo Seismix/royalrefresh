@@ -1,6 +1,6 @@
-import type { ExtensionSettings } from "~/types/types"
-import DEFAULTS, { DEFAULT_SELECTORS } from "~/lib/config/defaults"
 import { storage } from "wxt/utils/storage"
+import { DEFAULT_SELECTORS, getDefaults } from "~/lib/config/defaults"
+import type { ExtensionSettings } from "~/types/types"
 
 /**
  * WXT storage utilities for extension settings
@@ -10,7 +10,7 @@ import { storage } from "wxt/utils/storage"
 export const settingsStore = storage.defineItem<ExtensionSettings>(
     "sync:settings",
     {
-        fallback: DEFAULTS,
+        fallback: getDefaults(),
     },
 )
 
@@ -38,7 +38,7 @@ export async function updateSettings(
 export async function setSettings(
     settings: Partial<ExtensionSettings>,
 ): Promise<void> {
-    const newSettings = { ...DEFAULTS, ...settings }
+    const newSettings = { ...getDefaults(), ...settings }
     await settingsStore.setValue(newSettings)
 }
 
@@ -46,7 +46,7 @@ export async function setSettings(
  * Restore all settings to defaults
  */
 export async function restoreDefaults(): Promise<void> {
-    await settingsStore.setValue(DEFAULTS)
+    await settingsStore.setValue(getDefaults())
 }
 
 /**

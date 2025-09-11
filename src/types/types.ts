@@ -12,7 +12,8 @@ export type ExtensionSelectors = {
 
 export type ExtensionSettings = {
     wordCount: number
-    smoothScroll: boolean
+    enableJump: boolean
+    scrollBehavior: ScrollBehavior
     autoExpand: boolean
 } & ExtensionSelectors
 
