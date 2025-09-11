@@ -17,9 +17,7 @@ export class ContentManager {
      * @param settings - Extension settings
      * @returns Processed recap content or error message
      */
-    static async fetchRecap(
-        settings: ExtensionSettings,
-    ) {
+    static async fetchRecap(settings: ExtensionSettings) {
         // 1. Find previous chapter URL from DOM
         const prevChapterUrlResult = findPreviousChapterUrl(settings)
         if ("error" in prevChapterUrlResult) {
@@ -71,9 +69,7 @@ export class ContentManager {
      * @param settings - Extension settings
      * @returns Processed blurb content or error message
      */
-    static async fetchBlurb(
-        settings: ExtensionSettings,
-    ) {
+    static async fetchBlurb(settings: ExtensionSettings) {
         // 1. Find fiction overview URL from DOM
         const overviewUrlResult = findFictionOverviewUrl(settings)
         if ("error" in overviewUrlResult) {

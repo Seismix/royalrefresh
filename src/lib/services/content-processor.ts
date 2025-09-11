@@ -287,10 +287,7 @@ export class ContentProcessor {
     /**
      * Truncates an element node and its children to the specified word count
      */
-    private static truncateElementNode(
-        element: HTMLElement,
-        count: number,
-    ) {
+    private static truncateElementNode(element: HTMLElement, count: number) {
         const newElement = document.createElement(element.tagName.toLowerCase())
 
         // Copy all attributes efficiently

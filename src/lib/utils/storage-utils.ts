@@ -19,7 +19,9 @@ export const settingsStore = storage.defineItem<ExtensionSettings>(
                     const migrated = {
                         ...oldSettings,
                         enableJump: oldSettings.smoothScroll === true,
-                        scrollBehavior: oldSettings.smoothScroll ? "smooth" : "auto",
+                        scrollBehavior: oldSettings.smoothScroll
+                            ? "smooth"
+                            : "auto",
                     } as ExtensionSettings
 
                     // Remove the old property
@@ -27,14 +29,14 @@ export const settingsStore = storage.defineItem<ExtensionSettings>(
 
                     console.log("WXT Migration v1→v2: smoothScroll ->", {
                         enableJump: migrated.enableJump,
-                        scrollBehavior: migrated.scrollBehavior
+                        scrollBehavior: migrated.scrollBehavior,
                     })
 
                     return migrated
                 }
                 return oldSettings as ExtensionSettings
-            }
-        }
+            },
+        },
     },
 )
 
@@ -59,9 +61,7 @@ export async function updateSettings(
 /**
  * Set complete settings (replaces old settings entirely)
  */
-export async function setSettings(
-    settings: Partial<ExtensionSettings>,
-) {
+export async function setSettings(settings: Partial<ExtensionSettings>) {
     const newSettings = { ...getDefaults(), ...settings }
     await settingsStore.setValue(newSettings)
 }

@@ -40,7 +40,10 @@
         if ("error" in result) {
             recapState.setError(result.error)
         } else {
-            recapState.setContent(result.content, result.type as "recap" | "blurb")
+            recapState.setContent(
+                result.content,
+                result.type as "recap" | "blurb",
+            )
         }
     }
 

@@ -3,9 +3,7 @@
  * @param url - The URL to fetch content from
  * @returns Promise resolving to either success data or error message
  */
-export async function fetchHtml(
-    url: string | URL | Request,
-) {
+export async function fetchHtml(url: string | URL | Request) {
     try {
         const response = await fetch(url)
 
