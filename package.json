@@ -65,5 +65,8 @@
             "image-size": "^2.0.2",
             "@babel/runtime": "^7.26.10"
         }
+    },
+    "dependencies": {
+        "dompurify": "^3.2.6"
     }
 }

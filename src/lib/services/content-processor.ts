@@ -1,4 +1,5 @@
 import type { ExtensionSettings } from "~/types/types"
+import { HtmlSanitizer } from "./"
 
 /**
  * Content Processing Service - Pure functions for processing HTML content
@@ -50,7 +51,9 @@ export class ContentProcessor {
             const tempDiv = document.createElement("div")
             tempDiv.appendChild(fragment)
 
-            return { content: tempDiv.innerHTML }
+            // Sanitize the HTML content before returning
+            const sanitizedContent = HtmlSanitizer.sanitize(tempDiv.innerHTML)
+            return { content: sanitizedContent }
         } catch (error) {
             return {
                 error:
@@ -98,7 +101,9 @@ export class ContentProcessor {
             const tempDiv = document.createElement("div")
             tempDiv.appendChild(fragment)
 
-            return { content: tempDiv.innerHTML }
+            // Sanitize the HTML content before returning
+            const sanitizedContent = HtmlSanitizer.sanitize(tempDiv.innerHTML)
+            return { content: sanitizedContent }
         } catch (error) {
             return {
                 error:
