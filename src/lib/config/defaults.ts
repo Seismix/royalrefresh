@@ -15,31 +15,61 @@ export const DEFAULT_SELECTORS: ExtensionSelectors = {
 
 const DEFAULTS: ExtensionSettings = {
     wordCount: 250,
-    enableJump: true,
-    scrollBehavior: "smooth",
+    enableJump: true, // Will be adjusted in getDefaults() based on reduced motion
+    scrollBehavior: "smooth" as ScrollBehavior,
     autoExpand: false,
     ...DEFAULT_SELECTORS,
 }
 
 /**
- * Get defaults with prefers-reduced-motion detection
- * Falls back to static DEFAULTS if window is not available
+ * Get defaults with prefers-reduced-motion detection for fresh installs only
+ * For existing users, their settings are preserved completely
  */
-export function getDefaults() {
+export function getDefaults(existingSettings?: Partial<ExtensionSettings>) {
+    // If existing settings provided, merge with base defaults (for existing users)
+    if (existingSettings) {
+        return {
+            ...DEFAULTS,
+            ...existingSettings
+        }
+    }
+
+    // Fresh install: detect reduced motion preference
     try {
         if (typeof window !== "undefined" && window.matchMedia) {
             const prefersReducedMotion = window.matchMedia(
                 "(prefers-reduced-motion: reduce)",
             ).matches
-            return {
-                ...DEFAULTS,
-                enableJump: !prefersReducedMotion,
+            console.log("Fresh install: prefersReducedMotion", prefersReducedMotion)
+
+            if (prefersReducedMotion) {
+                return {
+                    ...DEFAULTS,
+                    enableJump: false, // Respect reduced motion by default
+                    scrollBehavior: "instant" as ScrollBehavior,
+                }
             }
         }
     } catch (error) {
-        // Ignore errors in case matchMedia is not available
+        console.log("Could not detect reduced motion preference:", error)
     }
+
+    // Default case (fresh install, no reduced motion or detection failed)
     return DEFAULTS
+}
+
+/**
+ * Check if user has reduced motion preference but has enabled jump (override)
+ */
+export function hasReducedMotionOverride(): boolean {
+    try {
+        if (typeof window !== "undefined" && window.matchMedia) {
+            return window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        }
+    } catch (error) {
+        // Ignore errors
+    }
+    return false
 }
 
 /**

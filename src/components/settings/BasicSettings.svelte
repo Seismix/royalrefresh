@@ -17,16 +17,11 @@
         return false
     })
 
-    // Auto-adjust scroll behavior when reduced motion is preferred
-    $effect(() => {
-        if (
-            prefersReducedMotion &&
-            settings.enableJump &&
-            settings.scrollBehavior === "smooth"
-        ) {
-            settings.scrollBehavior = "instant"
-        }
-    })
+    // Check if user is overriding reduced motion
+    // This happens when they have reduced motion enabled but chose to enable jump
+    const isOverridingReducedMotion = $derived(
+        prefersReducedMotion && settings.enableJump,
+    )
 
     // Validation for word count using result object pattern
     const wordCountValidation = $derived.by(() => {
@@ -83,6 +78,13 @@
     <input type="checkbox" bind:checked={settings.enableJump} />
 </label>
 
+{#if isOverridingReducedMotion}
+    <div class="override-warning">
+        <p><strong>Accessibility Notice:</strong></p>
+        <p>You have "prefers-reduced-motion" enabled in your system settings, but you've chosen to enable jump functionality which may include animations. This overrides your accessibility preference.</p>
+    </div>
+{/if}
+
 {#if settings.enableJump}
     <span class="label-text" class:reduced-motion={prefersReducedMotion}
         >Scroll behavior</span>
@@ -94,11 +96,10 @@
     </select>
 
     {#if prefersReducedMotion}
-        <p class="info-message">
-            You cannot select smooth scrolling behavior<br />
-            because "<em>prefers-reduced-motion</em>" is enabled <br />
-            in your operating system settings.
-        </p>
+        <div class="info-message">
+            <p>Smooth scrolling is disabled because <em>prefers-reduced-motion</em> is enabled in your system settings.</p>
+            <p>The browser will always use instant scrolling regardless of this setting.</p>
+        </div>
     {/if}
 {/if}
 
@@ -148,6 +149,31 @@
         font-size: smaller;
     }
 
+    .info-message p {
+        margin: 0 0 8px 0;
+    }
+
+    .info-message p:last-child {
+        margin-bottom: 0;
+    }
+
+    .override-warning {
+        border-radius: 4px;
+        padding: 12px;
+        margin-bottom: 16px;
+        background-color: #fff3e0;
+        border-left: 4px solid #ff9800;
+        font-size: smaller;
+    }
+
+    .override-warning p {
+        margin: 0 0 8px 0;
+    }
+
+    .override-warning p:last-child {
+        margin-bottom: 0;
+    }
+
     /* Dark mode styles */
     @media (prefers-color-scheme: dark) {
         .validation-error {
@@ -179,6 +205,11 @@
         .info-message {
             background-color: #1a2332;
             border-left-color: #64b5f6;
+        }
+
+        .override-warning {
+            background-color: #2d2319;
+            border-left-color: #ffb74d;
         }
     }
 </style>

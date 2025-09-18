@@ -1,12 +1,19 @@
-import DEFAULTS, { getDefaults } from "~/lib/config/defaults"
-import { setSettings, restoreSelectors } from "~/lib/utils/storage-utils"
-import { currentBrowser, BrowserType } from "~/lib/utils/platform"
+import { BrowserType, currentBrowser } from "~/lib/utils/platform"
+import { restoreSelectors, setSettings } from "~/lib/utils/storage-utils"
+import { DEFAULT_SELECTORS } from "~/lib/config/defaults"
 
 export default defineBackground(() => {
-    // Saves the default values to the browser storage after the extension has been installed
     browser.runtime.onInstalled.addListener(async (details) => {
         if (details.reason === "install") {
-            await setSettings(getDefaults())
+            // Use conservative defaults - assume reduced motion preference
+            await setSettings({
+                wordCount: 250,
+                enableJump: false, // Conservative default
+                scrollBehavior: "instant" as ScrollBehavior,
+                autoExpand: false,
+                hasDetectedReducedMotion: false, // Flag to trigger first-time detection
+                ...DEFAULT_SELECTORS,
+            })
         }
 
         if (details.reason === "update") {
@@ -24,7 +31,15 @@ export default defineBackground(() => {
         if (typeof message !== "object" || message === null) return
 
         if ("request" in message && message.request === "getDefaultSettings") {
-            return Promise.resolve(getDefaults())
+            // Return basic defaults - first-time detection happens on UI side
+            return Promise.resolve({
+                wordCount: 250,
+                enableJump: false,
+                scrollBehavior: "instant" as ScrollBehavior,
+                autoExpand: false,
+                hasDetectedReducedMotion: false,
+                ...DEFAULT_SELECTORS,
+            })
         }
 
         if ("action" in message && message.action === "openExtensionSettings") {

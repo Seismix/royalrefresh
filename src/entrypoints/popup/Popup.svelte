@@ -1,9 +1,9 @@
 <script lang="ts">
-    import type { ExtensionSettings } from "~/types/types"
-    import DEFAULTS from "~/lib/config/defaults"
-    import { settingsStore, watchSettings } from "~/lib/utils/storage-utils"
-    import BasicSettings from "~/components/settings/BasicSettings.svelte"
     import ActionButtons from "~/components/common/ActionButtons.svelte"
+    import BasicSettings from "~/components/settings/BasicSettings.svelte"
+    import DEFAULTS from "~/lib/config/defaults"
+    import { getSettings, watchSettings } from "~/lib/utils/storage-utils"
+    import type { ExtensionSettings } from "~/types/types"
 
     let localSettings = $state<ExtensionSettings | null>(null)
     let isValid = $state<boolean>(true)
@@ -12,7 +12,7 @@
     $effect(() => {
         const loadSettings = async () => {
             try {
-                localSettings = await settingsStore.getValue()
+                localSettings = await getSettings()
 
                 // Watch for external changes (from other tabs/popups)
                 return watchSettings((newValue) => {

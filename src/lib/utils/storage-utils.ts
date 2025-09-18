@@ -10,18 +10,28 @@ import type { ExtensionSettings } from "~/types/types"
 export const settingsStore = storage.defineItem<ExtensionSettings>(
     "sync:settings",
     {
-        fallback: getDefaults(),
+        fallback: {
+            wordCount: 250,
+            enableJump: true, // Will be adjusted in getSettings() based on reduced motion
+            scrollBehavior: "smooth" as ScrollBehavior,
+            autoExpand: false,
+            // hasDetectedReducedMotion is undefined for fresh installs - this triggers detection
+            ...DEFAULT_SELECTORS,
+        },
         version: 2,
         migrations: {
             2: (oldSettings: any) => {
                 // Migration from v1 to v2: smoothScroll -> enableJump & scrollBehavior
                 if ("smoothScroll" in oldSettings) {
+
                     const migrated = {
                         ...oldSettings,
                         enableJump: oldSettings.smoothScroll === true,
-                        scrollBehavior: oldSettings.smoothScroll
+                        scrollBehavior: (oldSettings.smoothScroll
                             ? "smooth"
-                            : "auto",
+                            : "instant") as ScrollBehavior,
+                        // Migration: mark as having been detected so we don't override user's choice
+                        hasDetectedReducedMotion: true,
                     } as ExtensionSettings
 
                     // Remove the old property
@@ -42,9 +52,55 @@ export const settingsStore = storage.defineItem<ExtensionSettings>(
 
 /**
  * Get current settings from storage
+ * Automatically performs first-time reduced motion detection if needed
  */
-export async function getSettings() {
-    return await settingsStore.getValue()
+export async function getSettings(): Promise<ExtensionSettings> {
+    const settings = await settingsStore.getValue()
+
+    // Skip if we've already done detection
+    if (settings?.hasDetectedReducedMotion) {
+        return settings
+    }
+
+    console.log("Performing first-time reduced motion detection...")
+
+    try {
+        if (typeof window !== "undefined" && window.matchMedia) {
+            const prefersReducedMotion = window.matchMedia(
+                "(prefers-reduced-motion: reduce)",
+            ).matches
+
+            console.log("First-time detection: prefersReducedMotion =", prefersReducedMotion)
+
+            let updatedSettings = {
+                ...settings,
+                hasDetectedReducedMotion: true,
+            }
+
+            // If user doesn't have reduced motion preference, enable jump by default
+            if (!prefersReducedMotion && !settings?.enableJump) {
+                updatedSettings = {
+                    ...updatedSettings,
+                    enableJump: true,
+                    scrollBehavior: "smooth" as ScrollBehavior,
+                }
+                console.log("Enabled jump for user without reduced motion preference")
+            }
+
+            await settingsStore.setValue(updatedSettings)
+            return updatedSettings
+        }
+    } catch (error) {
+        console.log("Could not detect reduced motion preference:", error)
+    }
+
+    // Fallback: just mark as detected
+    const fallbackSettings = {
+        ...settings,
+        hasDetectedReducedMotion: true,
+    }
+    await settingsStore.setValue(fallbackSettings)
+    return fallbackSettings
 }
 
 /**
