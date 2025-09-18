@@ -87,6 +87,7 @@
     <div class="action-buttons">
         <button
             type="button"
+            class="btn btn-danger"
             class:saved={restoreSelectorsText.includes("✔")}
             onclick={handleRestoreSelectors}>
             {restoreSelectorsText}
@@ -97,6 +98,7 @@
 <div class="action-buttons">
     <button
         type="submit"
+        class="btn btn-primary"
         class:saved={saveText.includes("✔")}
         onclick={handleSave}>
         {saveText}
@@ -104,6 +106,7 @@
 
     <button
         type="button"
+        class="btn btn-danger"
         class:saved={restoreAllText.includes("✔")}
         onclick={handleRestoreAll}>
         {restoreAllText}
@@ -111,10 +114,12 @@
 </div>
 
 <style>
+    @import '../../lib/styles/buttons.css';
+
     .action-buttons {
         display: flex;
-        gap: 10px;
-        margin-top: 20px;
+        gap: var(--spacing-lg);
+        margin-top: var(--spacing-xxl);
     }
 
     .action-buttons button {
@@ -122,17 +127,12 @@
         white-space: nowrap;
     }
 
+    /* State-specific styles */
     button.saved {
-        background-color: #00cc00;
+        background-color: var(--color-success);
     }
 
-    @media (prefers-color-scheme: dark) {
-        button.saved {
-            background-color: #51cf66;
-        }
-
-        button.saved:hover {
-            background-color: #40c057;
-        }
+    button.saved:hover {
+        background-color: var(--color-success-hover);
     }
 </style>
