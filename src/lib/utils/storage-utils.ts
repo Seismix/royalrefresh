@@ -1,6 +1,7 @@
 import { storage } from "wxt/utils/storage"
 import { DEFAULT_SELECTORS, getDefaults } from "~/lib/config/defaults"
 import type { ExtensionSettings } from "~/types/types"
+import { devLog } from "./logger"
 
 /**
  * WXT storage utilities for extension settings with migration support
@@ -23,7 +24,6 @@ export const settingsStore = storage.defineItem<ExtensionSettings>(
             2: (oldSettings: any) => {
                 // Migration from v1 to v2: smoothScroll -> enableJump & scrollBehavior
                 if ("smoothScroll" in oldSettings) {
-
                     const migrated = {
                         ...oldSettings,
                         enableJump: oldSettings.smoothScroll === true,
@@ -37,7 +37,7 @@ export const settingsStore = storage.defineItem<ExtensionSettings>(
                     // Remove the old property
                     delete (migrated as any).smoothScroll
 
-                    console.log("WXT Migration v1→v2: smoothScroll ->", {
+                    devLog.log("WXT Migration v1→v2: smoothScroll ->", {
                         enableJump: migrated.enableJump,
                         scrollBehavior: migrated.scrollBehavior,
                     })
@@ -62,15 +62,11 @@ export async function getSettings(): Promise<ExtensionSettings> {
         return settings
     }
 
-    console.log("Performing first-time reduced motion detection...")
-
     try {
         if (typeof window !== "undefined" && window.matchMedia) {
             const prefersReducedMotion = window.matchMedia(
                 "(prefers-reduced-motion: reduce)",
             ).matches
-
-            console.log("First-time detection: prefersReducedMotion =", prefersReducedMotion)
 
             let updatedSettings = {
                 ...settings,
@@ -96,7 +92,7 @@ export async function getSettings(): Promise<ExtensionSettings> {
             return updatedSettings
         }
     } catch (error) {
-        console.log("Could not detect reduced motion preference:", error)
+        devLog.log("Could not detect reduced motion preference:", error)
     }
 
     // Fallback: just mark as detected

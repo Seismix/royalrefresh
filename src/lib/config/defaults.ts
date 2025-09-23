@@ -1,4 +1,5 @@
 import { ExtensionSelectors, ExtensionSettings } from "~/types/types"
+import { devLog } from "../utils/logger"
 
 export const DEFAULT_SELECTORS: ExtensionSelectors = {
     prevChapterBtn: "a[href*='/chapter/']:has(> i.fa-chevron-double-left)",
@@ -40,7 +41,10 @@ export function getDefaults(existingSettings?: Partial<ExtensionSettings>) {
             const prefersReducedMotion = window.matchMedia(
                 "(prefers-reduced-motion: reduce)",
             ).matches
-            console.log("Fresh install: prefersReducedMotion", prefersReducedMotion)
+            devLog.log(
+                "Fresh install: prefersReducedMotion",
+                prefersReducedMotion,
+            )
 
             if (!prefersReducedMotion) {
                 // No reduced motion preference - safe to enable jump functionality
@@ -52,7 +56,7 @@ export function getDefaults(existingSettings?: Partial<ExtensionSettings>) {
             }
         }
     } catch (error) {
-        console.log("Could not detect reduced motion preference:", error)
+        devLog.log("Could not detect reduced motion preference:", error)
     }
 
     // Default case (fresh install, no reduced motion or detection failed)
