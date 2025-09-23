@@ -17,12 +17,6 @@
         return false
     })
 
-    // Check if user is overriding reduced motion
-    // This happens when they have reduced motion enabled but chose to enable jump
-    const isOverridingReducedMotion = $derived(
-        prefersReducedMotion && settings.enableJump,
-    )
-
     // Validation for word count using result object pattern
     const wordCountValidation = $derived.by(() => {
         if (!settings) {
@@ -79,29 +73,29 @@
     <input type="checkbox" bind:checked={settings.enableJump} />
 </label>
 
-{#if isOverridingReducedMotion}
-    <div class="message override-warning">
-        <p><strong>Accessibility Notice:</strong></p>
-        <p>You have "prefers-reduced-motion" enabled in your system settings, but you've chosen to enable jump functionality which may include animations. This overrides your accessibility preference.</p>
-    </div>
-{/if}
-
 {#if settings.enableJump}
     <label>
-        <span class:reduced-motion={prefersReducedMotion}>Scroll behavior</span>
+        <span>Scroll behavior</span>
         <select
             class="form-control"
             bind:value={settings.scrollBehavior}
             disabled={prefersReducedMotion}>
             <option value="smooth">Smooth (animated scroll)</option>
-            <option value="instant">Immediate (instant jump)</option>
+            <option value="instant">Instant</option>
         </select>
     </label>
 
     {#if prefersReducedMotion}
         <div class="message info-message">
-            <p>Smooth scrolling is disabled because <em>prefers-reduced-motion</em> is enabled in your system settings.</p>
-            <p>The browser will always use instant scrolling regardless of this setting.</p>
+            <p>
+                Smooth scrolling is disabled because <em
+                    >prefers-reduced-motion</em> is enabled in your system settings,
+                which overrides your extension settings.
+            </p>
+            <p>
+                To enable smooth scrolling, change your system's accessibility
+                settings to allow motion.
+            </p>
         </div>
     {/if}
 {/if}
@@ -112,5 +106,5 @@
 </label>
 
 <style>
-    @import '../../lib/styles/forms.css';
+    @import "../../lib/styles/forms.css";
 </style>

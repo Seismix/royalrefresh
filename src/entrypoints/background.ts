@@ -1,18 +1,14 @@
+import DEFAULTS from "~/lib/config/defaults"
 import { BrowserType, currentBrowser } from "~/lib/utils/platform"
 import { restoreSelectors, setSettings } from "~/lib/utils/storage-utils"
-import { DEFAULT_SELECTORS } from "~/lib/config/defaults"
 
 export default defineBackground(() => {
     browser.runtime.onInstalled.addListener(async (details) => {
         if (details.reason === "install") {
-            // Use conservative defaults - assume reduced motion preference
+            // Use conservative defaults - first-time detection happens on UI side
             await setSettings({
-                wordCount: 250,
-                enableJump: false, // Conservative default
-                scrollBehavior: "instant" as ScrollBehavior,
-                autoExpand: false,
+                ...DEFAULTS,
                 hasDetectedReducedMotion: false, // Flag to trigger first-time detection
-                ...DEFAULT_SELECTORS,
             })
         }
 
@@ -33,12 +29,8 @@ export default defineBackground(() => {
         if ("request" in message && message.request === "getDefaultSettings") {
             // Return basic defaults - first-time detection happens on UI side
             return Promise.resolve({
-                wordCount: 250,
-                enableJump: false,
-                scrollBehavior: "instant" as ScrollBehavior,
-                autoExpand: false,
-                hasDetectedReducedMotion: false,
-                ...DEFAULT_SELECTORS,
+                ...DEFAULTS,
+                hasDetectedReducedMotion: false, // Flag to trigger first-time detection
             })
         }
 

@@ -77,14 +77,19 @@ export async function getSettings(): Promise<ExtensionSettings> {
                 hasDetectedReducedMotion: true,
             }
 
-            // If user doesn't have reduced motion preference, enable jump by default
-            if (!prefersReducedMotion && !settings?.enableJump) {
+            // For users without reduced motion preference, enable jump by default if not already set
+            if (!prefersReducedMotion && settings?.enableJump === undefined) {
                 updatedSettings = {
                     ...updatedSettings,
                     enableJump: true,
                     scrollBehavior: "smooth" as ScrollBehavior,
                 }
-                console.log("Enabled jump for user without reduced motion preference")
+            } else if (prefersReducedMotion) {
+                // Respect reduced motion by ensuring instant scrolling
+                updatedSettings = {
+                    ...updatedSettings,
+                    scrollBehavior: "instant" as ScrollBehavior,
+                }
             }
 
             await settingsStore.setValue(updatedSettings)

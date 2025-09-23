@@ -15,8 +15,8 @@ export const DEFAULT_SELECTORS: ExtensionSelectors = {
 
 const DEFAULTS: ExtensionSettings = {
     wordCount: 250,
-    enableJump: true, // Will be adjusted in getDefaults() based on reduced motion
-    scrollBehavior: "smooth" as ScrollBehavior,
+    enableJump: false,
+    scrollBehavior: "instant" as ScrollBehavior,
     autoExpand: false,
     ...DEFAULT_SELECTORS,
 }
@@ -30,7 +30,7 @@ export function getDefaults(existingSettings?: Partial<ExtensionSettings>) {
     if (existingSettings) {
         return {
             ...DEFAULTS,
-            ...existingSettings
+            ...existingSettings,
         }
     }
 
@@ -42,11 +42,12 @@ export function getDefaults(existingSettings?: Partial<ExtensionSettings>) {
             ).matches
             console.log("Fresh install: prefersReducedMotion", prefersReducedMotion)
 
-            if (prefersReducedMotion) {
+            if (!prefersReducedMotion) {
+                // No reduced motion preference - safe to enable jump functionality
                 return {
                     ...DEFAULTS,
-                    enableJump: false, // Respect reduced motion by default
-                    scrollBehavior: "instant" as ScrollBehavior,
+                    enableJump: true,
+                    scrollBehavior: "smooth" as ScrollBehavior,
                 }
             }
         }
