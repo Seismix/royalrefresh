@@ -24,8 +24,8 @@
 
 ## Why?
 
-I've been an avid reader on [royalroad.com](https://royalroad.com) for over 4 years and like many others, I juggle
-multiple stories at the same time. At some point this got somewhat unmanagable and often I drew a blank when thinking
+I've been an avid reader on [royalroad.com](https://royalroad.com) since 2019 and like many others, I juggle
+multiple stories at the same time. At some point this got somewhat unmanageable and often I drew a blank when thinking
 about what happened in the last chapter of the story I just opened. More and more I found myself having to go back one
 chapter and scroll all the way down just to re-read the last few paragraphs as a refresher. This is especially annoying
 while on mobile, where I often read while on the train.
@@ -54,15 +54,17 @@ There are a few ways to access the settings page:
 (such as using `about:addons` in Firefox)
 
 <details>
-  <summary>Settings page</summary>
+  <summary>Basic Settings popup</summary>
   
   ![Settings page](docs/basic_settings.png)
   
 </details>  
 
-Advanced users can take advanced of the "Advanced options" toggle to reveal more settings. In case the website gets an
-update, the user can adjust the CSS selectors to make the extension work again, until a new update of RoyalRefresh is
-released with the adjusted defaults:
+Advanced users can change CSS selectors in the settings if the site design changes, until a new extension update is pushed.
+
+> [!NOTE]
+> Advanced settings for CSS selectors are only available in the full extension settings page, not in the popup. Use the
+> popup to quickly access basic settings, but open the full settings page for advanced configuration.
 
 <details>
   <summary>Advanced settings</summary>
@@ -70,6 +72,13 @@ released with the adjusted defaults:
   ![Advanced settings](docs/advanced_settings.png)
   
 </details>
+
+## Tech Stack
+
+This extension is built using:
+
+- **[WXT](https://wxt.dev/)**: A framework for building web extensions with a modern development experience.
+- **Svelte 5**: A reactive component framework for building the user interface.
 
 ## Bug reports & Ideas
 
@@ -81,25 +90,76 @@ marked with the `contributions welcome` label.
 
 ## Contributing
 
-Pull this repo and run `pnpm i` to install the dependencies. You can then run `pnpm dev` or `pnpm dev:chrome`
-to temporarily load the extension into your browser. The extension will be reloaded automatically when you make changes
-to [most](https://github.com/aklinker1/vite-plugin-web-extension/issues) of the code.
+### Prerequisites
 
-You can pass custom `web-ext` arguments to the `pnpm dev` command by creating a `.webextrc.(json|json5|yml|yaml)` file
-in the root of the project. For more information, see Vite Plugin Web Extension's
-[documentation](https://vite-plugin-web-extension.aklinker1.io/guide/configure-browser-startup.html#config-files).
+- Node.js (version 18 or higher)
+- pnpm (package manager)
 
-For example to always start the dev browser on certain URLs, you can create a `.webextrc.json` file with the
-following content:
+### Installation
 
-```json
-{
-  "startUrl": [
-    "https://www.royalroad.com/",
-    "about:addons"
-  ]
-}
+Clone the repository and install dependencies:
+
+```bash
+git clone https://github.com/Seismix/royalrefresh.git
+cd royalrefresh
+pnpm install
 ```
 
-For a full list of arguments, see the `web-ext`
-[command reference](https://extensionworkshop.com/documentation/develop/web-ext-command-reference/).
+### Development
+
+To start the development server for Chrome (default):
+
+```bash
+pnpm dev
+```
+
+To start the development server for Firefox:
+
+```bash
+pnpm dev:firefox
+```
+
+To develop for Firefox Android:
+
+```bash
+pnpm dev:android
+```
+
+This will build the Firefox version and run it on a connected Android device. Make sure you have ADB set up and the device connected.
+
+### Building
+
+To build the extension for chromium browsers:
+
+```bash
+pnpm build
+```
+
+To build specifically for Firefox:
+
+```bash
+pnpm build:firefox
+```
+
+### Browser Configuration
+
+You can configure browser startup options using `web-ext.config.ts` files. For more information, see WXT's
+[Browser Startup documentation](https://wxt.dev/guide/essentials/config/browser-startup.html).
+
+For example, to set custom browser binaries or startup URLs, create a `web-ext.config.ts` file:
+
+```typescript
+import { defineWebExtConfig } from 'wxt';
+
+export default defineWebExtConfig({
+  startUrl: [
+    "https://www.royalroad.com/",
+    "about:addons"
+  ],
+  binaries: {
+    firefox: 'firefoxdeveloperedition',
+  },
+});
+```
+
+For a full list of options, see the [web-ext command reference](https://extensionworkshop.com/documentation/develop/web-ext-command-reference/).
