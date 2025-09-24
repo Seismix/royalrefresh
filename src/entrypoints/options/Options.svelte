@@ -76,6 +76,7 @@
         color: var(--color-text);
         width: var(--container-width);
         margin: 0 auto;
+        padding: var(--spacing-lg);
         overflow-x: hidden;
     }
 
