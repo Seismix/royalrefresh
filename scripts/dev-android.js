@@ -14,9 +14,6 @@ if (!deviceId) {
   process.exit(1);
 }
 
-// Set the environment variable
-process.env.ADB_ID = deviceId;
-
 // Run the build and web-ext commands
 try {
   console.log(`Building Firefox extension...`);
