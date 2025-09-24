@@ -93,5 +93,5 @@
 </label>
 
 <style>
-    @import "../../lib/styles/forms.css";
+    @import "~/lib/styles/forms.css";
 </style>
