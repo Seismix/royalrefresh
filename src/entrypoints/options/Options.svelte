@@ -54,7 +54,7 @@
 </main>
 
 <style>
-    @import '../../lib/styles/tokens.css';
+    @import "~/lib/styles/tokens.css";
 
     :global(body) {
         font-family: var(--font-family);
@@ -83,7 +83,9 @@
         padding-left: var(--spacing-xxl);
     }
 
-    :global(h1), :global(h2), :global(h3) {
+    :global(h1),
+    :global(h2),
+    :global(h3) {
         color: var(--color-text);
         margin-bottom: var(--spacing-lg);
     }

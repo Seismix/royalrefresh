@@ -114,7 +114,7 @@
 </div>
 
 <style>
-    @import '../../lib/styles/buttons.css';
+    @import "~/lib/styles/buttons.css";
 
     .action-buttons {
         display: flex;

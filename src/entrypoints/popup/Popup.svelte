@@ -49,7 +49,7 @@
 </main>
 
 <style>
-    @import '../../lib/styles/tokens.css';
+    @import "~/lib/styles/tokens.css";
 
     :global(body) {
         font-family: var(--font-family);
