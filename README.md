@@ -119,13 +119,12 @@ To start the development server for Firefox:
 pnpm dev:firefox
 ```
 
-To develop for Firefox Android:
+This builds the Firefox version and runs it on a connected Android device. Make sure ADB is installed, your device is
+connected with USB debugging enabled, and set the `ADB_ID` variable to your device ID (found via `adb devices`).
 
 ```bash
-pnpm dev:android
+pnpm dev:android <device-id>
 ```
-
-This will build the Firefox version and run it on a connected Android device. Make sure you have ADB set up and the device connected.
 
 ### Building
 
