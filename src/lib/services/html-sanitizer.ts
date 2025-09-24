@@ -102,8 +102,6 @@ export class HtmlSanitizer {
             // Use DOMPurify to clean the HTML - ensure we get a string result
             const cleaned = DOMPurify.sanitize(html, this.config) as string
 
-            console.log("Sanitized HTML")
-
             // Additional cleanup: remove any remaining empty attributes that might cause issues
             return cleaned
                 .replace(/\s+class=""/g, "") // Remove empty class attributes

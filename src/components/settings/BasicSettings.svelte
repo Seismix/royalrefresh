@@ -17,17 +17,6 @@
         return false
     })
 
-    // Auto-adjust scroll behavior when reduced motion is preferred
-    $effect(() => {
-        if (
-            prefersReducedMotion &&
-            settings.enableJump &&
-            settings.scrollBehavior === "smooth"
-        ) {
-            settings.scrollBehavior = "instant"
-        }
-    })
-
     // Validation for word count using result object pattern
     const wordCountValidation = $derived.by(() => {
         if (!settings) {
@@ -71,6 +60,7 @@
         type="number"
         min="1"
         max="500"
+        class="form-control"
         bind:value={settings.wordCount}
         class:invalid={!isWordCountValid} />
     {#if wordCountError}
@@ -84,21 +74,29 @@
 </label>
 
 {#if settings.enableJump}
-    <span class="label-text" class:reduced-motion={prefersReducedMotion}
-        >Scroll behavior</span>
-    <select
-        bind:value={settings.scrollBehavior}
-        disabled={prefersReducedMotion}>
-        <option value="smooth">Smooth (animated scroll)</option>
-        <option value="instant">Immediate (instant jump)</option>
-    </select>
+    <label>
+        <span>Scroll behavior</span>
+        <select
+            class="form-control"
+            bind:value={settings.scrollBehavior}
+            disabled={prefersReducedMotion}>
+            <option value="smooth">Smooth (animated scroll)</option>
+            <option value="instant">Instant</option>
+        </select>
+    </label>
 
     {#if prefersReducedMotion}
-        <p class="info-message">
-            You cannot select smooth scrolling behavior<br />
-            because "<em>prefers-reduced-motion</em>" is enabled <br />
-            in your operating system settings.
-        </p>
+        <div class="message info-message">
+            <p>
+                Smooth scrolling is disabled because <em
+                    >prefers-reduced-motion</em> is enabled in your system settings,
+                which overrides your extension settings.
+            </p>
+            <p>
+                To enable smooth scrolling, change your system's accessibility
+                settings to allow motion.
+            </p>
+        </div>
     {/if}
 {/if}
 
@@ -108,77 +106,5 @@
 </label>
 
 <style>
-    .validation-error {
-        color: #c62828;
-        font-size: 0.875rem;
-        margin-top: 4px;
-        margin-bottom: 0;
-    }
-
-    input.invalid {
-        border-color: #f44336;
-        background-color: #ffebee;
-    }
-
-    select {
-        padding: 8px 12px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        font-size: 14px;
-        background-color: white;
-        color: #333;
-        margin-left: 8px;
-        transition: border-color 0.2s ease;
-    }
-
-    select:disabled {
-        background-color: #f5f5f5;
-        color: #999;
-        border-color: #ddd;
-        cursor: not-allowed;
-        opacity: 0.6;
-    }
-
-    .info-message {
-        border-radius: 4px;
-        padding: 12px;
-        margin-bottom: 16px;
-        background-color: #e3f2fd;
-        border-left: 4px solid #2196f3;
-        font-size: smaller;
-    }
-
-    /* Dark mode styles */
-    @media (prefers-color-scheme: dark) {
-        .validation-error {
-            color: #ef5350;
-        }
-
-        input.invalid {
-            border-color: #e57373;
-            background-color: #2d1b1b;
-            color: #ffcdd2;
-        }
-
-        select {
-            background-color: #2d2d2d;
-            color: #e0e0e0;
-            border-color: #555;
-        }
-
-        select:hover:not(:disabled) {
-            border-color: #777;
-        }
-
-        select:disabled {
-            background-color: #1a1a1a;
-            color: #666;
-            border-color: #444;
-        }
-
-        .info-message {
-            background-color: #1a2332;
-            border-left-color: #64b5f6;
-        }
-    }
+    @import "~/lib/styles/forms.css";
 </style>
