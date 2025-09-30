@@ -1,5 +1,6 @@
 <script lang="ts">
     import ActionButtons from "~/components/common/ActionButtons.svelte"
+    import PatchNotesButton from "~/components/common/PatchNotesButton.svelte"
     import SettingsGear from "~/components/common/SettingsGear.svelte"
     import AdvancedSettings from "~/components/settings/AdvancedSettings.svelte"
     import BasicSettings from "~/components/settings/BasicSettings.svelte"
@@ -39,9 +40,12 @@
 </script>
 
 <main>
-    {#if !isAndroidFirefox}
-        <SettingsGear />
-    {/if}
+    <div class="utility-buttons" aria-label="Extension utilities">
+        <PatchNotesButton />
+        {#if !isAndroidFirefox}
+            <SettingsGear />
+        {/if}
+    </div>
     <h1>RoyalRefresh Settings</h1>
 
     {#if !localSettings}
@@ -112,5 +116,13 @@
         margin: var(--spacing-lg) 0;
         border-top: 1px solid var(--border-color);
         padding-top: var(--spacing-md);
+    }
+
+    .utility-buttons {
+        position: absolute;
+        top: var(--spacing-sm);
+        right: var(--spacing-sm);
+        display: flex;
+        gap: var(--spacing-xs);
     }
 </style>

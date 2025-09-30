@@ -6,7 +6,7 @@
     }
 </script>
 
-<button aria-label="Open settings" class="settings-gear" onclick={openSettings}>
+<button aria-label="Open settings" class="icon-button settings-gear" onclick={openSettings}>
     <!-- https://icons.getbootstrap.com/icons/gear/ -->
     <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -23,43 +23,6 @@
 </button>
 
 <style>
-    .settings-gear {
-        background: none;
-        border: none;
-        padding: 4px;
-        cursor: pointer;
-        color: var(--color-text);
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 4px;
-        transition: background-color 0.2s;
-    }
+    @import "~/lib/styles/icon-button.css";
 
-    .settings-gear:hover {
-        background-color: var(--bg-secondary);
-    }
-
-    .settings-gear:focus {
-        outline: 2px solid var(--border-color-focus);
-        outline-offset: 2px;
-    }
-
-    @media (prefers-color-scheme: dark) {
-        .settings-gear {
-            color: #ffffff; /* Use pure white for maximum contrast in dark mode */
-        }
-
-        .settings-gear:hover {
-            background-color: rgba(
-                255,
-                255,
-                255,
-                0.1
-            ); /* Subtle light hover effect */
-        }
-    }
 </style>
