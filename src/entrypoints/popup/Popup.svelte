@@ -1,12 +1,16 @@
 <script lang="ts">
     import ActionButtons from "~/components/common/ActionButtons.svelte"
+    import SettingsGear from "~/components/common/SettingsGear.svelte"
+    import AdvancedSettings from "~/components/settings/AdvancedSettings.svelte"
     import BasicSettings from "~/components/settings/BasicSettings.svelte"
     import DEFAULTS from "~/lib/config/defaults"
+    import { BrowserType, currentBrowser } from "~/lib/utils/platform"
     import { getSettings, watchSettings } from "~/lib/utils/storage-utils"
     import type { ExtensionSettings } from "~/types/types"
 
     let localSettings = $state<ExtensionSettings | null>(null)
     let isValid = $state<boolean>(true)
+    const isAndroidFirefox = currentBrowser === BrowserType.AndroidFirefox
 
     // Load initial settings and set up watching
     $effect(() => {
@@ -35,6 +39,9 @@
 </script>
 
 <main>
+    {#if !isAndroidFirefox}
+        <SettingsGear />
+    {/if}
     <h1>RoyalRefresh Settings</h1>
 
     {#if !localSettings}
@@ -44,7 +51,16 @@
             bind:settings={localSettings}
             onValidationChange={handleValidationChange} />
 
-        <ActionButtons settings={localSettings} {isValid} />
+        {#if isAndroidFirefox}
+            <section class="advanced-section" aria-label="Advanced settings">
+                <AdvancedSettings bind:settings={localSettings} />
+            </section>
+        {/if}
+
+        <ActionButtons
+            settings={localSettings}
+            {isValid}
+            showRestoreSelectors={isAndroidFirefox} />
     {/if}
 </main>
 
@@ -72,7 +88,6 @@
         min-width: 300px;
         max-width: 400px;
         width: 400px;
-        max-height: 600px;
         overflow-y: auto;
         box-sizing: border-box;
     }
@@ -81,10 +96,21 @@
         color: var(--color-text);
         margin-bottom: var(--spacing-lg);
         font-size: 1.2rem;
+        margin-top: 0;
+    }
+
+    main {
+        position: relative; /* For absolute positioning of SettingsButton */
     }
 
     p {
         color: var(--color-text);
         margin-bottom: var(--spacing-sm);
+    }
+
+    .advanced-section {
+        margin: var(--spacing-lg) 0;
+        border-top: 1px solid var(--border-color);
+        padding-top: var(--spacing-md);
     }
 </style>
