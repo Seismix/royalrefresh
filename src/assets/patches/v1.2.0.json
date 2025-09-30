@@ -1,0 +1,10 @@
+{
+    "version": "1.2.0",
+    "releasedOn": "2025-08-20",
+    "summary": "Expanded recap customization and polished the popup experience.",
+    "changes": [
+        "Introduces quick filters for recap types inside the popup",
+        "Persists preferred chapter length across browser sessions",
+        "Tweaks typography and color tokens for better readability"
+    ]
+}

@@ -1,0 +1,10 @@
+{
+    "version": "1.2.1",
+    "releasedOn": "2025-09-15",
+    "summary": "Smoothed out rough edges in the recap workflow and tightened error handling.",
+    "changes": [
+        "Fixes a regression where recap summaries could duplicate highlighted paragraphs",
+        "Adds an inline retry option when RoyalRoad throttles requests",
+        "Improves logging for background tasks to simplify support requests"
+    ]
+}

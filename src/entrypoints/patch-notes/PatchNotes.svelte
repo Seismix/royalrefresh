@@ -1,16 +1,29 @@
 <script lang="ts">
-    const sampleUpdates = [
-        {
-            version: "1.3.0",
-            date: "September 30, 2025",
-            summary: "Introduced a dedicated patch notes page and refreshed UI components.",
-            changes: [
-                "Adds a dedicated Patch Notes view directly accessible from the extension popup",
-                "Improves responsive layout spacing across small and large screens",
-                "Prepares infrastructure for richer release documentation",
-            ],
-        },
-    ]
+    type PatchNote = {
+        version: string
+        releasedOn: string
+        summary: string
+        changes: string[]
+    }
+
+    const patchModules = import.meta.glob<PatchNote>("~/assets/patches/*.json", {
+        eager: true,
+        import: "default",
+    })
+
+    const formatDate = (isoDate: string) => {
+        const date = new Date(isoDate)
+        if (Number.isNaN(date.getTime())) return isoDate
+
+        return new Intl.DateTimeFormat(undefined, { dateStyle: "long" }).format(date)
+    }
+
+    const patchNotes = Object.values(patchModules)
+        .map((note) => ({
+            ...note,
+            displayDate: formatDate(note.releasedOn),
+        }))
+        .sort((a, b) => new Date(b.releasedOn).getTime() - new Date(a.releasedOn).getTime())
 </script>
 
 <main>
@@ -20,20 +33,24 @@
     </header>
 
     <section aria-label="Recent updates" class="updates">
-        {#each sampleUpdates as update}
-            <article class="update-card">
-                <header class="update-card__header">
-                    <h2>Version {update.version}</h2>
-                    <span class="update-card__date">{update.date}</span>
-                </header>
-                <p class="update-card__summary">{update.summary}</p>
-                <ul class="update-card__list">
-                    {#each update.changes as change}
-                        <li>{change}</li>
-                    {/each}
-                </ul>
-            </article>
-        {/each}
+        {#if patchNotes.length === 0}
+            <p class="empty-state">No patch notes available yet. Check back soon for updates.</p>
+        {:else}
+            {#each patchNotes as update}
+                <article class="update-card">
+                    <header class="update-card__header">
+                        <h2>Version {update.version}</h2>
+                        <span class="update-card__date">{update.displayDate}</span>
+                    </header>
+                    <p class="update-card__summary">{update.summary}</p>
+                    <ul class="update-card__list">
+                        {#each update.changes as change}
+                            <li>{change}</li>
+                        {/each}
+                    </ul>
+                </article>
+            {/each}
+        {/if}
     </section>
 </main>
 
@@ -135,6 +152,16 @@
         gap: var(--spacing-xs);
         font-size: clamp(0.95rem, 1vw + 0.85rem, 1.1rem);
         color: var(--color-text);
+    }
+
+    .empty-state {
+        margin: 0;
+        padding: clamp(var(--spacing-lg), 2vw, var(--spacing-xxl));
+        background-color: var(--bg-primary);
+        border-radius: var(--border-radius);
+        border: 1px dashed var(--border-color);
+        text-align: center;
+        color: var(--color-text-secondary, var(--color-text));
     }
 
     @media (min-width: 768px) {
