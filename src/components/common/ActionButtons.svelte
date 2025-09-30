@@ -1,10 +1,10 @@
 <script lang="ts">
-    import type { ExtensionSettings } from "~/types/types"
     import {
-        updateSettings,
         restoreDefaults,
         restoreSelectors,
+        updateSettings,
     } from "~/lib/utils/storage-utils"
+    import type { ExtensionSettings } from "~/types/types"
 
     let {
         settings,
@@ -118,13 +118,22 @@
 
     .action-buttons {
         display: flex;
+        flex-wrap: wrap;
         gap: var(--spacing-lg);
         margin-top: var(--spacing-xxl);
+        width: 100%;
     }
 
     .action-buttons button {
-        flex: auto;
-        white-space: nowrap;
+        flex: 1 1 calc(50% - var(--spacing-lg));
+        min-width: min(100%, 180px);
+        white-space: normal;
+    }
+
+    @media (max-width: 480px) {
+        .action-buttons button {
+            flex-basis: 100%;
+        }
     }
 
     /* State-specific styles */

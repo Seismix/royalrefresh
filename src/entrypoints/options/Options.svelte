@@ -61,7 +61,6 @@
         background-color: var(--bg-secondary);
         color: var(--color-text);
         margin: 0;
-        max-width: 400px;
         padding: 0;
         overflow-x: hidden;
         overflow-y: scroll; /* Always show vertical scrollbar to prevent CLS */
@@ -71,17 +70,20 @@
     }
 
     main {
+        --page-padding: clamp(var(--spacing-lg), 3vw, var(--spacing-xxl));
+
         font-family: var(--font-family);
         background-color: var(--bg-secondary);
         color: var(--color-text);
-        width: var(--container-width);
+        inline-size: min(100%, var(--container-width));
         margin: 0 auto;
-        padding: var(--spacing-lg);
+        padding: var(--page-padding);
+        box-sizing: border-box;
         overflow-x: hidden;
     }
 
     .firefox {
-        padding-left: var(--spacing-xxl);
+        padding-inline: var(--page-padding);
     }
 
     :global(h1),
