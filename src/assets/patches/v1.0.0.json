@@ -1,0 +1,18 @@
+{
+    "version": "1.0.0",
+    "releasedOn": "2025-03-05",
+    "summary": "Initial stable release — settings, improved recaps, and first public builds for Chrome and Firefox.",
+    "new": [
+        "Options and settings page lets you control refresh behavior and recap preferences",
+        "Recap length preference now sticks across sessions",
+        "Recap text formatting is clearer and easier to read",
+        "Short loading message appears on the first chapter to reduce perceived delay",
+        "Packaged builds available for Chrome and Firefox, including Android support"
+    ],
+    "fixes": [
+        "Recap failures now show friendly error messages instead of silently failing",
+        "Chapter navigation reliably scrolls chapters into view",
+        "Popup and options buttons have improved styling and accessibility",
+        "Popup-to-content message passing stays reliable during interactions"
+    ]
+}

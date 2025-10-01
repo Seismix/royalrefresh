@@ -3,7 +3,8 @@
         version: string
         releasedOn: string
         summary: string
-        changes: string[]
+        new?: string[]
+        fixes?: string[]
     }
 
     const patchModules = import.meta.glob<PatchNote>(
@@ -58,11 +59,23 @@
                             >{update.displayDate}</span>
                     </header>
                     <p class="update-card__summary">{update.summary}</p>
-                    <ul class="update-card__list">
-                        {#each update.changes as change}
-                            <li>{change}</li>
-                        {/each}
-                    </ul>
+                    {#if update.new && update.new.length > 0}
+                        <h3>New</h3>
+                        <ul class="update-card__list">
+                            {#each update.new as item}
+                                <li>{item}</li>
+                            {/each}
+                        </ul>
+                    {/if}
+
+                    {#if update.fixes && update.fixes.length > 0}
+                        <h3>Fixes</h3>
+                        <ul class="update-card__list">
+                            {#each update.fixes as item}
+                                <li>{item}</li>
+                            {/each}
+                        </ul>
+                    {/if}
                 </article>
             {/each}
         {/if}
@@ -152,6 +165,12 @@
     .update-card__summary {
         margin: 0;
         font-size: clamp(1rem, 1vw + 0.9rem, 1.15rem);
+    }
+
+    h3 {
+        margin: var(--spacing-sm) 0;
+        font-size: clamp(1.1rem, 1vw + 1rem, 1.25rem);
+        color: var(--color-text);
     }
 
     .update-card__list {
