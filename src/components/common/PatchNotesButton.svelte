@@ -18,6 +18,7 @@
     aria-label="Open patch notes"
     class="icon-button patch-notes-button"
     onclick={openPatchNotes}>
+    <!-- https://icons.getbootstrap.com/icons/info-circle/ -->
     <svg
         xmlns="http://www.w3.org/2000/svg"
         width="16"
