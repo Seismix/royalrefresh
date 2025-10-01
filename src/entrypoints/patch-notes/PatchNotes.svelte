@@ -127,12 +127,8 @@
         inline-size: min(100%, 960px);
         margin-inline: auto;
         box-sizing: border-box;
-        box-shadow: var(--shadow-sm);
         display: grid;
         gap: var(--spacing-md);
-        transition:
-            border-color var(--transition-normal),
-            box-shadow var(--transition-normal);
     }
 
     .update-card__header {
@@ -160,7 +156,7 @@
 
     .update-card__list {
         margin: 0;
-        padding-left: var(--spacing-lg);
+        padding-left: var(--spacing-2xl);
         display: grid;
         gap: var(--spacing-xs);
         font-size: clamp(0.95rem, 1vw + 0.85rem, 1.1rem);

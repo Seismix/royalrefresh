@@ -38,6 +38,8 @@
     --spacing-lg: 12px;
     --spacing-xl: 16px;
     --spacing-xxl: 20px;
+    --spacing-2xl: 32px;
+    --spacing-3xl: 48px;
 
     /* Typography */
     --font-family: Arial, sans-serif;
