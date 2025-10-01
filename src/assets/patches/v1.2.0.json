@@ -1,6 +1,6 @@
 {
     "version": "1.2.0",
-    "releasedOn": "2025-08-20",
+    "releasedOn": "2025-09-12",
     "summary": "Expanded recap customization and polished the popup experience.",
     "new": [
         "Jump to recap setting lets you disable automatic scrolling or choose smooth vs instant jump",
