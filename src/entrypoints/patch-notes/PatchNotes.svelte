@@ -6,16 +6,21 @@
         changes: string[]
     }
 
-    const patchModules = import.meta.glob<PatchNote>("~/assets/patches/*.json", {
-        eager: true,
-        import: "default",
-    })
+    const patchModules = import.meta.glob<PatchNote>(
+        "~/assets/patches/*.json",
+        {
+            eager: true,
+            import: "default",
+        },
+    )
 
     const formatDate = (isoDate: string) => {
         const date = new Date(isoDate)
         if (Number.isNaN(date.getTime())) return isoDate
 
-        return new Intl.DateTimeFormat(undefined, { dateStyle: "long" }).format(date)
+        return new Intl.DateTimeFormat(undefined, { dateStyle: "long" }).format(
+            date,
+        )
     }
 
     const patchNotes = Object.values(patchModules)
@@ -23,24 +28,34 @@
             ...note,
             displayDate: formatDate(note.releasedOn),
         }))
-        .sort((a, b) => new Date(b.releasedOn).getTime() - new Date(a.releasedOn).getTime())
+        .sort(
+            (a, b) =>
+                new Date(b.releasedOn).getTime() -
+                new Date(a.releasedOn).getTime(),
+        )
 </script>
 
 <main>
     <header>
         <h1>RoyalRefresh Patch Notes</h1>
-        <p>Stay in the loop with the latest improvements and fixes to your RoyalRefresh experience.</p>
+        <p>
+            Stay in the loop with the latest improvements and fixes to your
+            RoyalRefresh experience.
+        </p>
     </header>
 
     <section aria-label="Recent updates" class="updates">
         {#if patchNotes.length === 0}
-            <p class="empty-state">No patch notes available yet. Check back soon for updates.</p>
+            <p class="empty-state">
+                No patch notes available yet. Check back soon for updates.
+            </p>
         {:else}
             {#each patchNotes as update}
                 <article class="update-card">
                     <header class="update-card__header">
                         <h2>Version {update.version}</h2>
-                        <span class="update-card__date">{update.displayDate}</span>
+                        <span class="update-card__date"
+                            >{update.displayDate}</span>
                     </header>
                     <p class="update-card__summary">{update.summary}</p>
                     <ul class="update-card__list">
@@ -65,15 +80,13 @@
         margin: 0;
         padding: 0;
         overflow-x: hidden;
-        transition:
-            background-color var(--transition-slow),
-            color var(--transition-slow);
     }
 
     main {
-        inline-size: min(100%, var(--container-width));
+        inline-size: min(100%, 1120px);
         margin: 0 auto;
-        padding: clamp(var(--spacing-lg), 4vw, var(--spacing-xxl));
+        padding-block: clamp(var(--spacing-lg), 4vw, var(--spacing-xxl));
+        padding-inline: clamp(var(--spacing-lg), 6vw, var(--spacing-xxl));
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
@@ -100,8 +113,10 @@
     }
 
     .updates {
-        display: grid;
+        display: flex;
+        flex-direction: column;
         gap: var(--spacing-lg);
+        align-items: stretch;
     }
 
     .update-card {
@@ -109,17 +124,15 @@
         border-radius: var(--border-radius);
         border: 1px solid var(--border-color);
         padding: clamp(var(--spacing-lg), 2vw, var(--spacing-xxl));
+        inline-size: min(100%, 960px);
+        margin-inline: auto;
+        box-sizing: border-box;
         box-shadow: var(--shadow-sm);
         display: grid;
         gap: var(--spacing-md);
         transition:
             border-color var(--transition-normal),
             box-shadow var(--transition-normal);
-    }
-
-    .update-card:hover {
-        border-color: var(--color-primary);
-        box-shadow: var(--shadow-md);
     }
 
     .update-card__header {
@@ -164,13 +177,22 @@
         color: var(--color-text-secondary, var(--color-text));
     }
 
-    @media (min-width: 768px) {
-        .updates {
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    @media (min-width: 1024px) {
+        main {
+            inline-size: clamp(640px, 80vw, 1280px);
+            gap: var(--spacing-xxl);
         }
 
-        header {
-            text-align: left;
+        .update-card {
+            padding: clamp(
+                var(--spacing-lg),
+                1.5vw,
+                calc(var(--spacing-xxl) * 1.25)
+            );
+            inline-size: min(100%, 1024px);
+        }
+        .updates {
+            gap: var(--spacing-xxl);
         }
     }
 </style>
