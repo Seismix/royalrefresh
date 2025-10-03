@@ -5,7 +5,7 @@
     "new": [
         "Smooth scroll setting has been renamed to jump to recap, with existing preferences migrated",
         "Jump to recap setting lets you disable the jump, and if enabled, choose between smooth or instant modes",
-        "Settings now adapt to the user's theme preference"
+        "Settings pages now change from dark to light mode based on the OS theme"
     ],
     "fixes": [
         "Jump to recap option respects reduced-motion OS setting with visual feedback",
