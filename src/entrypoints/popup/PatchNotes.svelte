@@ -1,9 +1,8 @@
 <script lang="ts">
     import type { Snippet } from "svelte"
-    import PatchNotesButton from "~/components/common/PatchNotesButton.svelte"
-    import MegaphoneIcon from "~/components/common/MegaphoneIcon.svelte"
-    import ToolsIcon from "~/components/common/ToolsIcon.svelte"
-    import JournalIcon from "~/components/common/JournalIcon.svelte"
+    import MegaphoneIcon from "~/components/icons/MegaphoneIcon.svelte"
+    import ToolsIcon from "~/components/icons/ToolsIcon.svelte"
+    import JournalIcon from "~/components/icons/JournalIcon.svelte"
 
     interface Props {
         headerButtons?: Snippet

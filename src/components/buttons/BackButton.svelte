@@ -1,6 +1,6 @@
 <script lang="ts">
+    import ArrowLeftIcon from "~/components/icons/ArrowLeftIcon.svelte"
     import type { IconButtonProps } from "~/types/icon-button"
-    import ArrowLeftIcon from "./ArrowLeftIcon.svelte"
 
     interface Props extends IconButtonProps {
         onclick: () => void
@@ -9,10 +9,7 @@
     let { onclick, variant = "default" }: Props = $props()
 </script>
 
-<button
-    aria-label="Back to settings"
-    class="icon-button back-button"
-    {onclick}>
+<button aria-label="Back to settings" class="icon-button back-button" {onclick}>
     <ArrowLeftIcon {variant} />
 </button>
 

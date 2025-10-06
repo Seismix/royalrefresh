@@ -1,6 +1,6 @@
 <script lang="ts">
+    import JournalIcon from "~/components/icons/JournalIcon.svelte"
     import type { IconButtonProps } from "~/types/icon-button"
-    import JournalIcon from "./JournalIcon.svelte"
 
     let { onclick, variant = "default" }: IconButtonProps = $props()
 </script>

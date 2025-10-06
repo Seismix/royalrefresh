@@ -1,9 +1,9 @@
 <script lang="ts">
-    import ActionButtons from "~/components/common/ActionButtons.svelte"
-    import BackButton from "~/components/common/BackButton.svelte"
-    import PatchNotesButton from "~/components/common/PatchNotesButton.svelte"
+    import ActionButtons from "@/components/buttons/ActionButtons.svelte"
+    import BackButton from "@/components/buttons/BackButton.svelte"
+    import PatchNotesButton from "@/components/buttons/PatchNotesButton.svelte"
+    import SettingsButton from "@/components/buttons/SettingsButton.svelte"
     import PatchNotes from "@/entrypoints/popup/PatchNotes.svelte"
-    import SettingsGear from "~/components/common/SettingsGear.svelte"
     import AdvancedSettings from "~/components/settings/AdvancedSettings.svelte"
     import BasicSettings from "~/components/settings/BasicSettings.svelte"
     import DEFAULTS from "~/lib/config/defaults"
@@ -59,7 +59,7 @@
             <div class="utility-buttons" aria-label="Extension utilities">
                 <PatchNotesButton onclick={showPatchNotes} />
                 {#if !isAndroidFirefox}
-                    <SettingsGear />
+                    <SettingsButton />
                 {/if}
             </div>
         </header>

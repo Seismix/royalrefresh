@@ -1,5 +1,5 @@
 <script lang="ts">
-    import ActionButtons from "~/components/common/ActionButtons.svelte"
+    import ActionButtons from "@/components/buttons/ActionButtons.svelte"
     import AdvancedSettings from "~/components/settings/AdvancedSettings.svelte"
     import BasicSettings from "~/components/settings/BasicSettings.svelte"
     import { getDefaults } from "~/lib/config/defaults"
