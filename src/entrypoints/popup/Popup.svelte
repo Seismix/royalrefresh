@@ -139,7 +139,6 @@
 
     .actions {
         margin-top: auto;
-        padding-top: var(--spacing-md);
         background-color: var(--bg-secondary);
     }
 
@@ -147,7 +146,6 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: var(--spacing-lg);
         min-height: 2rem; /* Ensure minimum height for buttons */
     }
 

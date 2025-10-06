@@ -1,5 +1,9 @@
 <script lang="ts">
     import type { Snippet } from "svelte"
+    import PatchNotesButton from "~/components/common/PatchNotesButton.svelte"
+    import MegaphoneIcon from "~/components/common/MegaphoneIcon.svelte"
+    import ToolsIcon from "~/components/common/ToolsIcon.svelte"
+    import JournalIcon from "~/components/common/JournalIcon.svelte"
 
     interface Props {
         headerButtons?: Snippet
@@ -62,20 +66,7 @@
                 <article class="update-card">
                     <div class="update-card__header">
                         <div class="version-badge">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="14"
-                                height="14"
-                                fill="currentColor"
-                                class="version-icon"
-                                viewBox="0 0 16 16">
-                                <path
-                                    d="M5 10.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5m0-2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m0-2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m0-2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5" />
-                                <path
-                                    d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2" />
-                                <path
-                                    d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1z" />
-                            </svg>
+                            <JournalIcon variant="primary" />
                             <span>v{update.version}</span>
                         </div>
                         <span class="update-card__date"
@@ -85,18 +76,7 @@
                     {#if update.new && update.new.length > 0}
                         <div class="section new-section">
                             <div class="section-header">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="14"
-                                    height="14"
-                                    fill="currentColor"
-                                    class="section-icon"
-                                    viewBox="0 0 16 16">
-                                    <path
-                                        d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-                                    <path
-                                        d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
-                                </svg>
+                                <MegaphoneIcon variant="success" />
                                 <h4>New Features</h4>
                             </div>
                             <ul class="update-card__list">
@@ -110,18 +90,7 @@
                     {#if update.fixes && update.fixes.length > 0}
                         <div class="section fixes-section">
                             <div class="section-header">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="14"
-                                    height="14"
-                                    fill="currentColor"
-                                    class="section-icon"
-                                    viewBox="0 0 16 16">
-                                    <path
-                                        d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-                                    <path
-                                        d="M11.354 4.646a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L5 10.293l5.646-5.647a.5.5 0 0 1 .708 0" />
-                                </svg>
+                                <ToolsIcon variant="error" />
                                 <h4>Bug Fixes</h4>
                             </div>
                             <ul class="update-card__list">
@@ -224,11 +193,6 @@
         letter-spacing: -0.01em;
     }
 
-    .version-icon {
-        flex-shrink: 0;
-        display: block;
-    }
-
     .update-card__date {
         font-size: 0.7rem;
         color: var(--color-text-muted, var(--color-text));
@@ -259,11 +223,6 @@
         gap: var(--spacing-md);
     }
 
-    .section-icon {
-        display: block;
-        flex-shrink: 0;
-    }
-
     h4 {
         margin: 0;
         font-size: 0.75rem;
@@ -272,14 +231,6 @@
         text-transform: uppercase;
         letter-spacing: 0.8px;
         opacity: 0.9;
-    }
-
-    .new-section .section-icon {
-        color: var(--color-error);
-    }
-
-    .fixes-section .section-icon {
-        color: var(--color-success);
     }
 
     .update-card__list {
