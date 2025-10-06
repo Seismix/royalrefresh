@@ -84,7 +84,7 @@
 </script>
 
 {#if showRestoreSelectors}
-    <div class="action-buttons">
+    <div class="action-buttons-full">
         <button
             type="button"
             class="btn btn-danger"
@@ -116,24 +116,28 @@
 <style>
     @import "~/lib/styles/buttons.css";
 
+    .action-buttons-full {
+        display: flex;
+        gap: var(--spacing-lg);
+        margin-top: var(--spacing-xxl);
+        width: 100%;
+    }
+
+    .action-buttons-full button {
+        flex: 1;
+        white-space: normal;
+    }
+
     .action-buttons {
         display: flex;
-        flex-wrap: wrap;
         gap: var(--spacing-lg);
         margin-top: var(--spacing-xxl);
         width: 100%;
     }
 
     .action-buttons button {
-        flex: 1 1 calc(50% - var(--spacing-lg));
-        min-width: min(100%, 180px);
+        flex: 1;
         white-space: normal;
-    }
-
-    @media (max-width: 480px) {
-        .action-buttons button {
-            flex-basis: 100%;
-        }
     }
 
     /* State-specific styles */
