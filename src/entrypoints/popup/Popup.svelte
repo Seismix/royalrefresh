@@ -1,6 +1,8 @@
 <script lang="ts">
     import ActionButtons from "~/components/common/ActionButtons.svelte"
+    import BackButton from "~/components/common/BackButton.svelte"
     import PatchNotesButton from "~/components/common/PatchNotesButton.svelte"
+    import PatchNotes from "@/entrypoints/popup/PatchNotes.svelte"
     import SettingsGear from "~/components/common/SettingsGear.svelte"
     import AdvancedSettings from "~/components/settings/AdvancedSettings.svelte"
     import BasicSettings from "~/components/settings/BasicSettings.svelte"
@@ -9,8 +11,11 @@
     import { getSettings, watchSettings } from "~/lib/utils/storage-utils"
     import type { ExtensionSettings } from "~/types/types"
 
+    type View = "settings" | "patch-notes"
+
     let localSettings = $state<ExtensionSettings | null>(null)
     let isValid = $state<boolean>(true)
+    let currentView = $state<View>("settings")
     const isAndroidFirefox = currentBrowser === BrowserType.AndroidFirefox
 
     // Load initial settings and set up watching
@@ -37,34 +42,60 @@
     function handleValidationChange(valid: boolean) {
         isValid = valid
     }
+
+    function showPatchNotes() {
+        currentView = "patch-notes"
+    }
+
+    function showSettings() {
+        currentView = "settings"
+    }
 </script>
 
 <main>
-    <div class="utility-buttons" aria-label="Extension utilities">
-        <PatchNotesButton />
-        {#if !isAndroidFirefox}
-            <SettingsGear />
-        {/if}
-    </div>
-    <h1>RoyalRefresh Settings</h1>
+    {#if currentView === "settings"}
+        <header class="popup-header">
+            <h1>RoyalRefresh Settings</h1>
+            <div class="utility-buttons" aria-label="Extension utilities">
+                <PatchNotesButton onclick={showPatchNotes} />
+                {#if !isAndroidFirefox}
+                    <SettingsGear />
+                {/if}
+            </div>
+        </header>
 
-    {#if !localSettings}
-        <p>Loading settings...</p>
+        <div class="content">
+            {#if !localSettings}
+                <p>Loading settings...</p>
+            {:else}
+                <BasicSettings
+                    bind:settings={localSettings}
+                    onValidationChange={handleValidationChange} />
+
+                {#if isAndroidFirefox}
+                    <section
+                        class="advanced-section"
+                        aria-label="Advanced settings">
+                        <AdvancedSettings bind:settings={localSettings} />
+                    </section>
+                {/if}
+            {/if}
+        </div>
+
+        {#if localSettings}
+            <div class="actions">
+                <ActionButtons
+                    settings={localSettings}
+                    {isValid}
+                    showRestoreSelectors={isAndroidFirefox} />
+            </div>
+        {/if}
     {:else}
-        <BasicSettings
-            bind:settings={localSettings}
-            onValidationChange={handleValidationChange} />
-
-        {#if isAndroidFirefox}
-            <section class="advanced-section" aria-label="Advanced settings">
-                <AdvancedSettings bind:settings={localSettings} />
-            </section>
-        {/if}
-
-        <ActionButtons
-            settings={localSettings}
-            {isValid}
-            showRestoreSelectors={isAndroidFirefox} />
+        <PatchNotes>
+            {#snippet headerButtons()}
+                <BackButton onclick={showSettings} />
+            {/snippet}
+        </PatchNotes>
     {/if}
 </main>
 
@@ -92,37 +123,45 @@
         min-width: 300px;
         max-width: 400px;
         width: 400px;
+        max-height: 600px;
         overflow-y: auto;
         box-sizing: border-box;
+        position: relative; /* For absolute positioning of utility buttons */
+        display: flex;
+        flex-direction: column;
+    }
+
+    .content {
+        flex: 1;
+        overflow-y: auto;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .actions {
+        margin-top: auto;
+        padding-top: var(--spacing-md);
+        background-color: var(--bg-secondary);
+    }
+
+    .popup-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: var(--spacing-lg);
+        min-height: 2rem; /* Ensure minimum height for buttons */
     }
 
     h1 {
         color: var(--color-text);
-        margin-bottom: var(--spacing-lg);
         font-size: 1.2rem;
-        margin-top: 0;
-    }
-
-    main {
-        position: relative; /* For absolute positioning of SettingsButton */
-    }
-
-    p {
-        color: var(--color-text);
-        margin-bottom: var(--spacing-sm);
-    }
-
-    .advanced-section {
-        margin: var(--spacing-lg) 0;
-        border-top: 1px solid var(--border-color);
-        padding-top: var(--spacing-md);
+        margin: 0;
+        flex: 1;
     }
 
     .utility-buttons {
-        position: absolute;
-        top: var(--spacing-sm);
-        right: var(--spacing-sm);
         display: flex;
+        align-items: center;
         gap: var(--spacing-xs);
+        height: 100%;
     }
 </style>
