@@ -46,6 +46,13 @@
             onValidationChange(wordCountValidation.isValid)
         }
     })
+
+    // Compute effective scroll behavior - overrides to instant when animations can't run
+    const effectiveScrollBehavior = $derived(
+        (!settings.enableAnimations || userPrefersReducedMotion)
+            ? "instant"
+            : settings.scrollBehavior
+    )
 </script>
 
 <h2>Recap Settings</h2>
@@ -74,23 +81,29 @@
         <span>Scroll behavior</span>
         <select
             class="form-control"
-            bind:value={settings.scrollBehavior}
-            disabled={userPrefersReducedMotion}>
-            <option value="smooth">Smooth (animated scroll)</option>
+            value={effectiveScrollBehavior}
+            onchange={(e) => settings.scrollBehavior = e.currentTarget.value as ScrollBehavior}
+            disabled={userPrefersReducedMotion || !settings.enableAnimations}>
+            <option value="smooth">Animated scroll</option>
             <option value="instant">Instant</option>
         </select>
     </label>
+{/if}
 
+<label>
+    <span>Enable animations</span>
+    <input type="checkbox" bind:checked={settings.enableAnimations} />
+</label>
+
+{#if settings.enableAnimations}
     {#if userPrefersReducedMotion}
         <div class="message info-message">
             <p>
-                Smooth scrolling is disabled because <em
-                    >prefers-reduced-motion</em> is enabled in your system settings,
+                Animations are disabled because <em>prefers-reduced-motion</em> is enabled in your system settings,
                 which overrides your extension settings.
             </p>
             <p>
-                To enable smooth scrolling, change your system's accessibility
-                settings to allow motion.
+                To enable animations, change your system's accessibility settings to allow motion.
             </p>
         </div>
     {/if}

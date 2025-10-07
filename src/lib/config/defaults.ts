@@ -18,7 +18,8 @@ export const DEFAULT_SELECTORS: ExtensionSelectors = {
 const DEFAULTS: ExtensionSettings = {
     wordCount: 250,
     enableJump: false,
-    scrollBehavior: "instant" as ScrollBehavior,
+    scrollBehavior: "smooth" as ScrollBehavior,
+    enableAnimations: true,
     autoExpand: false,
     ...DEFAULT_SELECTORS,
 }
@@ -49,11 +50,15 @@ export function getDefaults(existingSettings?: Partial<ExtensionSettings>) {
             ...DEFAULTS,
             enableJump: true,
             scrollBehavior: "smooth" as ScrollBehavior,
+            enableAnimations: true,
         }
     }
 
-    // Default case (fresh install, no reduced motion or detection failed)
-    return DEFAULTS
+    // Default case (reduced motion or detection failed) - disable animations
+    return {
+        ...DEFAULTS,
+        enableAnimations: false,
+    }
 }
 
 /**

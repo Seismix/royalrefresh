@@ -3,6 +3,7 @@
     import { getSettings, watchSettings } from "~/lib/utils/storage-utils"
     import { ContentManager } from "~/lib/services/content-manager"
     import { getDefaults } from "~/lib/config/defaults"
+    import { prefersReducedMotion } from "~/lib/utils/platform"
     import type { ExtensionSettings } from "~/types/types"
 
     let { id = "recapContainer" }: { id?: string } = $props()
@@ -35,9 +36,14 @@
     // Effect: scroll into view when content becomes visible
     $effect(() => {
         if (recapState.isVisible && currentSettings?.enableJump) {
+            // Override to instant if animations are disabled or OS prefers reduced motion
+            const behavior = (!currentSettings.enableAnimations || prefersReducedMotion())
+                ? "instant"
+                : currentSettings.scrollBehavior
+
             document
                 .getElementById(id)
-                ?.scrollIntoView({ behavior: currentSettings.scrollBehavior })
+                ?.scrollIntoView({ behavior })
         }
     })
 
