@@ -14,3 +14,18 @@ export const currentBrowser: BrowserType =
             ? BrowserType.AndroidFirefox
             : BrowserType.Firefox
         : BrowserType.Chrome
+
+/**
+ * Check if the user prefers reduced motion
+ * @returns true if prefers-reduced-motion is set to reduce, false otherwise
+ */
+export function prefersReducedMotion(): boolean {
+    try {
+        if (typeof window !== "undefined" && window.matchMedia) {
+            return window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        }
+    } catch (error) {
+        // Ignore errors
+    }
+    return false
+}

@@ -1,8 +1,10 @@
 <script lang="ts">
     import type { Snippet } from "svelte"
+    import { slide } from "svelte/transition"
     import MegaphoneIcon from "~/components/icons/MegaphoneIcon.svelte"
     import ToolsIcon from "~/components/icons/ToolsIcon.svelte"
     import JournalIcon from "~/components/icons/JournalIcon.svelte"
+    import { prefersReducedMotion } from "~/lib/utils/platform"
 
     interface Props {
         headerButtons?: Snippet
@@ -45,6 +47,25 @@
                 new Date(b.releasedOn).getTime() -
                 new Date(a.releasedOn).getTime(),
         )
+
+    // Check for reduced motion preference - simpler approach
+    const userPrefersReducedMotion = prefersReducedMotion()
+
+    // Track expanded state for each patch note
+    let expandedStates = $state<Record<string, boolean>>(
+        patchNotes.reduce(
+            (acc, note, index) => {
+                // Only the first (most recent) patch note is expanded by default
+                acc[note.version] = index === 0
+                return acc
+            },
+            {} as Record<string, boolean>,
+        ),
+    )
+
+    const toggleExpanded = (version: string) => {
+        expandedStates[version] = !expandedStates[version]
+    }
 </script>
 
 <div class="patch-notes-content">
@@ -62,41 +83,73 @@
             <p class="empty-state">No updates available yet.</p>
         {:else}
             {#each patchNotes as update}
+                {@const isExpanded = expandedStates[update.version]}
                 <article class="update-card">
-                    <div class="update-card__header">
+                    <button
+                        type="button"
+                        class="update-card__header"
+                        onclick={() => toggleExpanded(update.version)}
+                        aria-expanded={isExpanded}
+                        aria-label={isExpanded
+                            ? `Collapse version ${update.version}`
+                            : `Expand version ${update.version}`}>
                         <div class="version-badge">
                             <JournalIcon variant="primary" />
                             <span>v{update.version}</span>
                         </div>
                         <span class="update-card__date"
                             >{update.displayDate}</span>
-                    </div>
-                    <p class="update-card__summary">{update.summary}</p>
-                    {#if update.new && update.new.length > 0}
-                        <div class="section new-section">
-                            <div class="section-header">
-                                <MegaphoneIcon variant="success" />
-                                <h4>New Features</h4>
-                            </div>
-                            <ul class="update-card__list">
-                                {#each update.new as item}
-                                    <li>{item}</li>
-                                {/each}
-                            </ul>
-                        </div>
-                    {/if}
+                        <svg
+                            class="expand-icon"
+                            class:expanded={isExpanded}
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            aria-hidden="true">
+                            <path
+                                d="M4 6L8 10L12 6"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                    {#if isExpanded}
+                        <div
+                            class="update-card__content"
+                            transition:slide|global={{
+                                duration: userPrefersReducedMotion ? 0 : undefined,
+                            }}>
+                            <p class="update-card__summary">{update.summary}</p>
+                            {#if update.new && update.new.length > 0}
+                                <div class="section new-section">
+                                    <div class="section-header">
+                                        <MegaphoneIcon variant="success" />
+                                        <h4>New Features</h4>
+                                    </div>
+                                    <ul class="update-card__list">
+                                        {#each update.new as item}
+                                            <li>{item}</li>
+                                        {/each}
+                                    </ul>
+                                </div>
+                            {/if}
 
-                    {#if update.fixes && update.fixes.length > 0}
-                        <div class="section fixes-section">
-                            <div class="section-header">
-                                <ToolsIcon variant="error" />
-                                <h4>Bug Fixes</h4>
-                            </div>
-                            <ul class="update-card__list">
-                                {#each update.fixes as item}
-                                    <li>{item}</li>
-                                {/each}
-                            </ul>
+                            {#if update.fixes && update.fixes.length > 0}
+                                <div class="section fixes-section">
+                                    <div class="section-header">
+                                        <ToolsIcon variant="error" />
+                                        <h4>Bug Fixes</h4>
+                                    </div>
+                                    <ul class="update-card__list">
+                                        {#each update.fixes as item}
+                                            <li>{item}</li>
+                                        {/each}
+                                    </ul>
+                                </div>
+                            {/if}
                         </div>
                     {/if}
                 </article>
@@ -167,6 +220,7 @@
         gap: var(--spacing-sm);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         transition: all 0.2s ease;
+        overflow: visible;
     }
 
     .update-card:hover {
@@ -180,6 +234,59 @@
         justify-content: space-between;
         align-items: center;
         gap: var(--spacing-xs);
+        background: transparent;
+        border: none;
+        padding: var(--spacing-sm);
+        margin: calc(var(--spacing-sm) * -1);
+        width: calc(100% + var(--spacing-sm) * 2);
+        min-height: 44px;
+        cursor: pointer;
+        color: inherit;
+        font-family: inherit;
+        text-align: left;
+        transition: opacity 0.2s ease;
+    }
+
+    .update-card__header:hover {
+        opacity: 0.8;
+        background: rgba(0, 0, 0, 0.02);
+    }
+
+    .update-card__header:active {
+        background: rgba(0, 0, 0, 0.04);
+    }
+
+    .update-card__header:focus-visible {
+        outline: 2px solid var(--color-primary);
+        outline-offset: 2px;
+        border-radius: 8px;
+    }
+
+    .expand-icon {
+        flex-shrink: 0;
+        color: var(--color-text-muted, var(--color-text));
+        opacity: 0.6;
+        transition: transform 0.3s ease;
+        width: 20px;
+        height: 20px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .expand-icon {
+            transition: none;
+        }
+    }
+
+    .expand-icon.expanded {
+        transform: rotate(180deg);
+    }
+
+    .update-card__content {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        margin-top: var(--spacing-sm);
+        will-change: height;
     }
 
     .version-badge {
@@ -199,10 +306,13 @@
         font-weight: 500;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        margin-left: auto;
+        margin-right: var(--spacing-xs);
     }
 
     .update-card__summary {
         margin: 0;
+        margin-top: var(--spacing-sm);
         font-size: 0.85rem;
         line-height: 1.5;
         color: var(--color-text);

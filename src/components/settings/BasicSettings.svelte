@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { ExtensionSettings } from "~/types/types"
+    import { prefersReducedMotion } from "~/lib/utils/platform"
 
     let {
         settings = $bindable(),
@@ -10,12 +11,7 @@
     } = $props()
 
     // Detect prefers-reduced-motion
-    const prefersReducedMotion = $derived.by(() => {
-        if (typeof window !== "undefined" && window.matchMedia) {
-            return window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        }
-        return false
-    })
+    const userPrefersReducedMotion = $derived.by(() => prefersReducedMotion())
 
     // Validation for word count using result object pattern
     const wordCountValidation = $derived.by(() => {
@@ -79,13 +75,13 @@
         <select
             class="form-control"
             bind:value={settings.scrollBehavior}
-            disabled={prefersReducedMotion}>
+            disabled={userPrefersReducedMotion}>
             <option value="smooth">Smooth (animated scroll)</option>
             <option value="instant">Instant</option>
         </select>
     </label>
 
-    {#if prefersReducedMotion}
+    {#if userPrefersReducedMotion}
         <div class="message info-message">
             <p>
                 Smooth scrolling is disabled because <em
