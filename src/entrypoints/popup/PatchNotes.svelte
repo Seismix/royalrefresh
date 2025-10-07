@@ -159,6 +159,8 @@
         display: flex;
         flex-direction: column;
         gap: var(--spacing-lg);
+        height: 100%;
+        min-height: 0; /* Important for flex overflow */
     }
 
     .patch-notes-header {
@@ -167,6 +169,7 @@
         justify-content: space-between;
         min-height: 2rem;
         margin: 0;
+        flex-shrink: 0;
     }
 
     h2 {
@@ -190,6 +193,7 @@
         font-size: 0.85rem;
         line-height: 1.4;
         opacity: 0.8;
+        flex-shrink: 0;
     }
 
     .updates {
@@ -197,6 +201,9 @@
         flex-direction: column;
         gap: var(--spacing-md);
         align-items: stretch;
+        flex: 1;
+        min-height: 0; /* Important for flex overflow */
+        overflow-y: auto;
     }
 
     .update-card {

@@ -48,7 +48,7 @@
     }
 </script>
 
-<main>
+<main class:android-firefox={isAndroidFirefox}>
     {#if currentView === "settings"}
         <header class="popup-header">
             <h1>RoyalRefresh Settings</h1>
@@ -87,12 +87,14 @@
             </div>
         {/if}
     {:else}
-        <PatchNotes>
-            {#snippet headerButtons()}
-                <GitHubButton />
-                <BackButton onclick={showSettings} />
-            {/snippet}
-        </PatchNotes>
+        <div class="patch-notes-wrapper">
+            <PatchNotes>
+                {#snippet headerButtons()}
+                    <GitHubButton />
+                    <BackButton onclick={showSettings} />
+                {/snippet}
+            </PatchNotes>
+        </div>
     {/if}
 </main>
 
@@ -112,6 +114,11 @@
             color var(--transition-slow);
     }
 
+    /* Android Firefox body takes full width */
+    :global(body:has(.android-firefox)) {
+        max-width: 100vw;
+    }
+
     main {
         font-family: var(--font-family);
         background-color: var(--bg-secondary);
@@ -120,23 +127,42 @@
         min-width: 300px;
         max-width: 400px;
         width: 400px;
+        min-height: 400px;
         max-height: 600px;
-        overflow-y: auto;
         box-sizing: border-box;
         position: relative; /* For absolute positioning of utility buttons */
         display: flex;
         flex-direction: column;
     }
 
+    /* Android Firefox popup takes full screen height */
+    main.android-firefox {
+        min-height: 100vh;
+        max-height: 100vh;
+        height: 100vh;
+        width: 100vw;
+        max-width: 100vw;
+        overflow: hidden;
+    }
+
     .content {
         flex: 1;
         overflow-y: auto;
         margin-bottom: var(--spacing-md);
+        min-height: 0; /* Important for flex overflow */
+    }
+
+    .patch-notes-wrapper {
+        flex: 1;
+        min-height: 0; /* Important for flex overflow */
+        display: flex;
+        flex-direction: column;
     }
 
     .actions {
         margin-top: auto;
         background-color: var(--bg-secondary);
+        flex-shrink: 0;
     }
 
     .popup-header {
@@ -144,6 +170,7 @@
         align-items: center;
         justify-content: space-between;
         min-height: 2rem; /* Ensure minimum height for buttons */
+        flex-shrink: 0;
     }
 
     h1 {
