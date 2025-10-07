@@ -47,6 +47,19 @@
         }
     })
 
+    // Track previous state to detect when animations are first enabled
+    let previousEnableAnimations = $state(settings.enableAnimations)
+
+    // Set scroll behavior to smooth when animations are FIRST enabled (if jump is on and OS allows)
+    $effect(() => {
+        if (settings.enableAnimations && !previousEnableAnimations && !userPrefersReducedMotion && settings.enableJump) {
+            if (settings.scrollBehavior === "instant") {
+                settings.scrollBehavior = "smooth"
+            }
+        }
+        previousEnableAnimations = settings.enableAnimations
+    })
+
     // Compute effective scroll behavior - overrides to instant when animations can't run
     const effectiveScrollBehavior = $derived(
         (!settings.enableAnimations || userPrefersReducedMotion)
