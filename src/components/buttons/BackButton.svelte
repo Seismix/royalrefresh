@@ -1,5 +1,5 @@
 <script lang="ts">
-    import ArrowLeftIcon from "~/components/icons/ArrowLeftIcon.svelte"
+    import { ArrowLeftIcon } from "~/components/icons"
     import type { IconButtonProps } from "~/types/icon-button"
 
     interface Props extends IconButtonProps {

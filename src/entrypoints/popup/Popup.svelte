@@ -1,11 +1,7 @@
 <script lang="ts">
-    import ActionButtons from "@/components/buttons/ActionButtons.svelte"
-    import BackButton from "@/components/buttons/BackButton.svelte"
-    import PatchNotesButton from "@/components/buttons/PatchNotesButton.svelte"
-    import SettingsButton from "@/components/buttons/SettingsButton.svelte"
+    import { ActionButtons, BackButton, GitHubButton, PatchNotesButton, SettingsButton } from "@/components/buttons"
     import PatchNotes from "@/entrypoints/popup/PatchNotes.svelte"
-    import AdvancedSettings from "~/components/settings/AdvancedSettings.svelte"
-    import BasicSettings from "~/components/settings/BasicSettings.svelte"
+    import { AdvancedSettings, BasicSettings } from "~/components/settings"
     import DEFAULTS from "~/lib/config/defaults"
     import { BrowserType, currentBrowser } from "~/lib/utils/platform"
     import { getSettings, watchSettings } from "~/lib/utils/storage-utils"
@@ -93,6 +89,7 @@
     {:else}
         <PatchNotes>
             {#snippet headerButtons()}
+                <GitHubButton />
                 <BackButton onclick={showSettings} />
             {/snippet}
         </PatchNotes>

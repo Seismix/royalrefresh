@@ -1,6 +1,6 @@
 <script lang="ts">
     import { browser } from "wxt/browser"
-    import GearIcon from "~/components/icons/GearIcon.svelte"
+    import { GearIcon } from "~/components/icons"
     import type { IconButtonProps } from "~/types/icon-button"
 
     let { variant = "default" }: Omit<IconButtonProps, "onclick"> = $props()
