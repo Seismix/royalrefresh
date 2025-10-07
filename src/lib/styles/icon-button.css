@@ -2,7 +2,7 @@
 .icon-button {
     background: none;
     border: none;
-    padding: 4px;
+    padding: 8px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -33,6 +33,8 @@
     display: block;
     color: var(--color-text);
     transition: color 0.2s;
+    width: var(--icon-size-base);
+    height: var(--icon-size-base);
 }
 
 /* Variant colors - apply to icon elements */
@@ -66,4 +68,18 @@
     }
 
     /* Variants remain unchanged in dark mode - they use CSS variables */
+}
+
+/* Mobile touch target improvements */
+@media (hover: none) and (pointer: coarse) {
+    .icon-button {
+        padding: var(--spacing-touch);
+        min-width: var(--touch-target-min);
+        min-height: var(--touch-target-min);
+    }
+
+    .icon {
+        width: var(--icon-size-touch);
+        height: var(--icon-size-touch);
+    }
 }
