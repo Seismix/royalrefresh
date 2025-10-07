@@ -1,13 +1,23 @@
 <script lang="ts">
     import type { Snippet } from "svelte"
     import { slide } from "svelte/transition"
+    import { tick } from "svelte"
     import { MegaphoneIcon, ToolsIcon, JournalIcon } from "~/components/icons"
+    import { getSettings } from "~/lib/utils/storage-utils"
+    import type { ExtensionSettings } from "~/types/types"
 
     interface Props {
         headerButtons?: Snippet
     }
 
     let { headerButtons }: Props = $props()
+
+    let settings = $state<ExtensionSettings | null>(null)
+
+    // Load settings on mount
+    getSettings().then((loadedSettings) => {
+        settings = loadedSettings
+    })
 
     type PatchNote = {
         version: string
@@ -57,8 +67,24 @@
         ),
     )
 
-    const toggleExpanded = (version: string) => {
+    // Store references to article elements
+    let articleRefs = $state<Record<string, HTMLElement | null>>({})
+
+    const toggleExpanded = async (version: string) => {
+        const wasExpanded = expandedStates[version]
         expandedStates[version] = !expandedStates[version]
+
+        // If we're expanding (not collapsing), scroll into view after the DOM updates
+        if (!wasExpanded && settings) {
+            await tick()
+            const article = articleRefs[version]
+            if (article) {
+                article.scrollIntoView({
+                    behavior: settings.scrollBehavior || "smooth",
+                    block: "nearest"
+                })
+            }
+        }
     }
 </script>
 
@@ -76,9 +102,9 @@
         {#if patchNotes.length === 0}
             <p class="empty-state">No updates available yet.</p>
         {:else}
-            {#each patchNotes as update}
+            {#each patchNotes as update (update.version)}
                 {@const isExpanded = expandedStates[update.version]}
-                <article class="update-card">
+                <article class="update-card" bind:this={articleRefs[update.version]}>
                     <button
                         type="button"
                         class="update-card__header"
@@ -124,7 +150,7 @@
                                         <h4>New Features</h4>
                                     </div>
                                     <ul class="update-card__list">
-                                        {#each update.new as item}
+                                        {#each update.new as item, index (index)}
                                             <li>{item}</li>
                                         {/each}
                                     </ul>
@@ -138,7 +164,7 @@
                                         <h4>Bug Fixes</h4>
                                     </div>
                                     <ul class="update-card__list">
-                                        {#each update.fixes as item}
+                                        {#each update.fixes as item, index (index)}
                                             <li>{item}</li>
                                         {/each}
                                     </ul>
