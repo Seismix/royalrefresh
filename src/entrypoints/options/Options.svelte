@@ -1,13 +1,17 @@
 <script lang="ts">
-    import { ActionButtons } from "@/components/buttons"
+    import { ActionButtons, BackButton, GitHubButton, PatchNotesButton } from "@/components/buttons"
+    import PatchNotes from "@/entrypoints/popup/PatchNotes.svelte"
     import { AdvancedSettings, BasicSettings } from "~/components/settings"
     import { getDefaults } from "~/lib/config/defaults"
     import { getSettings, watchSettings } from "~/lib/utils/storage-utils"
     import type { ExtensionSettings } from "~/types/types"
 
+    type View = "settings" | "patch-notes"
+
     let localSettings = $state<ExtensionSettings | null>(null)
     let isValid = $state<boolean>(true)
     let isFirefox = $state(import.meta.env.FIREFOX)
+    let currentView = $state<View>("settings")
 
     // Load initial settings and set up watching
     $effect(() => {
@@ -33,22 +37,48 @@
     function handleValidationChange(valid: boolean) {
         isValid = valid
     }
+
+    function showPatchNotes() {
+        currentView = "patch-notes"
+    }
+
+    function showSettings() {
+        currentView = "settings"
+    }
 </script>
 
 <main class={isFirefox ? "firefox" : ""}>
-    {#if !localSettings}
-        <p>Loading settings...</p>
+    {#if currentView === "settings"}
+        <header class="options-header">
+            <h1>RoyalRefresh Settings</h1>
+            <div class="utility-buttons" aria-label="Extension utilities">
+                <PatchNotesButton onclick={showPatchNotes} />
+            </div>
+        </header>
+
+        {#if !localSettings}
+            <p>Loading settings...</p>
+        {:else}
+            <BasicSettings
+                bind:settings={localSettings}
+                onValidationChange={handleValidationChange} />
+
+            <AdvancedSettings bind:settings={localSettings} />
+
+            <ActionButtons
+                settings={localSettings}
+                {isValid}
+                showRestoreSelectors={true} />
+        {/if}
     {:else}
-        <BasicSettings
-            bind:settings={localSettings}
-            onValidationChange={handleValidationChange} />
-
-        <AdvancedSettings bind:settings={localSettings} />
-
-        <ActionButtons
-            settings={localSettings}
-            {isValid}
-            showRestoreSelectors={true} />
+        <div class="patch-notes-wrapper">
+            <PatchNotes>
+                {#snippet headerButtons()}
+                    <GitHubButton />
+                    <BackButton onclick={showSettings} />
+                {/snippet}
+            </PatchNotes>
+        </div>
     {/if}
 </main>
 
@@ -79,10 +109,42 @@
         padding: var(--page-padding);
         box-sizing: border-box;
         overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
     }
 
     .firefox {
         padding-inline: var(--page-padding);
+    }
+
+    .options-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 2rem; /* Ensure minimum height for buttons */
+        flex-shrink: 0;
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .options-header h1 {
+        font-size: 1.5rem;
+        margin: 0;
+        flex: 1;
+    }
+
+    .utility-buttons {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        height: 100%;
+    }
+
+    .patch-notes-wrapper {
+        flex: 1;
+        min-height: 0; /* Important for flex overflow */
+        display: flex;
+        flex-direction: column;
     }
 
     :global(h1),
