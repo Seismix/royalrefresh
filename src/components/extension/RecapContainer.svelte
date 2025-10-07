@@ -36,8 +36,8 @@
     // Effect: scroll into view when content becomes visible
     $effect(() => {
         if (recapState.isVisible && currentSettings?.enableJump) {
-            // Override to instant if animations are disabled or OS prefers reduced motion
-            const behavior = (!currentSettings.enableAnimations || prefersReducedMotion())
+            // Use scroll behavior, but override to instant if OS prefers reduced motion
+            const behavior = prefersReducedMotion()
                 ? "instant"
                 : currentSettings.scrollBehavior
 

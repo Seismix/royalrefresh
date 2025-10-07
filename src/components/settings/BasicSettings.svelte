@@ -47,24 +47,9 @@
         }
     })
 
-    // Track previous state to detect when animations are first enabled
-    let previousEnableAnimations = $state(settings.enableAnimations)
-
-    // Set scroll behavior to smooth when animations are FIRST enabled (if jump is on and OS allows)
-    $effect(() => {
-        if (settings.enableAnimations && !previousEnableAnimations && !userPrefersReducedMotion && settings.enableJump) {
-            if (settings.scrollBehavior === "instant") {
-                settings.scrollBehavior = "smooth"
-            }
-        }
-        previousEnableAnimations = settings.enableAnimations
-    })
-
-    // Compute effective scroll behavior - overrides to instant when animations can't run
+    // Compute effective scroll behavior - respects OS reduced motion preference
     const effectiveScrollBehavior = $derived(
-        (!settings.enableAnimations || userPrefersReducedMotion)
-            ? "instant"
-            : settings.scrollBehavior
+        userPrefersReducedMotion ? "instant" : settings.scrollBehavior
     )
 </script>
 
@@ -96,27 +81,18 @@
             class="form-control"
             value={effectiveScrollBehavior}
             onchange={(e) => settings.scrollBehavior = e.currentTarget.value as ScrollBehavior}
-            disabled={userPrefersReducedMotion || !settings.enableAnimations}>
+            disabled={userPrefersReducedMotion}>
             <option value="smooth">Animated scroll</option>
             <option value="instant">Instant</option>
         </select>
     </label>
-{/if}
-
-<label>
-    <span>Enable animations</span>
-    <input type="checkbox" bind:checked={settings.enableAnimations} />
-</label>
-
-{#if settings.enableAnimations}
     {#if userPrefersReducedMotion}
         <div class="message info-message">
             <p>
-                Animations are disabled because <em>prefers-reduced-motion</em> is enabled in your system settings,
-                which overrides your extension settings.
+                Scroll animations are disabled because <em>prefers-reduced-motion</em> is enabled in your system settings.
             </p>
             <p>
-                To enable animations, change your system's accessibility settings to allow motion.
+                To enable smooth scrolling, change your system's accessibility settings to allow motion.
             </p>
         </div>
     {/if}

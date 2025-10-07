@@ -14,7 +14,6 @@ export type ExtensionSettings = {
     wordCount: number
     enableJump: boolean
     scrollBehavior: ScrollBehavior
-    enableAnimations: boolean
     autoExpand: boolean
     hasDetectedReducedMotion?: boolean
 } & ExtensionSelectors

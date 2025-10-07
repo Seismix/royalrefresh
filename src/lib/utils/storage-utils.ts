@@ -16,7 +16,6 @@ export const settingsStore = storage.defineItem<ExtensionSettings>(
             wordCount: 250,
             enableJump: true, // Will be adjusted in getSettings() based on reduced motion
             scrollBehavior: "smooth" as ScrollBehavior,
-            enableAnimations: true,
             autoExpand: false,
             // hasDetectedReducedMotion is undefined for fresh installs - this triggers detection
             ...DEFAULT_SELECTORS,
@@ -32,7 +31,6 @@ export const settingsStore = storage.defineItem<ExtensionSettings>(
                         scrollBehavior: (oldSettings.smoothScroll
                             ? "smooth"
                             : "instant") as ScrollBehavior,
-                        enableAnimations: true,  // Add new field
                         // Migration: mark as having been detected so we don't override user's choice
                         hasDetectedReducedMotion: true,
                     } as ExtensionSettings
@@ -79,14 +77,12 @@ export async function getSettings(): Promise<ExtensionSettings> {
                 ...updatedSettings,
                 enableJump: settings?.enableJump ?? true,
                 scrollBehavior: settings?.scrollBehavior ?? ("smooth" as ScrollBehavior),
-                enableAnimations: settings?.enableAnimations ?? true,
             }
         } else {
             // Respect reduced motion by ensuring instant scrolling and disabling animations
             updatedSettings = {
                 ...updatedSettings,
                 scrollBehavior: "instant" as ScrollBehavior,
-                enableAnimations: settings?.enableAnimations ?? false,
             }
         }
 

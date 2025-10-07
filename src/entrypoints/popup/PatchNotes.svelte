@@ -4,7 +4,6 @@
     import MegaphoneIcon from "~/components/icons/MegaphoneIcon.svelte"
     import ToolsIcon from "~/components/icons/ToolsIcon.svelte"
     import JournalIcon from "~/components/icons/JournalIcon.svelte"
-    import { prefersReducedMotion } from "~/lib/utils/platform"
 
     interface Props {
         headerButtons?: Snippet
@@ -47,9 +46,6 @@
                 new Date(b.releasedOn).getTime() -
                 new Date(a.releasedOn).getTime(),
         )
-
-    // Check for reduced motion preference - simpler approach
-    const userPrefersReducedMotion = prefersReducedMotion()
 
     // Track expanded state for each patch note
     let expandedStates = $state<Record<string, boolean>>(
@@ -120,7 +116,7 @@
                         <div
                             class="update-card__content"
                             transition:slide|global={{
-                                duration: userPrefersReducedMotion ? 0 : undefined,
+                                duration: 0,
                             }}>
                             <p class="update-card__summary">{update.summary}</p>
                             {#if update.new && update.new.length > 0}
