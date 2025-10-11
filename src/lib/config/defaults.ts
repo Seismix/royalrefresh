@@ -38,10 +38,7 @@ export function getDefaults(existingSettings?: Partial<ExtensionSettings>) {
 
     // Fresh install: detect reduced motion preference
     const reducedMotion = prefersReducedMotion()
-    devLog.log(
-        "Fresh install: prefersReducedMotion",
-        reducedMotion,
-    )
+    devLog.log("Fresh install: prefersReducedMotion", reducedMotion)
 
     if (!reducedMotion) {
         // No reduced motion preference - safe to enable jump functionality

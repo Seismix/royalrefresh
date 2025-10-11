@@ -1,9 +1,14 @@
 <script lang="ts">
     import type { Snippet } from "svelte"
-    import { slide } from "svelte/transition"
     import { tick } from "svelte"
+    import { slide } from "svelte/transition"
+    import {
+        ChevronDownIcon,
+        JournalIcon,
+        MegaphoneIcon,
+        ToolsIcon,
+    } from "~/components/icons"
     import { PageHeader } from "~/components/layout"
-    import { ChevronDownIcon, MegaphoneIcon, ToolsIcon, JournalIcon } from "~/components/icons"
     import { getSettings } from "~/lib/utils/storage-utils"
     import type { ExtensionSettings } from "~/types/types"
 
@@ -83,7 +88,7 @@
             if (article) {
                 article.scrollIntoView({
                     behavior: settings.scrollBehavior || "smooth",
-                    block: "nearest"
+                    block: "nearest",
                 })
             }
         }
@@ -106,7 +111,9 @@
         {:else}
             {#each patchNotes as update (update.version)}
                 {@const isExpanded = expandedStates[update.version]}
-                <article class="update-card" bind:this={articleRefs[update.version]}>
+                <article
+                    class="update-card"
+                    bind:this={articleRefs[update.version]}>
                     <button
                         type="button"
                         class="update-card__header"

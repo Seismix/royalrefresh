@@ -3,7 +3,7 @@
     import type { IconButtonProps } from "~/types/icon-button"
 
     interface Props extends Omit<IconButtonProps, "onclick"> {
-        path: Snippet  // SVG path content
+        path: Snippet // SVG path content
         size?: number
     }
 

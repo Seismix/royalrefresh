@@ -1,5 +1,8 @@
 import { storage } from "wxt/utils/storage"
-import { DEFAULT_SELECTORS, getDefaults, hasReducedMotionOverride } from "~/lib/config/defaults"
+import {
+    DEFAULT_SELECTORS,
+    getDefaults
+} from "~/lib/config/defaults"
 import type { ExtensionSettings } from "~/types/types"
 import { devLog } from "./logger"
 import { prefersReducedMotion } from "./platform"
@@ -76,7 +79,8 @@ export async function getSettings(): Promise<ExtensionSettings> {
             updatedSettings = {
                 ...updatedSettings,
                 enableJump: settings?.enableJump ?? true,
-                scrollBehavior: settings?.scrollBehavior ?? ("smooth" as ScrollBehavior),
+                scrollBehavior:
+                    settings?.scrollBehavior ?? ("smooth" as ScrollBehavior),
             }
         } else {
             // Respect reduced motion by ensuring instant scrolling and disabling animations

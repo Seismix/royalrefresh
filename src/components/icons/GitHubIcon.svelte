@@ -1,6 +1,6 @@
 <script lang="ts">
-    import Icon from "./Icon.svelte"
     import type { IconButtonProps } from "~/types/icon-button"
+    import Icon from "./Icon.svelte"
 
     let { variant = "default" }: Omit<IconButtonProps, "onclick"> = $props()
 </script>

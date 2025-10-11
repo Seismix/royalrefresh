@@ -5,7 +5,11 @@
     let { variant = "default" }: Omit<IconButtonProps, "onclick"> = $props()
 
     const openGitHub = () => {
-        window.open("https://github.com/Seismix/royalrefresh", "_blank", "noopener,noreferrer")
+        window.open(
+            "https://github.com/Seismix/royalrefresh",
+            "_blank",
+            "noopener,noreferrer",
+        )
     }
 </script>
 

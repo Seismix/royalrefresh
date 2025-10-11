@@ -1,6 +1,6 @@
 <script lang="ts">
-    import type { ExtensionSettings } from "~/types/types"
     import { prefersReducedMotion } from "~/lib/utils/platform"
+    import type { ExtensionSettings } from "~/types/types"
 
     let {
         settings = $bindable(),
@@ -49,7 +49,7 @@
 
     // Compute effective scroll behavior - respects OS reduced motion preference
     const effectiveScrollBehavior = $derived(
-        userPrefersReducedMotion ? "instant" : settings.scrollBehavior
+        userPrefersReducedMotion ? "instant" : settings.scrollBehavior,
     )
 </script>
 
@@ -80,7 +80,9 @@
         <select
             class="form-control"
             value={effectiveScrollBehavior}
-            onchange={(e) => settings.scrollBehavior = e.currentTarget.value as ScrollBehavior}
+            onchange={(e) =>
+                (settings.scrollBehavior = e.currentTarget
+                    .value as ScrollBehavior)}
             disabled={userPrefersReducedMotion}>
             <option value="smooth">Animated scroll</option>
             <option value="instant">Instant</option>
@@ -89,10 +91,12 @@
     {#if userPrefersReducedMotion}
         <div class="message info-message">
             <p>
-                Scroll animations are disabled because <em>prefers-reduced-motion</em> is enabled in your system settings.
+                Scroll animations are disabled because <em
+                    >prefers-reduced-motion</em> is enabled in your system settings.
             </p>
             <p>
-                To enable smooth scrolling, change your system's accessibility settings to allow motion.
+                To enable smooth scrolling, change your system's accessibility
+                settings to allow motion.
             </p>
         </div>
     {/if}

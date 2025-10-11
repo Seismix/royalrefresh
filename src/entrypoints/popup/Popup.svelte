@@ -1,5 +1,11 @@
 <script lang="ts">
-    import { ActionButtons, BackButton, GitHubButton, PatchNotesButton, SettingsButton } from "@/components/buttons"
+    import {
+        ActionButtons,
+        BackButton,
+        GitHubButton,
+        PatchNotesButton,
+        SettingsButton,
+    } from "@/components/buttons"
     import PatchNotes from "@/entrypoints/popup/PatchNotes.svelte"
     import { PageHeader } from "~/components/layout"
     import { AdvancedSettings, BasicSettings } from "~/components/settings"

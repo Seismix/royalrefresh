@@ -41,9 +41,7 @@
                 ? "instant"
                 : currentSettings.scrollBehavior
 
-            document
-                .getElementById(id)
-                ?.scrollIntoView({ behavior })
+            document.getElementById(id)?.scrollIntoView({ behavior })
         }
     })
 
