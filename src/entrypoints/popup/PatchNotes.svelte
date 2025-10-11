@@ -2,7 +2,7 @@
     import type { Snippet } from "svelte"
     import { slide } from "svelte/transition"
     import { tick } from "svelte"
-    import { MegaphoneIcon, ToolsIcon, JournalIcon } from "~/components/icons"
+    import { ChevronDownIcon, MegaphoneIcon, ToolsIcon, JournalIcon } from "~/components/icons"
     import { getSettings } from "~/lib/utils/storage-utils"
     import type { ExtensionSettings } from "~/types/types"
 
@@ -119,22 +119,9 @@
                         </div>
                         <span class="update-card__date"
                             >{update.displayDate}</span>
-                        <svg
-                            class="expand-icon"
-                            class:expanded={isExpanded}
-                            width="16"
-                            height="16"
-                            viewBox="0 0 16 16"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                            aria-hidden="true">
-                            <path
-                                d="M4 6L8 10L12 6"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
+                        <div class="expand-icon" class:expanded={isExpanded}>
+                            <ChevronDownIcon />
+                        </div>
                     </button>
                     {#if isExpanded}
                         <div

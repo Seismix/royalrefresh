@@ -1,4 +1,5 @@
 export { default as ArrowLeftIcon } from "./ArrowLeftIcon.svelte"
+export { default as ChevronDownIcon } from "./ChevronDownIcon.svelte"
 export { default as GearIcon } from "./GearIcon.svelte"
 export { default as GitHubIcon } from "./GitHubIcon.svelte"
 export { default as JournalIcon } from "./JournalIcon.svelte"
