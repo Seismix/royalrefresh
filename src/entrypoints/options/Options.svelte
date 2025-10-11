@@ -13,25 +13,25 @@
     let isFirefox = $state(import.meta.env.FIREFOX)
     let currentView = $state<View>("settings")
 
-    // Load initial settings and set up watching
+    // Load initial settings
+    getSettings()
+        .then((settings) => {
+            localSettings = settings
+        })
+        .catch((error) => {
+            console.error("Failed to load settings:", error)
+            localSettings = getDefaults()
+        })
+
+    // Watch for external changes (from other tabs/popups)
     $effect(() => {
-        const loadSettings = async () => {
-            try {
-                localSettings = await getSettings()
+        if (!localSettings) return
 
-                // Watch for external changes (from other tabs/popups)
-                return watchSettings((newValue) => {
-                    if (newValue) {
-                        localSettings = newValue
-                    }
-                })
-            } catch (error) {
-                console.error("Failed to load settings:", error)
-                localSettings = getDefaults()
+        return watchSettings((newValue) => {
+            if (newValue) {
+                localSettings = newValue
             }
-        }
-
-        loadSettings()
+        })
     })
 
     function handleValidationChange(valid: boolean) {
