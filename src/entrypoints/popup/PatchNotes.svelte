@@ -2,6 +2,7 @@
     import type { Snippet } from "svelte"
     import { slide } from "svelte/transition"
     import { tick } from "svelte"
+    import { PageHeader } from "~/components/layout"
     import { ChevronDownIcon, MegaphoneIcon, ToolsIcon, JournalIcon } from "~/components/icons"
     import { getSettings } from "~/lib/utils/storage-utils"
     import type { ExtensionSettings } from "~/types/types"
@@ -27,6 +28,7 @@
         fixes?: string[]
     }
 
+    // Eagerly loaded at build time - safe to use at module level
     const patchModules = import.meta.glob<PatchNote>(
         "~/assets/patches/*.json",
         {
@@ -89,14 +91,14 @@
 </script>
 
 <div class="patch-notes-content">
-    <header class="patch-notes-header">
-        <h2>What's New</h2>
-        {#if headerButtons}
-            <div class="header-buttons">
+    <PageHeader title="What's New" variant="patch-notes">
+        {#snippet buttons()}
+            {#if headerButtons}
                 {@render headerButtons()}
-            </div>
-        {/if}
-    </header>
+            {/if}
+        {/snippet}
+    </PageHeader>
+
     <p class="description">Latest updates & improvements</p>
     <section aria-label="Recent updates" class="updates">
         {#if patchNotes.length === 0}
@@ -174,30 +176,6 @@
         gap: var(--spacing-lg);
         height: 100%;
         min-height: 0; /* Important for flex overflow */
-    }
-
-    .patch-notes-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        min-height: 2rem;
-        margin: 0;
-        flex-shrink: 0;
-    }
-
-    h2 {
-        margin: 0;
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: var(--color-text);
-        flex: 1;
-    }
-
-    .header-buttons {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-xs);
-        height: 100%;
     }
 
     .description {
@@ -281,8 +259,9 @@
         color: var(--color-text-muted, var(--color-text));
         opacity: 0.6;
         transition: transform 0.3s ease;
-        width: 20px;
-        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     @media (prefers-reduced-motion: reduce) {

@@ -1,6 +1,7 @@
 <script lang="ts">
     import { ActionButtons, BackButton, GitHubButton, PatchNotesButton } from "@/components/buttons"
     import PatchNotes from "@/entrypoints/popup/PatchNotes.svelte"
+    import { PageHeader } from "~/components/layout"
     import { AdvancedSettings, BasicSettings } from "~/components/settings"
     import { getDefaults } from "~/lib/config/defaults"
     import { getSettings, watchSettings } from "~/lib/utils/storage-utils"
@@ -49,12 +50,11 @@
 
 <main class={isFirefox ? "firefox" : ""}>
     {#if currentView === "settings"}
-        <header class="options-header">
-            <h1>RoyalRefresh Settings</h1>
-            <div class="utility-buttons" aria-label="Extension utilities">
+        <PageHeader title="RoyalRefresh Settings" variant="options">
+            {#snippet buttons()}
                 <PatchNotesButton onclick={showPatchNotes} />
-            </div>
-        </header>
+            {/snippet}
+        </PageHeader>
 
         {#if !localSettings}
             <p>Loading settings...</p>
@@ -116,28 +116,6 @@
 
     .firefox {
         padding-inline: var(--page-padding);
-    }
-
-    .options-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        min-height: 2rem; /* Ensure minimum height for buttons */
-        flex-shrink: 0;
-        margin-bottom: var(--spacing-lg);
-    }
-
-    .options-header h1 {
-        font-size: 1.5rem;
-        margin: 0;
-        flex: 1;
-    }
-
-    .utility-buttons {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-xs);
-        height: 100%;
     }
 
     .patch-notes-wrapper {

@@ -1,6 +1,7 @@
 <script lang="ts">
     import { ActionButtons, BackButton, GitHubButton, PatchNotesButton, SettingsButton } from "@/components/buttons"
     import PatchNotes from "@/entrypoints/popup/PatchNotes.svelte"
+    import { PageHeader } from "~/components/layout"
     import { AdvancedSettings, BasicSettings } from "~/components/settings"
     import DEFAULTS from "~/lib/config/defaults"
     import { BrowserType, currentBrowser } from "~/lib/utils/platform"
@@ -50,15 +51,14 @@
 
 <main class:android-firefox={isAndroidFirefox}>
     {#if currentView === "settings"}
-        <header class="popup-header">
-            <h1>RoyalRefresh Settings</h1>
-            <div class="utility-buttons" aria-label="Extension utilities">
+        <PageHeader title="RoyalRefresh Settings">
+            {#snippet buttons()}
                 <PatchNotesButton onclick={showPatchNotes} />
                 {#if !isAndroidFirefox}
                     <SettingsButton />
                 {/if}
-            </div>
-        </header>
+            {/snippet}
+        </PageHeader>
 
         <div class="content">
             {#if !localSettings}
@@ -163,27 +163,5 @@
         margin-top: auto;
         background-color: var(--bg-secondary);
         flex-shrink: 0;
-    }
-
-    .popup-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        min-height: 2rem; /* Ensure minimum height for buttons */
-        flex-shrink: 0;
-    }
-
-    h1 {
-        color: var(--color-text);
-        font-size: 1.2rem;
-        margin: 0;
-        flex: 1;
-    }
-
-    .utility-buttons {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-xs);
-        height: 100%;
     }
 </style>
