@@ -1,8 +1,5 @@
 import { storage } from "wxt/utils/storage"
-import {
-    DEFAULT_SELECTORS,
-    getDefaults
-} from "~/lib/config/defaults"
+import { DEFAULT_SELECTORS, getDefaults } from "~/lib/config/defaults"
 import type { ExtensionSettings } from "~/types/types"
 import { devLog } from "./logger"
 import { prefersReducedMotion } from "./platform"
