@@ -20,10 +20,16 @@
 
     let settings = $state<ExtensionSettings | null>(null)
 
-    // Load settings on mount
-    getSettings().then((loadedSettings) => {
-        settings = loadedSettings
-    })
+    // Load settings once on mount
+    const initSettings = async () => {
+        try {
+            settings = await getSettings()
+        } catch (error) {
+            console.error("Failed to load settings:", error)
+        }
+    }
+
+    initSettings()
 
     type PatchNote = {
         version: string

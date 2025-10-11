@@ -1,11 +1,12 @@
 <script lang="ts">
+    import { untrack } from "svelte"
     import {
         ActionButtons,
         BackButton,
         GitHubButton,
         PatchNotesButton,
-    } from "~/components/buttons"
-    import PatchNotes from "~/entrypoints/popup/PatchNotes.svelte"
+    } from "@/components/buttons"
+    import PatchNotes from "@/entrypoints/popup/PatchNotes.svelte"
     import { PageHeader } from "~/components/layout"
     import { AdvancedSettings, BasicSettings } from "~/components/settings"
     import { getDefaults } from "~/lib/config/defaults"
@@ -19,23 +20,28 @@
     let isFirefox = $state(import.meta.env.FIREFOX)
     let currentView = $state<View>("settings")
 
-    // Load initial settings
-    getSettings()
-        .then((settings) => {
-            localSettings = settings
-        })
-        .catch((error) => {
+    // Load initial settings once on mount
+    const initSettings = async () => {
+        try {
+            localSettings = await getSettings()
+        } catch (error) {
             console.error("Failed to load settings:", error)
             localSettings = getDefaults()
-        })
+        }
+    }
 
-    // Watch for external changes (from other tabs/popups)
+    initSettings()
+
+    // Effect: Watch for external settings changes (from other tabs/popups)
     $effect(() => {
         if (!localSettings) return
 
         return watchSettings((newValue) => {
             if (newValue) {
-                localSettings = newValue
+                // Use untrack to prevent infinite loops when updating state in effect
+                untrack(() => {
+                    localSettings = newValue
+                })
             }
         })
     })
