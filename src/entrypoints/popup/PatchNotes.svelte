@@ -228,11 +228,6 @@
         overflow: visible;
     }
 
-    .update-card:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        transform: translateY(-1px);
-    }
-
     .update-card__header {
         display: flex;
         flex-direction: row;
