@@ -119,12 +119,22 @@ To start the development server for Firefox:
 pnpm dev:firefox
 ```
 
-This builds the Firefox version and runs it on a connected Android device. Make sure ADB is installed, your device is
-connected with USB debugging enabled, and set the `ADB_ID` variable to your device ID (found via `adb devices`).
+To develop on Android, this builds the Firefox version and runs it on a connected Android device. Make sure ADB is installed, your device is
+connected with USB debugging enabled. You can pass additional `web-ext run` flags after the device ID:
 
 ```bash
+# Basic usage
 pnpm dev:android <device-id>
+
+# With custom source directory
+pnpm dev:android <device-id> --s ./custom-output
+
+# With additional web-ext flags
+pnpm dev:android <device-id> --adb-remove-old-artifacts
 ```
+
+> [!NOTE]
+> Some `web-ext run` options may not work when targeting Android devices. For example, browser startup options like `--start-url` are not supported on Android.
 
 ### Building
 
