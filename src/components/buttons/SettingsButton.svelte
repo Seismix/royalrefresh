@@ -3,10 +3,14 @@
     import { GearIcon } from "~/components/icons"
     import type { IconButtonProps } from "~/types/icon-button"
 
-    let { variant = "default" }: Omit<IconButtonProps, "onclick"> = $props()
+    let { variant = "default", onclick }: IconButtonProps = $props()
 
     const openSettings = async () => {
-        await browser.runtime.openOptionsPage()
+        if (onclick) {
+            onclick()
+        } else {
+            await browser.runtime.openOptionsPage()
+        }
     }
 </script>
 
