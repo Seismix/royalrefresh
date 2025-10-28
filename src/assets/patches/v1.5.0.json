@@ -1,14 +1,16 @@
 {
     "version": "1.5.0",
     "releasedOn": "2025-10-28",
-    "summary": "Improved advanced settings access on Android.",
+    "summary": "Improved advanced settings access and navigation on Android.",
     "new": [
         "Advanced settings accessible via dedicated tab on Android Firefox",
         "Gear icon in popup header opens advanced settings view on Android",
-        "Cleaner popup interface with basic settings separated from advanced options"
+        "Cleaner popup interface with basic settings separated from advanced options",
+        "GitHub button now uses browser tabs API for consistent link handling across platforms"
     ],
     "fixes": [
         "Advanced settings no longer clutter the main popup on Android devices",
-        "Settings button behavior now platform-aware for better user experience"
+        "Settings button behavior now platform-aware for better user experience",
+        "GitHub link opens reliably on Android with automatic popup closure for better feedback"
     ]
 }
