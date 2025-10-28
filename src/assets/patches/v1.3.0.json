@@ -1,17 +1,5 @@
 {
     "version": "1.3.0",
-    "releasedOn": "2025-10-15",
-    "summary": "Major UI overhaul with patch notes, improved navigation, and better mobile experience.",
-    "new": [
-        "Patch notes viewer shows what's new in each version, accessible from the popup",
-        "Back button navigation makes it easy to return from patch notes to the main popup",
-        "Improved touch targets on mobile for better button and icon interactions",
-        "Consistent page headers across options and popup views for a unified look"
-    ],
-    "fixes": [
-        "Action buttons now appear side-by-side instead of stacked for better use of space",
-        "Popup layout and overflow handling works correctly on Android devices",
-        "Icon components unified with consistent styling and variant support",
-        "Settings loading logic streamlined to prevent unnecessary re-renders"
-    ]
+    "releasedOn": "2025-09-24",
+    "summary": "Better code tooling: This release focuses on internal improvements with no new user-facing features."
 }

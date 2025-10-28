@@ -3,11 +3,15 @@
     "releasedOn": "2025-10-22",
     "summary": "Animation preferences and enhanced patch notes navigation.",
     "new": [
+        "Patch notes viewer shows what's new in each version, accessible from the popup",
+        "Improved touch targets on mobile for better button and icon interactions",
         "Animation preferences control smooth scrolling to recaps with an enable animations toggle",
         "Expanding patch notes feature allows viewing full details for each version update",
         "Scroll behavior can be adjusted to instant mode even after enabling animations"
     ],
     "fixes": [
+        "Popup layout and overflow handling works correctly on Android devices",
+        "Settings loading logic streamlined to prevent unnecessary re-renders",
         "Scroll behavior respects animation settings and changes apply immediately",
         "Reduced motion preferences checked more reliably for accessibility",
         "Settings watching logic simplified for better performance across components"
