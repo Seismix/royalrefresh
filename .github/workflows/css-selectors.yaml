@@ -4,15 +4,13 @@ on:
     pull_request:
         branches: [main]
         types: [opened, reopened, synchronize, ready_for_review]
-        paths-ignore:
-            - '**.md'
-            - 'docs/**'
-            - '.github/ISSUE_TEMPLATE/**'
-            - '.github/pull_request_template.md'
-            - '.github/workflows/**'
-            - '.gitignore'
-            - '.editorconfig'
-            - '.prettierrc'
+        paths:
+            - 'src/**'
+            - 'tests/**'
+            - 'playwright.config.ts'
+            - 'package.json'
+            - 'pnpm-lock.yaml'
+            - 'wxt.config.ts'
 
 jobs:
     css-selectors:
