@@ -1,0 +1,14 @@
+{
+    "version": "1.5.0",
+    "releasedOn": "2025-10-28",
+    "summary": "Improved advanced settings access on Android.",
+    "new": [
+        "Advanced settings accessible via dedicated tab on Android Firefox",
+        "Gear icon in popup header opens advanced settings view on Android",
+        "Cleaner popup interface with basic settings separated from advanced options"
+    ],
+    "fixes": [
+        "Advanced settings no longer clutter the main popup on Android devices",
+        "Settings button behavior now platform-aware for better user experience"
+    ]
+}
