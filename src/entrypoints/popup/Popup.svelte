@@ -8,6 +8,7 @@
         SettingsButton,
     } from "@/components/buttons"
     import PatchNotes from "@/entrypoints/popup/PatchNotes.svelte"
+    import AdvancedSettingsView from "@/entrypoints/popup/AdvancedSettingsView.svelte"
     import { PageHeader } from "~/components/layout"
     import { AdvancedSettings, BasicSettings } from "~/components/settings"
     import DEFAULTS from "~/lib/config/defaults"
@@ -15,7 +16,7 @@
     import { getSettings, watchSettings } from "~/lib/utils/storage-utils"
     import type { ExtensionSettings } from "~/types/types"
 
-    type View = "settings" | "patch-notes"
+    type View = "settings" | "patch-notes" | "advanced-settings"
 
     let localSettings = $state<ExtensionSettings | null>(null)
     let isValid = $state<boolean>(true)
@@ -56,6 +57,10 @@
         currentView = "patch-notes"
     }
 
+    function showAdvancedSettings() {
+        currentView = "advanced-settings"
+    }
+
     function showSettings() {
         currentView = "settings"
     }
@@ -66,7 +71,9 @@
         <PageHeader title="RoyalRefresh Settings">
             {#snippet buttons()}
                 <PatchNotesButton onclick={showPatchNotes} />
-                {#if !isAndroidFirefox}
+                {#if isAndroidFirefox}
+                    <SettingsButton onclick={showAdvancedSettings} />
+                {:else}
                     <SettingsButton />
                 {/if}
             {/snippet}
@@ -79,14 +86,6 @@
                 <BasicSettings
                     bind:settings={localSettings}
                     onValidationChange={handleValidationChange} />
-
-                {#if isAndroidFirefox}
-                    <section
-                        class="advanced-section"
-                        aria-label="Advanced settings">
-                        <AdvancedSettings bind:settings={localSettings} />
-                    </section>
-                {/if}
             {/if}
         </div>
 
@@ -95,10 +94,10 @@
                 <ActionButtons
                     settings={localSettings}
                     {isValid}
-                    showRestoreSelectors={isAndroidFirefox} />
+                    showRestoreSelectors={false} />
             </div>
         {/if}
-    {:else}
+    {:else if currentView === "patch-notes"}
         <div class="patch-notes-wrapper">
             <PatchNotes>
                 {#snippet headerButtons()}
@@ -106,6 +105,16 @@
                     <BackButton onclick={showSettings} />
                 {/snippet}
             </PatchNotes>
+        </div>
+    {:else if currentView === "advanced-settings"}
+        <div class="advanced-settings-wrapper">
+            {#if localSettings}
+                <AdvancedSettingsView bind:settings={localSettings} {isValid}>
+                    {#snippet headerButtons()}
+                        <BackButton onclick={showSettings} />
+                    {/snippet}
+                </AdvancedSettingsView>
+            {/if}
         </div>
     {/if}
 </main>
@@ -165,6 +174,13 @@
     }
 
     .patch-notes-wrapper {
+        flex: 1;
+        min-height: 0; /* Important for flex overflow */
+        display: flex;
+        flex-direction: column;
+    }
+
+    .advanced-settings-wrapper {
         flex: 1;
         min-height: 0; /* Important for flex overflow */
         display: flex;

@@ -1,15 +1,23 @@
 <script lang="ts">
+    import { browser } from "wxt/browser"
     import { GitHubIcon } from "~/components/icons"
+    import { BrowserType, currentBrowser } from "~/lib/utils/platform"
     import type { IconButtonProps } from "~/types/icon-button"
 
     let { variant = "default" }: Omit<IconButtonProps, "onclick"> = $props()
 
-    const openGitHub = () => {
-        window.open(
-            "https://github.com/Seismix/royalrefresh",
-            "_blank",
-            "noopener,noreferrer",
-        )
+    const isAndroidFirefox = currentBrowser === BrowserType.AndroidFirefox
+
+    const openGitHub = async () => {
+        await browser.tabs.create({
+            url: "https://github.com/Seismix/royalrefresh",
+            active: true,
+        })
+
+        // Close popup on Android to give user feedback that action was taken
+        if (isAndroidFirefox) {
+            window.close()
+        }
     }
 </script>
 
