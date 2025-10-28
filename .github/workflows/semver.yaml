@@ -3,6 +3,14 @@ on:
     pull_request:
         branches: [main]
         types: [opened, reopened, synchronize, ready_for_review]
+        paths-ignore:
+            - '**.md'
+            - 'docs/**'
+            - '.github/ISSUE_TEMPLATE/**'
+            - '.github/pull_request_template.md'
+            - '.gitignore'
+            - '.editorconfig'
+            - '.prettierrc'
 
 jobs:
     semver-check:
