@@ -43,3 +43,17 @@
 .btn-danger:hover {
     background-color: #c82333;
 }
+
+/* Mobile touch improvements */
+@media (hover: none) and (pointer: coarse) {
+    .btn {
+        padding: var(--spacing-touch) var(--spacing-xl);
+        font-size: var(--font-size-touch);
+        min-height: var(--touch-target-min);
+    }
+
+    /* Reduce transform animations on mobile for better performance */
+    .btn:hover {
+        transform: none;
+    }
+}

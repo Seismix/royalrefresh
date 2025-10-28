@@ -1,5 +1,6 @@
 import { ExtensionSelectors, ExtensionSettings } from "~/types/types"
 import { devLog } from "../utils/logger"
+import { prefersReducedMotion } from "../utils/platform"
 
 export const DEFAULT_SELECTORS: ExtensionSelectors = {
     prevChapterBtn: "a[href*='/chapter/']:has(> i.fa-chevron-double-left)",
@@ -17,7 +18,7 @@ export const DEFAULT_SELECTORS: ExtensionSelectors = {
 const DEFAULTS: ExtensionSettings = {
     wordCount: 250,
     enableJump: false,
-    scrollBehavior: "instant" as ScrollBehavior,
+    scrollBehavior: "smooth" as ScrollBehavior,
     autoExpand: false,
     ...DEFAULT_SELECTORS,
 }
@@ -36,45 +37,29 @@ export function getDefaults(existingSettings?: Partial<ExtensionSettings>) {
     }
 
     // Fresh install: detect reduced motion preference
-    try {
-        if (typeof window !== "undefined" && window.matchMedia) {
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches
-            devLog.log(
-                "Fresh install: prefersReducedMotion",
-                prefersReducedMotion,
-            )
+    const reducedMotion = prefersReducedMotion()
+    devLog.log("Fresh install: prefersReducedMotion", reducedMotion)
 
-            if (!prefersReducedMotion) {
-                // No reduced motion preference - safe to enable jump functionality
-                return {
-                    ...DEFAULTS,
-                    enableJump: true,
-                    scrollBehavior: "smooth" as ScrollBehavior,
-                }
-            }
+    if (!reducedMotion) {
+        // No reduced motion preference - safe to enable jump functionality
+        return {
+            ...DEFAULTS,
+            enableJump: true,
+            scrollBehavior: "smooth" as ScrollBehavior,
         }
-    } catch (error) {
-        devLog.log("Could not detect reduced motion preference:", error)
     }
 
-    // Default case (fresh install, no reduced motion or detection failed)
-    return DEFAULTS
+    // Default case (reduced motion or detection failed) - disable animations
+    return {
+        ...DEFAULTS,
+    }
 }
 
 /**
  * Check if user has reduced motion preference but has enabled jump (override)
  */
 export function hasReducedMotionOverride(): boolean {
-    try {
-        if (typeof window !== "undefined" && window.matchMedia) {
-            return window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        }
-    } catch (error) {
-        // Ignore errors
-    }
-    return false
+    return prefersReducedMotion()
 }
 
 /**

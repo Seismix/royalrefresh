@@ -1,47 +1,61 @@
 <script lang="ts">
+    import { untrack } from "svelte"
     import { recapState } from "~/lib/state/recap-state.svelte"
     import { getSettings, watchSettings } from "~/lib/utils/storage-utils"
     import { ContentManager } from "~/lib/services/content-manager"
     import { getDefaults } from "~/lib/config/defaults"
+    import { prefersReducedMotion } from "~/lib/utils/platform"
     import type { ExtensionSettings } from "~/types/types"
 
     let { id = "recapContainer" }: { id?: string } = $props()
 
-    // Track previous settings to detect changes
+    // Track previous word count to detect changes (derived from settings)
     let previousWordCount = $state<number>(getDefaults().wordCount)
     let currentSettings = $state<ExtensionSettings | null>(null)
 
-    // Load initial settings and watch for changes
-    $effect(() => {
-        const loadSettings = async () => {
-            try {
-                currentSettings = await getSettings()
-                previousWordCount = currentSettings.wordCount
-
-                // Watch for settings changes
-                return watchSettings((newSettings) => {
-                    if (newSettings) {
-                        currentSettings = newSettings
-                    }
-                })
-            } catch (error) {
-                console.error("Failed to load settings:", error)
-            }
+    // Load initial settings once on mount
+    const initSettings = async () => {
+        try {
+            const settings = await getSettings()
+            // Use untrack to prevent effect re-runs when updating state
+            untrack(() => {
+                currentSettings = settings
+                previousWordCount = settings.wordCount
+            })
+        } catch (error) {
+            console.error("Failed to load settings:", error)
         }
+    }
 
-        loadSettings()
+    initSettings()
+
+    // Effect: Watch for external settings changes (from other tabs/popups)
+    $effect(() => {
+        if (!currentSettings) return
+
+        return watchSettings((newSettings) => {
+            if (newSettings) {
+                // Use untrack to prevent infinite loops
+                untrack(() => {
+                    currentSettings = newSettings
+                })
+            }
+        })
     })
 
-    // Effect: scroll into view when content becomes visible
+    // Effect: Scroll into view when content becomes visible
     $effect(() => {
         if (recapState.isVisible && currentSettings?.enableJump) {
-            document
-                .getElementById(id)
-                ?.scrollIntoView({ behavior: currentSettings.scrollBehavior })
+            // Use scroll behavior, but override to instant if OS prefers reduced motion
+            const behavior = prefersReducedMotion()
+                ? "instant"
+                : currentSettings.scrollBehavior
+
+            document.getElementById(id)?.scrollIntoView({ behavior })
         }
     })
 
-    // Effect: refresh content when word count changes (uses cache to avoid re-fetching)
+    // Effect: Refresh content when word count changes (uses cache to avoid re-fetching)
     $effect(() => {
         if (
             recapState.isVisible &&
@@ -50,6 +64,9 @@
             currentSettings &&
             currentSettings.wordCount !== previousWordCount
         ) {
+            // Store the word count before processing to maintain type safety
+            const newWordCount = currentSettings.wordCount
+
             // Try to refresh from cache first
             const result = ContentManager.refreshRecapFromCache(currentSettings)
 
@@ -60,7 +77,10 @@
                 recapState.setContent(result.content, result.type)
             }
 
-            previousWordCount = currentSettings.wordCount
+            // Update tracked value using untrack to prevent effect re-run
+            untrack(() => {
+                previousWordCount = newWordCount
+            })
         }
     })
 </script>

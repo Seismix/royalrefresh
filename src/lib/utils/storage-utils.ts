@@ -2,6 +2,7 @@ import { storage } from "wxt/utils/storage"
 import { DEFAULT_SELECTORS, getDefaults } from "~/lib/config/defaults"
 import type { ExtensionSettings } from "~/types/types"
 import { devLog } from "./logger"
+import { prefersReducedMotion } from "./platform"
 
 /**
  * WXT storage utilities for extension settings with migration support
@@ -63,34 +64,31 @@ export async function getSettings(): Promise<ExtensionSettings> {
     }
 
     try {
-        if (typeof window !== "undefined" && window.matchMedia) {
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches
+        const reducedMotion = prefersReducedMotion()
 
-            let updatedSettings = {
-                ...settings,
-                hasDetectedReducedMotion: true,
-            }
-
-            // For users without reduced motion preference, enable jump by default if not already set
-            if (!prefersReducedMotion && settings?.enableJump === undefined) {
-                updatedSettings = {
-                    ...updatedSettings,
-                    enableJump: true,
-                    scrollBehavior: "smooth" as ScrollBehavior,
-                }
-            } else if (prefersReducedMotion) {
-                // Respect reduced motion by ensuring instant scrolling
-                updatedSettings = {
-                    ...updatedSettings,
-                    scrollBehavior: "instant" as ScrollBehavior,
-                }
-            }
-
-            await settingsStore.setValue(updatedSettings)
-            return updatedSettings
+        let updatedSettings = {
+            ...settings,
+            hasDetectedReducedMotion: true,
         }
+
+        // For users without reduced motion preference, enable jump and animations by default if not already set
+        if (!reducedMotion) {
+            updatedSettings = {
+                ...updatedSettings,
+                enableJump: settings?.enableJump ?? true,
+                scrollBehavior:
+                    settings?.scrollBehavior ?? ("smooth" as ScrollBehavior),
+            }
+        } else {
+            // Respect reduced motion by ensuring instant scrolling and disabling animations
+            updatedSettings = {
+                ...updatedSettings,
+                scrollBehavior: "instant" as ScrollBehavior,
+            }
+        }
+
+        await settingsStore.setValue(updatedSettings)
+        return updatedSettings
     } catch (error) {
         devLog.log("Could not detect reduced motion preference:", error)
     }

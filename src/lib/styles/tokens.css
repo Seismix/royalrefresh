@@ -38,11 +38,22 @@
     --spacing-lg: 12px;
     --spacing-xl: 16px;
     --spacing-xxl: 20px;
+    --spacing-2xl: 32px;
+    --spacing-3xl: 48px;
+
+    /* Icon Sizes */
+    --icon-size-base: 20px;
+    --icon-size-touch: 24px;
+
+    /* Mobile Touch Targets */
+    --touch-target-min: 44px;
+    --spacing-touch: 16px;
 
     /* Typography */
     --font-family: Arial, sans-serif;
     --font-size-sm: 0.875rem;
     --font-size-base: 16px;
+    --font-size-touch: 18px;
     --font-weight-normal: 400;
     --font-weight-bold: 700;
 

@@ -1,50 +1,112 @@
 <script lang="ts">
-    import ActionButtons from "~/components/common/ActionButtons.svelte"
-    import BasicSettings from "~/components/settings/BasicSettings.svelte"
+    import { untrack } from "svelte"
+    import {
+        ActionButtons,
+        BackButton,
+        GitHubButton,
+        PatchNotesButton,
+        SettingsButton,
+    } from "@/components/buttons"
+    import PatchNotes from "@/entrypoints/popup/PatchNotes.svelte"
+    import { PageHeader } from "~/components/layout"
+    import { AdvancedSettings, BasicSettings } from "~/components/settings"
     import DEFAULTS from "~/lib/config/defaults"
+    import { BrowserType, currentBrowser } from "~/lib/utils/platform"
     import { getSettings, watchSettings } from "~/lib/utils/storage-utils"
     import type { ExtensionSettings } from "~/types/types"
 
+    type View = "settings" | "patch-notes"
+
     let localSettings = $state<ExtensionSettings | null>(null)
     let isValid = $state<boolean>(true)
+    let currentView = $state<View>("settings")
+    const isAndroidFirefox = currentBrowser === BrowserType.AndroidFirefox
 
-    // Load initial settings and set up watching
-    $effect(() => {
-        const loadSettings = async () => {
-            try {
-                localSettings = await getSettings()
-
-                // Watch for external changes (from other tabs/popups)
-                return watchSettings((newValue) => {
-                    if (newValue) {
-                        localSettings = newValue
-                    }
-                })
-            } catch (error) {
-                console.error("Failed to load settings:", error)
-                localSettings = DEFAULTS
-            }
+    // Load initial settings once on mount
+    const initSettings = async () => {
+        try {
+            localSettings = await getSettings()
+        } catch (error) {
+            console.error("Failed to load settings:", error)
+            localSettings = DEFAULTS
         }
+    }
 
-        loadSettings()
+    initSettings()
+
+    // Effect: Watch for external settings changes (from other tabs/popups)
+    $effect(() => {
+        if (!localSettings) return
+
+        return watchSettings((newValue) => {
+            if (newValue) {
+                // Use untrack to prevent infinite loops when updating state in effect
+                untrack(() => {
+                    localSettings = newValue
+                })
+            }
+        })
     })
 
     function handleValidationChange(valid: boolean) {
         isValid = valid
     }
+
+    function showPatchNotes() {
+        currentView = "patch-notes"
+    }
+
+    function showSettings() {
+        currentView = "settings"
+    }
 </script>
 
-<main>
-    <h1>RoyalRefresh Settings</h1>
+<main class:android-firefox={isAndroidFirefox}>
+    {#if currentView === "settings"}
+        <PageHeader title="RoyalRefresh Settings">
+            {#snippet buttons()}
+                <PatchNotesButton onclick={showPatchNotes} />
+                {#if !isAndroidFirefox}
+                    <SettingsButton />
+                {/if}
+            {/snippet}
+        </PageHeader>
 
-    {#if !localSettings}
-        <p>Loading settings...</p>
+        <div class="content">
+            {#if !localSettings}
+                <p>Loading settings...</p>
+            {:else}
+                <BasicSettings
+                    bind:settings={localSettings}
+                    onValidationChange={handleValidationChange} />
+
+                {#if isAndroidFirefox}
+                    <section
+                        class="advanced-section"
+                        aria-label="Advanced settings">
+                        <AdvancedSettings bind:settings={localSettings} />
+                    </section>
+                {/if}
+            {/if}
+        </div>
+
+        {#if localSettings}
+            <div class="actions">
+                <ActionButtons
+                    settings={localSettings}
+                    {isValid}
+                    showRestoreSelectors={isAndroidFirefox} />
+            </div>
+        {/if}
     {:else}
-        <BasicSettings
-            bind:settings={localSettings}
-            onValidationChange={handleValidationChange} />
-
-        <ActionButtons settings={localSettings} {isValid} />
+        <div class="patch-notes-wrapper">
+            <PatchNotes>
+                {#snippet headerButtons()}
+                    <GitHubButton />
+                    <BackButton onclick={showSettings} />
+                {/snippet}
+            </PatchNotes>
+        </div>
     {/if}
 </main>
 
@@ -64,6 +126,11 @@
             color var(--transition-slow);
     }
 
+    /* Android Firefox body takes full width */
+    :global(body:has(.android-firefox)) {
+        max-width: 100vw;
+    }
+
     main {
         font-family: var(--font-family);
         background-color: var(--bg-secondary);
@@ -72,19 +139,41 @@
         min-width: 300px;
         max-width: 400px;
         width: 400px;
+        min-height: 400px;
         max-height: 600px;
-        overflow-y: auto;
         box-sizing: border-box;
+        position: relative; /* For absolute positioning of utility buttons */
+        display: flex;
+        flex-direction: column;
     }
 
-    h1 {
-        color: var(--color-text);
-        margin-bottom: var(--spacing-lg);
-        font-size: 1.2rem;
+    /* Android Firefox popup takes full screen height */
+    main.android-firefox {
+        min-height: 100vh;
+        max-height: 100vh;
+        height: 100vh;
+        width: 100vw;
+        max-width: 100vw;
+        overflow: hidden;
     }
 
-    p {
-        color: var(--color-text);
-        margin-bottom: var(--spacing-sm);
+    .content {
+        flex: 1;
+        overflow-y: auto;
+        margin-bottom: var(--spacing-md);
+        min-height: 0; /* Important for flex overflow */
+    }
+
+    .patch-notes-wrapper {
+        flex: 1;
+        min-height: 0; /* Important for flex overflow */
+        display: flex;
+        flex-direction: column;
+    }
+
+    .actions {
+        margin-top: auto;
+        background-color: var(--bg-secondary);
+        flex-shrink: 0;
     }
 </style>

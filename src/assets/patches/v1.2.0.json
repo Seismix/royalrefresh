@@ -1,0 +1,17 @@
+{
+    "version": "1.2.0",
+    "releasedOn": "2025-09-12",
+    "summary": "Expanded recap customization and polished the popup experience.",
+    "new": [
+        "Smooth scroll setting has been renamed to jump to recap, with existing preferences migrated",
+        "Jump to recap setting lets you disable the jump, and if enabled, choose between smooth or instant modes",
+        "Settings pages now change from dark to light mode based on the OS theme"
+    ],
+    "fixes": [
+        "Jump to recap option respects reduced-motion OS setting with visual feedback",
+        "Extension settings now center correctly in Firefox",
+        "Warning labels appear in fiction blurbs on first chapters",
+        "Toggle buttons no longer stay pressed after clicking",
+        "Recap HTML is sanitized to prevent security risks"
+    ]
+}

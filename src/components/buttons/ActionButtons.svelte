@@ -1,10 +1,10 @@
 <script lang="ts">
-    import type { ExtensionSettings } from "~/types/types"
     import {
-        updateSettings,
         restoreDefaults,
         restoreSelectors,
+        updateSettings,
     } from "~/lib/utils/storage-utils"
+    import type { ExtensionSettings } from "~/types/types"
 
     let {
         settings,
@@ -84,7 +84,7 @@
 </script>
 
 {#if showRestoreSelectors}
-    <div class="action-buttons">
+    <div class="action-buttons-full">
         <button
             type="button"
             class="btn btn-danger"
@@ -116,15 +116,28 @@
 <style>
     @import "~/lib/styles/buttons.css";
 
+    .action-buttons-full {
+        display: flex;
+        gap: var(--spacing-lg);
+        margin-top: var(--spacing-xxl);
+        width: 100%;
+    }
+
+    .action-buttons-full button {
+        flex: 1;
+        white-space: normal;
+    }
+
     .action-buttons {
         display: flex;
         gap: var(--spacing-lg);
         margin-top: var(--spacing-xxl);
+        width: 100%;
     }
 
     .action-buttons button {
-        flex: auto;
-        white-space: nowrap;
+        flex: 1;
+        white-space: normal;
     }
 
     /* State-specific styles */

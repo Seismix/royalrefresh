@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { prefersReducedMotion } from "~/lib/utils/platform"
     import type { ExtensionSettings } from "~/types/types"
 
     let {
@@ -10,12 +11,7 @@
     } = $props()
 
     // Detect prefers-reduced-motion
-    const prefersReducedMotion = $derived.by(() => {
-        if (typeof window !== "undefined" && window.matchMedia) {
-            return window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        }
-        return false
-    })
+    const userPrefersReducedMotion = $derived.by(() => prefersReducedMotion())
 
     // Validation for word count using result object pattern
     const wordCountValidation = $derived.by(() => {
@@ -50,6 +46,11 @@
             onValidationChange(wordCountValidation.isValid)
         }
     })
+
+    // Compute effective scroll behavior - respects OS reduced motion preference
+    const effectiveScrollBehavior = $derived(
+        userPrefersReducedMotion ? "instant" : settings.scrollBehavior,
+    )
 </script>
 
 <h2>Recap Settings</h2>
@@ -78,19 +79,20 @@
         <span>Scroll behavior</span>
         <select
             class="form-control"
-            bind:value={settings.scrollBehavior}
-            disabled={prefersReducedMotion}>
-            <option value="smooth">Smooth (animated scroll)</option>
+            value={effectiveScrollBehavior}
+            onchange={(e) =>
+                (settings.scrollBehavior = e.currentTarget
+                    .value as ScrollBehavior)}
+            disabled={userPrefersReducedMotion}>
+            <option value="smooth">Animated scroll</option>
             <option value="instant">Instant</option>
         </select>
     </label>
-
-    {#if prefersReducedMotion}
+    {#if userPrefersReducedMotion}
         <div class="message info-message">
             <p>
-                Smooth scrolling is disabled because <em
-                    >prefers-reduced-motion</em> is enabled in your system settings,
-                which overrides your extension settings.
+                Scroll animations are disabled because <em
+                    >prefers-reduced-motion</em> is enabled in your system settings.
             </p>
             <p>
                 To enable smooth scrolling, change your system's accessibility
