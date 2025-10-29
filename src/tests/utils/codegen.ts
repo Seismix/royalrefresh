@@ -5,9 +5,10 @@
  */
 
 import { chromium } from "@playwright/test"
+import path from "path"
 
 async function runCodegen() {
-    const chromeExtensionPath = "dist/chrome"
+    const chromeExtensionPath = path.resolve(".output/chrome-mv3")
 
     // Launch browser with persistent context and load the extension
     const context = await chromium.launchPersistentContext("", {

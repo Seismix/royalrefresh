@@ -12,8 +12,13 @@ export default defineConfig({
     permissions: ['storage', '*://*.royalroad.com/*'],
     browser_specific_settings: {
         gecko: {
-            id: 'royalrefresh.extension@example.com'
+            id: 'royalrefresh.extension@example.com',
+            // @ts-expect-error - data_collection_permissions not yet in WXT types
+            data_collection_permissions: {
+                required: ['none']
+            }
         },
+        gecko_android: {}
     },
     icons: {
         "48": "icons/royalroad_48.png",
