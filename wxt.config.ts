@@ -18,6 +18,7 @@ export default defineConfig({
                 required: ['none']
             }
         },
+        gecko_android: {}
     },
     icons: {
         "48": "icons/royalroad_48.png",
