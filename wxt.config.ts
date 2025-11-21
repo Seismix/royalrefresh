@@ -3,6 +3,9 @@ import { defineConfig } from 'wxt';
 // See https://wxt.dev/api/config.html
 export default defineConfig({
   srcDir: 'src',
+  zip: {
+    exclude: ['**.env**'],
+  },
   outDir: process.env.WXT_OUT_DIR || '.output',
   modules: ['@wxt-dev/module-svelte'],
   manifest: {
