@@ -1,17 +1,17 @@
 <script lang="ts">
-    import { untrack } from "svelte"
     import {
         ActionButtons,
         BackButton,
         GitHubButton,
         PatchNotesButton,
         SettingsButton,
-    } from "@/components/buttons"
-    import PatchNotes from "@/entrypoints/popup/PatchNotes.svelte"
-    import AdvancedSettingsView from "@/entrypoints/popup/AdvancedSettingsView.svelte"
+    } from "~/components/buttons"
+    import AdvancedSettingsView from "~/entrypoints/popup/AdvancedSettingsView.svelte"
+    import PatchNotes from "~/entrypoints/popup/PatchNotes.svelte"
+    import { untrack } from "svelte"
     import { PageHeader } from "~/components/layout"
-    import { AdvancedSettings, BasicSettings } from "~/components/settings"
-    import DEFAULTS from "~/lib/config/defaults"
+    import { BasicSettings } from "~/components/settings"
+    import { getDefaults } from "~/lib/config/defaults"
     import { BrowserType, currentBrowser } from "~/lib/utils/platform"
     import { getSettings, watchSettings } from "~/lib/utils/storage-utils"
     import type { ExtensionSettings } from "~/types/types"
@@ -29,7 +29,7 @@
             localSettings = await getSettings()
         } catch (error) {
             console.error("Failed to load settings:", error)
-            localSettings = DEFAULTS
+            localSettings = getDefaults()
         }
     }
 

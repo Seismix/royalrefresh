@@ -14,10 +14,10 @@ export const settingsStore = storage.defineItem<ExtensionSettings>(
     {
         fallback: {
             wordCount: 250,
-            enableJump: true, // Will be adjusted in getSettings() based on reduced motion
+            enableJump: true, // Jump is a core feature, always enabled by default
             scrollBehavior: "smooth" as ScrollBehavior,
             autoExpand: false,
-            // hasDetectedReducedMotion is undefined for fresh installs - this triggers detection
+            hasDetectedReducedMotion: false, // Fresh installs should trigger detection
             ...DEFAULT_SELECTORS,
         },
         version: 2,
@@ -27,7 +27,7 @@ export const settingsStore = storage.defineItem<ExtensionSettings>(
                 if ("smoothScroll" in oldSettings) {
                     const migrated = {
                         ...oldSettings,
-                        enableJump: oldSettings.smoothScroll === true,
+                        enableJump: oldSettings.smoothScroll === true, // Preserve user's choice
                         scrollBehavior: (oldSettings.smoothScroll
                             ? "smooth"
                             : "instant") as ScrollBehavior,
@@ -65,26 +65,25 @@ export async function getSettings(): Promise<ExtensionSettings> {
 
     try {
         const reducedMotion = prefersReducedMotion()
+        devLog.log(
+            "First time detection - prefersReducedMotion:",
+            reducedMotion,
+        )
 
         let updatedSettings = {
             ...settings,
+            enableJump: true, // Jump is a core feature, always enabled
             hasDetectedReducedMotion: true,
         }
 
-        // For users without reduced motion preference, enable jump and animations by default if not already set
+        // Adjust scroll behavior based on reduced motion preference
         if (!reducedMotion) {
-            updatedSettings = {
-                ...updatedSettings,
-                enableJump: settings?.enableJump ?? true,
-                scrollBehavior:
-                    settings?.scrollBehavior ?? ("smooth" as ScrollBehavior),
-            }
+            updatedSettings.scrollBehavior = "smooth" as ScrollBehavior
+            devLog.log("No reduced motion detected, using smooth scroll")
         } else {
-            // Respect reduced motion by ensuring instant scrolling and disabling animations
-            updatedSettings = {
-                ...updatedSettings,
-                scrollBehavior: "instant" as ScrollBehavior,
-            }
+            // Respect reduced motion by using instant scrolling
+            updatedSettings.scrollBehavior = "instant" as ScrollBehavior
+            devLog.log("Reduced motion detected, using instant scroll")
         }
 
         await settingsStore.setValue(updatedSettings)
