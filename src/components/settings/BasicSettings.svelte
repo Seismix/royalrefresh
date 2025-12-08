@@ -91,12 +91,13 @@
     {#if userPrefersReducedMotion}
         <div class="message info-message">
             <p>
-                Scroll animations are disabled because <em
-                    >prefers-reduced-motion</em> is enabled in your system settings.
+                Scroll behavior was set to instant for you because you have
+                motion reduction enabled in your system settings.
             </p>
             <p>
-                To enable smooth scrolling, change your system's accessibility
-                settings to allow motion.
+                This means the scroll will jump instantly. If you want to use
+                smooth scrolling instead, turn off motion reduction in your
+                accessibility settings.
             </p>
         </div>
     {/if}
