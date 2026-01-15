@@ -15,7 +15,6 @@ export type ExtensionSettings = {
     enableJump: boolean
     scrollBehavior: ScrollBehavior
     autoExpand: boolean
-    hasDetectedReducedMotion?: boolean
 } & ExtensionSelectors
 
 export type ExtensionSettingsKeys = keyof ExtensionSettings

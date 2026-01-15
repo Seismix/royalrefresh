@@ -17,7 +17,6 @@ export const settingsStore = storage.defineItem<ExtensionSettings>(
             enableJump: true, // Jump is a core feature, always enabled by default
             scrollBehavior: "smooth" as ScrollBehavior,
             autoExpand: false,
-            hasDetectedReducedMotion: false, // Fresh installs should trigger detection
             ...DEFAULT_SELECTORS,
         },
         version: 2,
@@ -31,8 +30,6 @@ export const settingsStore = storage.defineItem<ExtensionSettings>(
                         scrollBehavior: (oldSettings.smoothScroll
                             ? "smooth"
                             : "instant") as ScrollBehavior,
-                        // Migration: mark as having been detected so we don't override user's choice
-                        hasDetectedReducedMotion: true,
                     } as ExtensionSettings
 
                     // Remove the old property
@@ -53,52 +50,9 @@ export const settingsStore = storage.defineItem<ExtensionSettings>(
 
 /**
  * Get current settings from storage
- * Automatically performs first-time reduced motion detection if needed
  */
 export async function getSettings(): Promise<ExtensionSettings> {
-    const settings = await settingsStore.getValue()
-
-    // Skip if we've already done detection
-    if (settings?.hasDetectedReducedMotion) {
-        return settings
-    }
-
-    try {
-        const reducedMotion = prefersReducedMotion()
-        devLog.log(
-            "First time detection - prefersReducedMotion:",
-            reducedMotion,
-        )
-
-        let updatedSettings = {
-            ...settings,
-            enableJump: true, // Jump is a core feature, always enabled
-            hasDetectedReducedMotion: true,
-        }
-
-        // Adjust scroll behavior based on reduced motion preference
-        if (!reducedMotion) {
-            updatedSettings.scrollBehavior = "smooth" as ScrollBehavior
-            devLog.log("No reduced motion detected, using smooth scroll")
-        } else {
-            // Respect reduced motion by using instant scrolling
-            updatedSettings.scrollBehavior = "instant" as ScrollBehavior
-            devLog.log("Reduced motion detected, using instant scroll")
-        }
-
-        await settingsStore.setValue(updatedSettings)
-        return updatedSettings
-    } catch (error) {
-        devLog.log("Could not detect reduced motion preference:", error)
-    }
-
-    // Fallback: just mark as detected
-    const fallbackSettings = {
-        ...settings,
-        hasDetectedReducedMotion: true,
-    }
-    await settingsStore.setValue(fallbackSettings)
-    return fallbackSettings
+    return await settingsStore.getValue()
 }
 
 /**
