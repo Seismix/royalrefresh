@@ -46,11 +46,6 @@
             onValidationChange(wordCountValidation.isValid)
         }
     })
-
-    // Compute effective scroll behavior - respects OS reduced motion preference
-    const effectiveScrollBehavior = $derived(
-        userPrefersReducedMotion ? "instant" : settings.scrollBehavior,
-    )
 </script>
 
 <h2>Recap Settings</h2>
@@ -77,26 +72,20 @@
 {#if settings.enableJump}
     <label>
         <span>Scroll behavior</span>
-        <select
-            class="form-control"
-            value={effectiveScrollBehavior}
-            onchange={(e) =>
-                (settings.scrollBehavior = e.currentTarget
-                    .value as ScrollBehavior)}
-            disabled={userPrefersReducedMotion}>
-            <option value="smooth">Animated scroll</option>
+        <select class="form-control" bind:value={settings.scrollBehavior}>
+            <option value="smooth">Auto (Recommended)</option>
             <option value="instant">Instant</option>
         </select>
     </label>
-    {#if userPrefersReducedMotion}
+    {#if userPrefersReducedMotion && settings.scrollBehavior === "smooth"}
         <div class="message info-message">
             <p>
-                Scroll animations are disabled because <em
-                    >prefers-reduced-motion</em> is enabled in your system settings.
+                <strong>System Reduced Motion Detected</strong>
             </p>
             <p>
-                To enable smooth scrolling, change your system's accessibility
-                settings to allow motion.
+                Your system has reduced motion enabled, so "Auto" will use
+                instant scrolling. If you prefer not to jump at all, disable
+                "Enable jump to recap" above.
             </p>
         </div>
     {/if}

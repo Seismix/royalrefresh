@@ -1,0 +1,12 @@
+{
+    "version": "1.6.0",
+    "releasedOn": "2026-01-20",
+    "summary": "Enhanced scrolling options and accessibility improvements.",
+    "new": [
+        "You can now choose between 'Auto' and 'Instant' scrolling speeds when jumping to recaps"
+    ],
+    "fixes": [
+        "Clearer explanations when your device's Reduced Motion settings affect animations",
+        "Improved reliability when jumping to the recap section"
+    ]
+}
