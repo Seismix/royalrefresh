@@ -1,5 +1,4 @@
 import { ExtensionSelectors, ExtensionSettings } from "~/types/types"
-import { devLog } from "../utils/logger"
 import { prefersReducedMotion } from "../utils/platform"
 
 export const DEFAULT_SELECTORS: ExtensionSelectors = {
