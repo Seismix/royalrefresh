@@ -72,9 +72,7 @@
 {#if settings.enableJump}
     <label>
         <span>Scroll behavior</span>
-        <select
-            class="form-control"
-            bind:value={settings.scrollBehavior}>
+        <select class="form-control" bind:value={settings.scrollBehavior}>
             <option value="smooth">Auto (Recommended)</option>
             <option value="instant">Instant</option>
         </select>

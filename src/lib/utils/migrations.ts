@@ -8,7 +8,9 @@ export function migrateV1toV2(oldSettings: any): ExtensionSettings {
         const migrated: ExtensionSettings = {
             ...rest,
             enableJump: smoothScroll === true, // Preserve user's choice
-            scrollBehavior: (smoothScroll ? "smooth" : "instant") as ScrollBehavior,
+            scrollBehavior: (smoothScroll
+                ? "smooth"
+                : "instant") as ScrollBehavior,
         }
 
         devLog.log("WXT Migration v1→v2: smoothScroll ->", {
