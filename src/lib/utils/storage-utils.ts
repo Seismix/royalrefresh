@@ -1,8 +1,7 @@
 import { storage } from "wxt/utils/storage"
 import { DEFAULT_SELECTORS, getDefaults } from "~/lib/config/defaults"
 import type { ExtensionSettings } from "~/types/types"
-import { devLog } from "./logger"
-import { prefersReducedMotion } from "./platform"
+import { migrateV1toV2 } from "./migrations"
 
 /**
  * WXT storage utilities for extension settings with migration support
@@ -21,29 +20,7 @@ export const settingsStore = storage.defineItem<ExtensionSettings>(
         },
         version: 2,
         migrations: {
-            2: (oldSettings: any) => {
-                // Migration from v1 to v2: smoothScroll -> enableJump & scrollBehavior
-                if ("smoothScroll" in oldSettings) {
-                    const migrated = {
-                        ...oldSettings,
-                        enableJump: oldSettings.smoothScroll === true, // Preserve user's choice
-                        scrollBehavior: (oldSettings.smoothScroll
-                            ? "smooth"
-                            : "instant") as ScrollBehavior,
-                    } as ExtensionSettings
-
-                    // Remove the old property
-                    delete (migrated as any).smoothScroll
-
-                    devLog.log("WXT Migration v1→v2: smoothScroll ->", {
-                        enableJump: migrated.enableJump,
-                        scrollBehavior: migrated.scrollBehavior,
-                    })
-
-                    return migrated
-                }
-                return oldSettings as ExtensionSettings
-            },
+            2: migrateV1toV2,
         },
     },
 )
