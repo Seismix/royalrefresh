@@ -47,9 +47,9 @@
         }
     }
 
-    const buttonText = type === "recap" ? "Recap" : "Blurb"
-    const iconName = type === "recap" ? "book" : "info-circle"
-    const buttonId = type === "recap" ? "recapButton" : "blurbButton"
+    let buttonText = $derived(type === "recap" ? "Recap" : "Blurb")
+    let iconName = $derived(type === "recap" ? "book" : "info-circle")
+    let buttonId = $derived(type === "recap" ? "recapButton" : "blurbButton")
 </script>
 
 <button
