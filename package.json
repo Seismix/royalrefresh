@@ -10,7 +10,7 @@
     "scripts": {
         "dev": "wxt",
         "dev:firefox": "wxt -b firefox",
-        "dev:android": "node scripts/dev-android.js",
+        "dev:android": "node scripts/dev-android.ts",
         "build": "wxt build",
         "build:firefox": "wxt build -b firefox",
         "zip": "wxt zip",
