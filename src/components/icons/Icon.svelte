@@ -8,7 +8,9 @@
     }
 
     let { variant = "default", path, size = 16 }: Props = $props()
-    let variantClass = $derived(variant !== "default" ? `variant-${variant}` : "")
+    let variantClass = $derived(
+        variant !== "default" ? `variant-${variant}` : "",
+    )
 </script>
 
 <div class="icon-wrapper">
