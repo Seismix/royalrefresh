@@ -2,7 +2,7 @@ name: Prettier Check
 
 on:
     pull_request:
-        branches: [main]
+        branches: [main, dev]
         types: [opened, reopened, synchronize, ready_for_review]
 
 jobs:

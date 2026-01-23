@@ -8,7 +8,9 @@
     }
 
     let { variant = "default", path, size = 16 }: Props = $props()
-    const variantClass = variant !== "default" ? `variant-${variant}` : ""
+    let variantClass = $derived(
+        variant !== "default" ? `variant-${variant}` : "",
+    )
 </script>
 
 <div class="icon-wrapper">
@@ -24,5 +26,5 @@
 </div>
 
 <style>
-    @import "~/lib/styles/icon-button.css";
+    @import "~/lib/styles/icon.css";
 </style>
