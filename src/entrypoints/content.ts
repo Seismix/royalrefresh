@@ -1,5 +1,6 @@
 import ToggleButton from "~/components/extension/ToggleButton.svelte"
 import SettingsButton from "~/components/extension/SettingsButton.svelte"
+import ReportLink from "~/components/extension/ReportLink.svelte"
 import RecapContainer from "~/components/extension/RecapContainer.svelte"
 import {
     documentIsChapterURL,
@@ -43,6 +44,13 @@ export default defineContentScript({
         )
         if (settingsPlacement) {
             const cleanup = mountComponent(SettingsButton, settingsPlacement)
+            ctx.onInvalidated(cleanup)
+        }
+
+        // Create report button
+        const reportPlacement = document.querySelector(settings.reportPlacement)
+        if (reportPlacement) {
+            const cleanup = mountComponent(ReportLink, reportPlacement, {}, false)
             ctx.onInvalidated(cleanup)
         }
 

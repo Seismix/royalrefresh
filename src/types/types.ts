@@ -8,6 +8,7 @@ export type ExtensionSelectors = {
     blurb: string
     blurbLabels: string
     closeButtonSelector: string
+    reportPlacement: string
 }
 
 export type ExtensionSettings = {

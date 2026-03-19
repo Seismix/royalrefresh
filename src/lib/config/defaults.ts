@@ -12,6 +12,7 @@ export const DEFAULT_SELECTORS: ExtensionSelectors = {
     blurbLabels: ".portlet .text-center.font-red-sunglo",
     closeButtonSelector:
         "#settings > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > button:last-child",
+    reportPlacement: "div.col-lg-3:nth-child(3)",
 }
 
 const DEFAULTS: ExtensionSettings = {
@@ -57,6 +58,7 @@ export function getChapterPageSelectors() {
         togglePlacement: DEFAULT_SELECTORS.togglePlacement,
         settingsPlacement: DEFAULT_SELECTORS.settingsPlacement,
         closeButtonSelector: DEFAULT_SELECTORS.closeButtonSelector,
+        reportPlacement: DEFAULT_SELECTORS.reportPlacement,
     }
 }
 
