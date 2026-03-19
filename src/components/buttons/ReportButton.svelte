@@ -12,16 +12,12 @@
 
     const isAndroidFirefox = currentBrowser === BrowserType.AndroidFirefox
 
-    // TODO: Replace with your actual Google Form URL and entry IDs
     const FORM_BASE_URL =
-        "https://docs.google.com/forms/d/e/FORM_ID/viewform"
-    const DATE_FIELD_ID = "entry.DATE_FIELD_ID"
-    const URL_FIELD_ID = "entry.URL_FIELD_ID"
+        "https://docs.google.com/forms/d/e/1FAIpQLSfY1V_30w8IdS4HdC9PFY6vxEjyz4Wl2oci4oTjyGSijvez4Q/viewform"
+    const URL_FIELD_ID = "entry.328681820"
 
     const buildFormUrl = (chapterUrl: string) => {
-        const today = new Date().toISOString().split("T")[0]
         const params = new URLSearchParams({
-            [DATE_FIELD_ID]: today,
             [URL_FIELD_ID]: chapterUrl,
         })
         return `${FORM_BASE_URL}?${params.toString()}`
