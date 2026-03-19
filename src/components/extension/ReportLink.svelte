@@ -1,16 +1,7 @@
 <script lang="ts">
-    const FORM_BASE_URL =
-        "https://docs.google.com/forms/d/e/1FAIpQLSfY1V_30w8IdS4HdC9PFY6vxEjyz4Wl2oci4oTjyGSijvez4Q/viewform"
-    const URL_FIELD_ID = "entry.328681820"
+    import { buildReportFormUrl } from "~/lib/config/report-form"
 
-    const buildFormUrl = () => {
-        const params = new URLSearchParams({
-            [URL_FIELD_ID]: window.location.href,
-        })
-        return `${FORM_BASE_URL}?${params.toString()}`
-    }
-
-    const formUrl = buildFormUrl()
+    const formUrl = buildReportFormUrl(window.location.href)
 </script>
 
 <a
