@@ -50,7 +50,12 @@ export default defineContentScript({
         // Create report button
         const reportPlacement = document.querySelector(settings.reportPlacement)
         if (reportPlacement) {
-            const cleanup = mountComponent(ReportLink, reportPlacement, {}, false)
+            const cleanup = mountComponent(
+                ReportLink,
+                reportPlacement,
+                {},
+                false,
+            )
             ctx.onInvalidated(cleanup)
         }
 
