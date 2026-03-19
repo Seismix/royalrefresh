@@ -32,6 +32,11 @@ export default defineBackground(() => {
             })
         }
 
+        if ("action" in message && message.action === "openUrl") {
+            browser.tabs.create({ url: message.url, active: true })
+            return true
+        }
+
         if ("action" in message && message.action === "openExtensionSettings") {
             // Platform-specific options page handling
             switch (currentBrowser) {
