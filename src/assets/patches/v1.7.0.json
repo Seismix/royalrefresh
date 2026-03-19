@@ -1,0 +1,10 @@
+{
+    "version": "1.7.0",
+    "releasedOn": "2026-03-19",
+    "summary": "Report broken recaps directly from the chapter page or popup.",
+    "new": [
+        "Report broken recaps via a Google Form link on the chapter page sidebar",
+        "Report button in the popup pre-fills the current chapter URL"
+    ],
+    "fixes": []
+}
