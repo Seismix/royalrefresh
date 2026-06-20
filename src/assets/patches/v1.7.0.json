@@ -1,10 +1,11 @@
 {
     "version": "1.7.0",
-    "releasedOn": "2026-03-19",
-    "summary": "Report broken recaps directly from the chapter page or popup.",
+    "releasedOn": "2026-06-21",
+    "summary": "Report broken recaps and blurbs directly from the page or popup.",
     "new": [
-        "Report broken recaps via a Google Form link on the chapter page sidebar",
-        "Report button in the popup pre-fills the current chapter URL"
+        "Report broken recaps from the chapter page, or broken blurbs from a fiction page, via a Google Form link in the sidebar",
+        "Report button in the popup pre-fills the current chapter for you",
+        "Reports now automatically include your extension version and browser to make debugging faster"
     ],
     "fixes": []
 }
