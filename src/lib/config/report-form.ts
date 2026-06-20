@@ -4,10 +4,9 @@ export const REPORT_FORM_BASE_URL =
     "https://docs.google.com/forms/d/e/1FAIpQLSfY1V_30w8IdS4HdC9PFY6vxEjyz4Wl2oci4oTjyGSijvez4Q/viewform"
 
 export const REPORT_URL_FIELD_ID = "entry.328681820"
-// TODO: replace with real entry IDs after adding the fields in Google Forms
-export const REPORT_VERSION_FIELD_ID = "entry.PLACEHOLDER_VERSION"
-export const REPORT_BROWSER_FIELD_ID = "entry.PLACEHOLDER_BROWSER"
-export const REPORT_TYPE_FIELD_ID = "entry.PLACEHOLDER_TYPE"
+export const REPORT_VERSION_FIELD_ID = "entry.1083154892"
+export const REPORT_BROWSER_FIELD_ID = "entry.1482311816"
+export const REPORT_TYPE_FIELD_ID = "entry.1358230788"
 
 export interface ReportFormParams {
     chapterUrl: string
