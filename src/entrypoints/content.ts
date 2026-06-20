@@ -8,6 +8,7 @@ import {
     mountComponent,
 } from "~/lib/utils/dom-utils"
 import { getSettings } from "~/lib/utils/storage-utils"
+import type { ContentType } from "~/types/types"
 
 export default defineContentScript({
     matches: ["*://*.royalroad.com/*"],
@@ -20,17 +21,18 @@ export default defineContentScript({
         // Get settings from storage
         const settings = await getSettings()
         const hasPrevChapter = documentHasPreviousChapterURL(settings)
+        const contentType: ContentType = hasPrevChapter ? "recap" : "blurb"
 
         // Create toggle button
         const togglePlacement = document.querySelector(settings.togglePlacement)
         if (togglePlacement) {
             const cleanup = mountComponent(ToggleButton, togglePlacement, {
-                type: hasPrevChapter ? "recap" : "blurb",
+                type: contentType,
             })
             ctx.onInvalidated(cleanup)
 
             if (settings.autoExpand) {
-                const buttonId = hasPrevChapter ? "recapButton" : "blurbButton"
+                const buttonId = `${contentType}Button`
                 // ensure DOM is ready
                 requestAnimationFrame(() => {
                     const btn = document.getElementById(buttonId)
@@ -47,13 +49,13 @@ export default defineContentScript({
             ctx.onInvalidated(cleanup)
         }
 
-        // Create report button
+        // Create report link (label/type matches what the toggle button shows)
         const reportPlacement = document.querySelector(settings.reportPlacement)
         if (reportPlacement) {
             const cleanup = mountComponent(
                 ReportLink,
                 reportPlacement,
-                {},
+                { type: contentType },
                 false,
             )
             ctx.onInvalidated(cleanup)

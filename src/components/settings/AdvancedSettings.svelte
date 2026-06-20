@@ -51,6 +51,14 @@
 </label>
 
 <label>
+    <span>Report link placement:</span>
+    <input
+        type="text"
+        class="form-control"
+        bind:value={settings.reportPlacement} />
+</label>
+
+<label>
     <span>Chapter content:</span>
     <input
         type="text"

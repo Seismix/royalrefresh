@@ -2,11 +2,12 @@
     import { recapState } from "~/lib/state/recap-state.svelte"
     import { getSettings } from "~/lib/utils/storage-utils"
     import { ContentManager } from "~/lib/services/content-manager"
+    import type { ContentType } from "~/types/types"
 
     let {
         type = "recap",
     }: {
-        type?: "recap" | "blurb"
+        type?: ContentType
     } = $props()
 
     // Reference to the button element
@@ -40,10 +41,7 @@
         if ("error" in result) {
             recapState.setError(result.error)
         } else {
-            recapState.setContent(
-                result.content,
-                result.type as "recap" | "blurb",
-            )
+            recapState.setContent(result.content, result.type as ContentType)
         }
     }
 

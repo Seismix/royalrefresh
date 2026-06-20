@@ -15,6 +15,7 @@
     import { getDefaults } from "~/lib/config/defaults"
     import { BrowserType, currentBrowser } from "~/lib/utils/platform"
     import { browser } from "wxt/browser"
+    import { isChapterUrl } from "~/lib/utils/dom-utils"
     import { getSettings, watchSettings } from "~/lib/utils/storage-utils"
     import type { ExtensionSettings } from "~/types/types"
 
@@ -25,14 +26,6 @@
     let currentView = $state<View>("settings")
     let activeTabUrl = $state("")
     const isAndroidFirefox = currentBrowser === BrowserType.AndroidFirefox
-
-    const isChapterUrl = (url: string) => {
-        try {
-            return new URL(url).pathname.split("/").includes("chapter")
-        } catch {
-            return false
-        }
-    }
 
     let isOnChapterPage = $derived(isChapterUrl(activeTabUrl))
 

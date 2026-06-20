@@ -1,7 +1,22 @@
 <script lang="ts">
+    import { browser } from "wxt/browser"
     import { buildReportFormUrl } from "~/lib/config/report-form"
+    import { currentBrowser } from "~/lib/utils/platform"
+    import type { ContentType } from "~/types/types"
 
-    const formUrl = buildReportFormUrl(window.location.href)
+    let { type = "recap" }: { type?: ContentType } = $props()
+
+    const formUrl = $derived(
+        buildReportFormUrl({
+            chapterUrl: window.location.href,
+            type,
+            version: browser.runtime.getManifest().version,
+            browserType: currentBrowser,
+        }),
+    )
+    const label = $derived(
+        type === "recap" ? "Report Broken Recap" : "Report Broken Blurb",
+    )
 </script>
 
 <a
@@ -9,5 +24,6 @@
     href={formUrl}
     target="_blank"
     rel="noopener noreferrer">
-    <i class="fa fa-flag"></i> Report Broken Recap
+    <i class="fa fa-flag"></i>
+    {label}
 </a>

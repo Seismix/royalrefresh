@@ -15,7 +15,12 @@
 
     const openReport = async () => {
         await browser.tabs.create({
-            url: buildReportFormUrl(chapterUrl),
+            url: buildReportFormUrl({
+                chapterUrl,
+                type: "recap",
+                version: browser.runtime.getManifest().version,
+                browserType: currentBrowser,
+            }),
             active: true,
         })
 

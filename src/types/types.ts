@@ -29,3 +29,5 @@ export type RecapContainerStrings = {
 }
 
 export type DisplayMessageType = "success" | "restore" | "restoreSelectors"
+
+export type ContentType = "recap" | "blurb"

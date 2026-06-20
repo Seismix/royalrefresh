@@ -1,3 +1,5 @@
+import type { ContentType } from "~/types/types"
+
 export type RecapState = "hidden" | "visible" | "error"
 
 /**
@@ -8,12 +10,12 @@ class RecapStateManager {
     visibility = $state<RecapState>("hidden")
     content = $state<string>("")
     error = $state<string | null>(null)
-    type = $state<"recap" | "blurb">("recap")
+    type = $state<ContentType>("recap")
 
     /**
      * Sets content and makes it visible
      */
-    setContent(content: string, type: "recap" | "blurb") {
+    setContent(content: string, type: ContentType) {
         this.content = content
         this.type = type
         this.visibility = "visible"
