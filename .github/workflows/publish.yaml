@@ -4,12 +4,12 @@ on:
     push:
         branches: [main]
         paths-ignore:
-            - '**.md'
-            - 'docs/**'
-            - '.github/**'
-            - '.gitignore'
-            - '.editorconfig'
-            - '.prettierrc'
+            - "**.md"
+            - "docs/**"
+            - ".github/**"
+            - ".gitignore"
+            - ".editorconfig"
+            - ".prettierrc"
     workflow_dispatch:
 
 jobs:
@@ -17,6 +17,7 @@ jobs:
         runs-on: ubuntu-latest
         outputs:
             should_publish: ${{ steps.check.outputs.should_publish }}
+            has_chrome: ${{ steps.chrome.outputs.has_chrome }}
             version: ${{ steps.version.outputs.version }}
         steps:
             - uses: actions/checkout@v4
@@ -40,17 +41,25 @@ jobs:
                       echo "should_publish=true" >> "$GITHUB_OUTPUT"
                   fi
 
-    publish:
+            # `secrets` is not available in job-level `if:`, so resolve the Chrome
+            # token gate here and expose it as an output the chrome job can read.
+            - name: Detect Chrome credentials
+              id: chrome
+              run: |
+                  if [ -n "${{ secrets.CHROME_REFRESH_TOKEN }}" ]; then
+                      echo "has_chrome=true" >> "$GITHUB_OUTPUT"
+                  else
+                      echo "Chrome refresh token not set - skipping Chrome publish."
+                      echo "has_chrome=false" >> "$GITHUB_OUTPUT"
+                  fi
+
+    # Firefox and Chrome publish as independent jobs so a failure in one store
+    # never blocks the other, and "Re-run failed jobs" retries only the store
+    # that failed instead of re-submitting a version that already went through.
+    firefox:
         needs: check
         if: needs.check.outputs.should_publish == 'true'
         runs-on: ubuntu-latest
-        permissions:
-            contents: write
-        env:
-            VERSION: ${{ needs.check.outputs.version }}
-            # Chrome only runs once a refresh token secret is present. Until then
-            # Firefox publishes on its own and the Chrome step is skipped.
-            HAS_CHROME_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN != '' }}
         steps:
             - uses: actions/checkout@v4
 
@@ -63,13 +72,10 @@ jobs:
               uses: actions/setup-node@v4
               with:
                   node-version: lts/*
-                  cache: 'pnpm'
+                  cache: "pnpm"
 
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
-
-            - name: Build & zip (Chrome)
-              run: pnpm zip
 
             - name: Build & zip (Firefox + sources)
               run: pnpm zip:firefox
@@ -85,8 +91,31 @@ jobs:
                   FIREFOX_JWT_SECRET: ${{ secrets.FIREFOX_JWT_SECRET }}
                   FIREFOX_CHANNEL: ${{ secrets.FIREFOX_CHANNEL }}
 
+    chrome:
+        needs: check
+        if: needs.check.outputs.should_publish == 'true' && needs.check.outputs.has_chrome == 'true'
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: lts/*
+                  cache: "pnpm"
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Build & zip (Chrome)
+              run: pnpm zip
+
             - name: Submit to Chrome Web Store
-              if: env.HAS_CHROME_TOKEN == 'true'
               run: |
                   pnpm wxt submit \
                       --chrome-zip .output/*-chrome.zip
@@ -97,6 +126,24 @@ jobs:
                   CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
                   CHROME_PUBLISH_TARGET: ${{ secrets.CHROME_PUBLISH_TARGET }}
                   CHROME_SKIP_SUBMIT_REVIEW: ${{ secrets.CHROME_SKIP_SUBMIT_REVIEW }}
+
+    # Only tag and release once the stores are done. Runs when Firefox succeeded
+    # and Chrome either succeeded or was skipped (no token yet). If either store
+    # failed, the release is held back so a retry can complete it before tagging.
+    release:
+        needs: [check, firefox, chrome]
+        if: >-
+            ${{ !cancelled()
+            && needs.check.outputs.should_publish == 'true'
+            && needs.firefox.result == 'success'
+            && (needs.chrome.result == 'success' || needs.chrome.result == 'skipped') }}
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        env:
+            VERSION: ${{ needs.check.outputs.version }}
+        steps:
+            - uses: actions/checkout@v4
 
             - name: Tag and create GitHub release
               env:
