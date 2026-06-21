@@ -4,6 +4,7 @@
         BackButton,
         GitHubButton,
         PatchNotesButton,
+        ReportButton,
         SettingsButton,
     } from "~/components/buttons"
     import AdvancedSettingsView from "~/entrypoints/popup/AdvancedSettingsView.svelte"
@@ -13,6 +14,8 @@
     import { BasicSettings } from "~/components/settings"
     import { getDefaults } from "~/lib/config/defaults"
     import { BrowserType, currentBrowser } from "~/lib/utils/platform"
+    import { browser } from "wxt/browser"
+    import { isChapterUrl } from "~/lib/utils/dom-utils"
     import { getSettings, watchSettings } from "~/lib/utils/storage-utils"
     import type { ExtensionSettings } from "~/types/types"
 
@@ -21,19 +24,32 @@
     let localSettings = $state<ExtensionSettings | null>(null)
     let isValid = $state<boolean>(true)
     let currentView = $state<View>("settings")
+    let activeTabUrl = $state("")
     const isAndroidFirefox = currentBrowser === BrowserType.AndroidFirefox
 
-    // Load initial settings once on mount
-    const initSettings = async () => {
+    let isOnChapterPage = $derived(isChapterUrl(activeTabUrl))
+
+    const getActiveTabUrl = async () => {
+        const [tab] = await browser.tabs.query({
+            active: true,
+            currentWindow: true,
+        })
+        return tab?.url ?? ""
+    }
+
+    // Load initial settings and active tab URL on mount
+    const init = async () => {
         try {
             localSettings = await getSettings()
         } catch (error) {
             console.error("Failed to load settings:", error)
             localSettings = getDefaults()
         }
+
+        activeTabUrl = await getActiveTabUrl()
     }
 
-    initSettings()
+    init()
 
     // Effect: Watch for external settings changes (from other tabs/popups)
     $effect(() => {
@@ -70,6 +86,9 @@
     {#if currentView === "settings"}
         <PageHeader title="RoyalRefresh Settings">
             {#snippet buttons()}
+                {#if isOnChapterPage}
+                    <ReportButton chapterUrl={activeTabUrl} />
+                {/if}
                 <PatchNotesButton onclick={showPatchNotes} />
                 {#if isAndroidFirefox}
                     <SettingsButton onclick={showAdvancedSettings} />

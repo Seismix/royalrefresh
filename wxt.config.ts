@@ -19,7 +19,8 @@ export default defineConfig({
         description:
             "A web extension for royalroad.com. For people who juggle multiple stories",
         homepage_url: "https://github.com/Seismix/royalrefresh",
-        permissions: ["storage", "*://*.royalroad.com/*"],
+        permissions: ["storage"],
+        host_permissions: ["*://*.royalroad.com/*"],
         browser_specific_settings: {
             gecko: {
                 id: "royalrefresh.extension@example.com",

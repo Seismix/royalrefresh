@@ -8,6 +8,7 @@ export type ExtensionSelectors = {
     blurb: string
     blurbLabels: string
     closeButtonSelector: string
+    reportPlacement: string
 }
 
 export type ExtensionSettings = {
@@ -28,3 +29,5 @@ export type RecapContainerStrings = {
 }
 
 export type DisplayMessageType = "success" | "restore" | "restoreSelectors"
+
+export type ContentType = "recap" | "blurb"

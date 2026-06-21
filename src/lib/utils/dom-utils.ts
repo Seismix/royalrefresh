@@ -8,6 +8,17 @@ import type { ExtensionSettings } from "~/types/types"
 /**
  * True if `chapter` is in the URL path, otherwise false.
  */
+export function isChapterUrl(url: string) {
+    try {
+        return new URL(url).pathname.split("/").includes("chapter")
+    } catch {
+        return false
+    }
+}
+
+/**
+ * True if the current document is a chapter page.
+ */
 export function documentIsChapterURL() {
     return window.location.pathname.split("/").includes("chapter")
 }
