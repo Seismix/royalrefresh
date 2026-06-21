@@ -1,0 +1,36 @@
+<!doctype html>
+<!--
+  Representative, hand-built chapter page fixture for RoyalRefresh tests.
+  Matches the selectors in src/lib/config/defaults.ts:
+    - fictionTitle:   h2.font-white  (wrapped in an <a> so findFictionOverviewUrl works)
+    - prevChapterBtn: a[href*='/chapter/']:has(> i.fa-chevron-double-left)
+    - chapterTitle:   h1.font-white
+    - chapterContent: .chapter-inner
+  See README.md for how to refresh from a real page.
+-->
+<html lang="en">
+    <head>
+        <title>Test Chapter</title>
+    </head>
+    <body>
+        <div class="chapter">
+            <a href="https://www.royalroad.com/fiction/1/test-story">
+                <h2 class="font-white">Test Story</h2>
+            </a>
+            <h1 class="font-white">Chapter 2: The Climb</h1>
+
+            <div class="actions">
+                <a
+                    href="https://www.royalroad.com/fiction/1/test-story/chapter/1/the-start">
+                    <i class="fa fa-chevron-double-left"></i>
+                    Previous
+                </a>
+            </div>
+
+            <div class="chapter-inner">
+                <p>This is the first paragraph of the current chapter.</p>
+                <p>This is the second paragraph of the current chapter.</p>
+            </div>
+        </div>
+    </body>
+</html>

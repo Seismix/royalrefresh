@@ -1,0 +1,30 @@
+<!doctype html>
+<!--
+  Representative fiction-overview fixture (fetched for a blurb).
+  ContentProcessor.createBlurb reads from this parsed document:
+    - blurb:       .description .hidden-content
+    - blurbLabels: .portlet .text-center.font-red-sunglo
+  Includes a <script> tag inside the blurb to assert the sanitizer strips it.
+-->
+<html lang="en">
+    <head>
+        <title>Test Story</title>
+    </head>
+    <body>
+        <div class="portlet">
+            <div class="text-center font-red-sunglo">
+                Ongoing &middot; Fantasy &middot; Adventure
+            </div>
+        </div>
+
+        <div class="description">
+            <div class="hidden-content">
+                <p>A hero rises from humble beginnings to face great peril.</p>
+                <script>
+                    window.__danger = "should be stripped"
+                </script>
+                <p>Will they prevail? Read on to find out.</p>
+            </div>
+        </div>
+    </body>
+</html>

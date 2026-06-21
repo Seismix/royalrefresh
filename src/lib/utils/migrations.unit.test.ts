@@ -1,5 +1,5 @@
-import { test, expect } from "@playwright/test"
-import { migrateV1toV2 } from "../lib/utils/migrations"
+import { describe, expect, test } from "vitest"
+import { migrateV1toV2 } from "./migrations"
 
 // Helper to simulate the full migration chain
 // As you add more versions, update this function
@@ -19,7 +19,7 @@ function migrateToLatest(settings: any, startVersion: number) {
     return migrated
 }
 
-test.describe("Settings Migrations", () => {
+describe("Settings Migrations", () => {
     // Test Scenarios
     // Add new test cases here instead of writing new test blocks
     const scenarios = [

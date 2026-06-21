@@ -1,0 +1,34 @@
+<!doctype html>
+<!--
+  Representative previous-chapter fixture (the page that gets fetched for a recap).
+  ContentProcessor.createRecap reads from this parsed document:
+    - chapterTitle:   h1.font-white
+    - chapterContent: .chapter-inner  (paragraphs, last-N-words taken from the END)
+  Includes a <script> tag to assert the sanitizer strips it.
+-->
+<html lang="en">
+    <head>
+        <title>Previous Chapter</title>
+    </head>
+    <body>
+        <div class="chapter">
+            <h1 class="font-white">Chapter 1: The Start</h1>
+            <div class="chapter-inner">
+                <script>
+                    window.__danger = "should be stripped"
+                </script>
+                <p>
+                    Alpha bravo charlie delta echo foxtrot golf hotel india
+                    juliet.
+                </p>
+                <p>
+                    Kilo lima mike november oscar papa quebec romeo sierra
+                    tango.
+                </p>
+                <p>
+                    Uniform victor whiskey xray yankee zulu one two three four.
+                </p>
+            </div>
+        </div>
+    </body>
+</html>
