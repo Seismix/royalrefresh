@@ -19,6 +19,11 @@
             buttonElement.blur()
         }
 
+        // Ignore clicks while a fetch is already in flight
+        if (recapState.isLoading) {
+            return
+        }
+
         // If we're currently visible, just toggle to hide
         if (recapState.visibility === "visible") {
             recapState.hide()
@@ -32,6 +37,7 @@
         }
 
         // If we don't have content, fetch it first then show
+        recapState.setLoading()
         const settings = await getSettings()
         const result =
             type === "recap"
@@ -55,7 +61,12 @@
     class="btn btn-primary btn-circle"
     onclick={handleToggle}
     id={buttonId}
+    disabled={recapState.isLoading}
     style="outline: none !important;">
     <i class="fa fa-{iconName}" style="margin-right: 0.15em;"></i>
-    <span>{recapState.toggleText}</span>{buttonText}
+    {#if recapState.isLoading}
+        <span>Loading…</span>
+    {:else}
+        <span>{recapState.toggleText}</span>{buttonText}
+    {/if}
 </button>
