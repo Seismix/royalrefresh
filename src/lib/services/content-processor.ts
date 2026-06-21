@@ -1,6 +1,11 @@
 import type { ExtensionSettings } from "~/types/types"
 import { HtmlSanitizer } from "./"
 
+/** Appended to selector-failure messages — these usually mean RoyalRoad
+ * changed its page layout, which the user can flag via the Report button. */
+const LAYOUT_HINT =
+    "RoyalRoad's layout may have changed — please report this with the Report button."
+
 /**
  * Content Processing Service - Pure functions for processing HTML content
  * No side effects, returns result objects with processed content or errors
@@ -52,14 +57,18 @@ export class ContentProcessor {
             tempDiv.appendChild(fragment)
 
             // Sanitize the HTML content before returning
-            const sanitizedContent = HtmlSanitizer.sanitize(tempDiv.innerHTML)
+            const rawHtml = tempDiv.innerHTML
+            const sanitizedContent = HtmlSanitizer.sanitize(rawHtml)
+
+            // Guard against sanitization silently swallowing all content
+            if (rawHtml.trim() && !sanitizedContent.trim()) {
+                return { error: "Could not safely display the recap content." }
+            }
+
             return { content: sanitizedContent }
-        } catch (error) {
+        } catch {
             return {
-                error:
-                    error instanceof Error
-                        ? `Failed to process recap: ${error.message}`
-                        : "Failed to process recap content",
+                error: "Could not build the recap. RoyalRoad's layout may have changed — please report this with the Report button.",
             }
         }
     }
@@ -102,14 +111,18 @@ export class ContentProcessor {
             tempDiv.appendChild(fragment)
 
             // Sanitize the HTML content before returning
-            const sanitizedContent = HtmlSanitizer.sanitize(tempDiv.innerHTML)
+            const rawHtml = tempDiv.innerHTML
+            const sanitizedContent = HtmlSanitizer.sanitize(rawHtml)
+
+            // Guard against sanitization silently swallowing all content
+            if (rawHtml.trim() && !sanitizedContent.trim()) {
+                return { error: "Could not safely display the blurb content." }
+            }
+
             return { content: sanitizedContent }
-        } catch (error) {
+        } catch {
             return {
-                error:
-                    error instanceof Error
-                        ? `Failed to process blurb: ${error.message}`
-                        : "Failed to process blurb content",
+                error: "Could not build the blurb. RoyalRoad's layout may have changed — please report this with the Report button.",
             }
         }
     }
@@ -125,7 +138,9 @@ export class ContentProcessor {
         )
 
         if (!fictionTitleElement || !fictionTitleElement.textContent) {
-            return { error: "Could not find fiction title on current page" }
+            return {
+                error: `Could not find the story title on this page. ${LAYOUT_HINT}`,
+            }
         }
 
         return { data: fictionTitleElement.textContent.trim() }
@@ -141,7 +156,9 @@ export class ContentProcessor {
         const chapterTitleElement = doc.querySelector(settings.chapterTitle)
 
         if (!chapterTitleElement || !chapterTitleElement.textContent) {
-            return { error: "Could not find chapter title in fetched content" }
+            return {
+                error: `Could not find the previous chapter's title. ${LAYOUT_HINT}`,
+            }
         }
 
         return { data: chapterTitleElement.textContent.trim() }
@@ -169,11 +186,13 @@ export class ContentProcessor {
         const blurbElement = overviewDoc.querySelector(settings.blurb)
 
         if (!blurbElement || !(blurbElement instanceof HTMLElement)) {
-            return { error: "Could not find story blurb in overview page" }
+            return {
+                error: `Could not find the story blurb on the overview page. ${LAYOUT_HINT}`,
+            }
         }
 
         if (!blurbElement.textContent || !blurbElement.textContent.trim()) {
-            return { error: "Story blurb appears to be empty" }
+            return { error: "The story blurb appears to be empty." }
         }
 
         fragment.appendChild(blurbElement.cloneNode(true) as HTMLElement)
@@ -191,16 +210,20 @@ export class ContentProcessor {
         const chapterElement = chapterDoc.querySelector(settings.chapterContent)
 
         if (!chapterElement) {
-            return { error: "Could not find chapter content in fetched page" }
+            return {
+                error: `Could not find the previous chapter's content. ${LAYOUT_HINT}`,
+            }
         }
 
         if (!chapterElement.textContent?.trim()) {
-            return { error: "Chapter content appears to be empty" }
+            return { error: "The previous chapter appears to be empty." }
         }
 
         const paragraphs = chapterElement.querySelectorAll("p")
         if (paragraphs.length === 0) {
-            return { error: "No paragraphs found in chapter content" }
+            return {
+                error: `Could not read any text from the previous chapter. ${LAYOUT_HINT}`,
+            }
         }
 
         return this.selectParagraphsByWordCount(paragraphs, settings.wordCount)
