@@ -5,7 +5,7 @@
     import { ContentManager } from "~/lib/services/content-manager"
     import { getDefaults } from "~/lib/config/defaults"
     import { prefersReducedMotion } from "~/lib/utils/platform"
-    import type { ExtensionSettings } from "~/types/types"
+    import type { ContentType, ExtensionSettings } from "~/types/types"
 
     let { id = "recapContainer" }: { id?: string } = $props()
 
@@ -71,13 +71,25 @@
         ) {
             // Store the word count before processing to maintain type safety
             const newWordCount = currentSettings.wordCount
+            const settings = currentSettings
 
-            // Try to refresh from cache first
-            const result = ContentManager.refreshRecapFromCache(currentSettings)
+            // Try to refresh from cache first (fast, no network)
+            const result = ContentManager.refreshRecapFromCache(settings)
 
             if ("error" in result) {
-                // If cache refresh fails, the user can manually refresh
-                console.warn("Could not refresh from cache:", result.error)
+                // Cache expired or missing — re-fetch so the new word count
+                // still takes effect instead of leaving stale content on screen
+                recapState.setLoading()
+                ContentManager.fetchRecap(settings).then((fetchResult) => {
+                    if ("error" in fetchResult) {
+                        recapState.setError(fetchResult.error)
+                    } else {
+                        recapState.setContent(
+                            fetchResult.content,
+                            fetchResult.type as ContentType,
+                        )
+                    }
+                })
             } else {
                 recapState.setContent(result.content, result.type)
             }

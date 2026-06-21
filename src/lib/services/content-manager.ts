@@ -43,9 +43,7 @@ export class ContentManager {
         // 3. Fetch from network
         const fetchResult = await fetchHtml(prevChapterUrl)
         if ("error" in fetchResult) {
-            return {
-                error: `Failed to fetch previous chapter: ${fetchResult.error}`,
-            }
+            return { error: fetchResult.error }
         }
 
         // 4. Cache the raw HTML
@@ -81,9 +79,7 @@ export class ContentManager {
         // 2. Fetch from network (no caching for blurb)
         const fetchResult = await fetchHtml(overviewUrl)
         if ("error" in fetchResult) {
-            return {
-                error: `Failed to fetch story overview: ${fetchResult.error}`,
-            }
+            return { error: fetchResult.error }
         }
 
         // 3. Process the content
