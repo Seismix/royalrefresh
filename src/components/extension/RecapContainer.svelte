@@ -43,9 +43,14 @@
         })
     })
 
-    // Effect: Scroll into view when content becomes visible
+    // Effect: Scroll into view as soon as the recap is shown — including while
+    // it's still loading, so the reader is taken to the indicator immediately
+    // rather than waiting for the fetch to finish.
     $effect(() => {
-        if (recapState.isVisible && currentSettings?.enableJump) {
+        if (
+            (recapState.isVisible || recapState.isLoading) &&
+            currentSettings?.enableJump
+        ) {
             // Use scroll behavior, but override to instant if OS prefers reduced motion
             const behavior = prefersReducedMotion()
                 ? "instant"
@@ -87,20 +92,22 @@
 
 <div
     {id}
-    style="display: {recapState.isVisible || recapState.hasError
+    style="display: {recapState.isVisible ||
+    recapState.hasError ||
+    recapState.isLoading
         ? 'block'
         : 'none'}">
-    {#if recapState.hasError}
-        <div class="error">{recapState.error}</div>
+    {#if recapState.isLoading}
+        <!-- Reuse RoyalRoad's Bootstrap utility classes so loading/error states
+         inherit the page theme (text-muted/text-danger read on light + dark) -->
+        <div class="text-center text-muted" style="padding: 1rem;">
+            Loading…
+        </div>
+    {:else if recapState.hasError}
+        <div class="text-center text-danger" style="padding: 1rem;">
+            {recapState.error}
+        </div>
     {:else if recapState.content}
         {@html recapState.content}
     {/if}
 </div>
-
-<style>
-    .error {
-        padding: 1rem;
-        text-align: center;
-        color: #ff4444;
-    }
-</style>
