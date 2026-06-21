@@ -12,6 +12,9 @@ import { defineConfig, devices } from "@playwright/test"
  */
 export default defineConfig({
     testDir: "./src/tests",
+    /* Vitest owns *.unit.test.ts / *.svelte.test.ts — keep Playwright from
+     * collecting them so the two runners never double-collect files. */
+    testIgnore: ["**/*.unit.test.ts", "**/*.svelte.test.ts"],
     /* Run tests in files in parallel */
     fullyParallel: true,
     /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -31,16 +34,20 @@ export default defineConfig({
         trace: "on-first-retry",
     },
 
-    /* Configure projects for major browsers */
+    /* Two projects, selected via --project:
+     *   - "e2e"    : mocked-page extension tests (zero network) — runs on every PR.
+     *   - "canary" : live RoyalRoad selector check — scheduled / manual only.
+     * `pnpm test` defaults to the e2e project so the live canary never blocks PRs. */
     projects: [
         {
-            name: "chromium",
+            name: "e2e",
+            testMatch: /e2e\.test\.ts/,
             use: { ...devices["Desktop Chrome"] },
         },
-
-        // {
-        //     name: "firefox",
-        //     use: { ...devices["Desktop Firefox"] },
-        // },
+        {
+            name: "canary",
+            testMatch: /selectors\.test\.ts/,
+            use: { ...devices["Desktop Chrome"] },
+        },
     ],
 })
