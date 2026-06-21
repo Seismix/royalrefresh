@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test"
+import { describe, expect, test } from "vitest"
 import {
     REPORT_BROWSER_FIELD_ID,
     REPORT_FORM_BASE_URL,
@@ -6,7 +6,7 @@ import {
     REPORT_URL_FIELD_ID,
     REPORT_VERSION_FIELD_ID,
     buildReportFormUrl,
-} from "../lib/config/report-form"
+} from "./report-form"
 
 const baseParams = {
     chapterUrl: "https://www.royalroad.com/fiction/1/test/chapter/2/foo",
@@ -15,7 +15,7 @@ const baseParams = {
     browserType: "chrome",
 }
 
-test.describe("buildReportFormUrl", () => {
+describe("buildReportFormUrl", () => {
     test("starts with the form base URL", () => {
         const url = buildReportFormUrl(baseParams)
         expect(url.startsWith(`${REPORT_FORM_BASE_URL}?`)).toBe(true)
