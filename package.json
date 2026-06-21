@@ -1,6 +1,6 @@
 {
     "name": "royalrefresh",
-    "version": "1.5.0",
+    "version": "1.7.1",
     "description": "A web extension for royalroad.com. For people who juggle multiple stories",
     "main": "background.js",
     "directories": {
@@ -10,7 +10,7 @@
     "scripts": {
         "dev": "wxt",
         "dev:firefox": "wxt -b firefox",
-        "dev:android": "node scripts/dev-android.js",
+        "dev:android": "node scripts/dev-android.ts",
         "build": "wxt build",
         "build:firefox": "wxt build -b firefox",
         "zip": "wxt zip",
@@ -18,9 +18,12 @@
         "check": "svelte-check --tsconfig ./tsconfig.json",
         "postinstall": "wxt prepare",
         "lint": "pnpm build && web-ext lint --source-dir .output/firefox-mv2",
-        "test": "playwright test --reporter=list",
+        "test": "playwright test --project=e2e --reporter=list",
         "test:ui": "playwright test --ui",
-        "test:detailed": "playwright test",
+        "test:detailed": "playwright test --project=e2e",
+        "test:canary": "playwright test --project=canary --reporter=list",
+        "test:unit": "vitest run",
+        "test:unit:watch": "vitest",
         "format": "prettier --write src/",
         "format:check": "prettier --check src/"
     },
@@ -44,21 +47,27 @@
     },
     "homepage": "https://github.com/Seismix/royalrefresh#readme",
     "devDependencies": {
-        "@playwright/test": "^1.56.1",
-        "@tsconfig/svelte": "^5.0.5",
+        "@playwright/test": "^1.61.0",
+        "@sveltejs/vite-plugin-svelte": "^7.1.2",
+        "@testing-library/jest-dom": "^6.9.1",
+        "@testing-library/svelte": "^5.3.1",
+        "@tsconfig/svelte": "^5.0.6",
         "@types/firefox-webext-browser": "^143.0.0",
-        "@types/node": "^24.9.2",
+        "@types/node": "^25.0.9",
+        "@vitest/coverage-v8": "^3.2.6",
         "@wxt-dev/module-svelte": "^2.0.4",
-        "prettier": "^3.6.2",
-        "prettier-plugin-svelte": "^3.4.0",
-        "svelte": "^5.43.0",
-        "svelte-check": "^4.3.3",
+        "happy-dom": "^20.10.6",
+        "prettier": "^3.8.0",
+        "prettier-plugin-svelte": "^3.4.1",
+        "svelte": "^5.47.1",
+        "svelte-check": "^4.3.5",
         "tslib": "^2.8.1",
         "typescript": "^5.9.3",
-        "web-ext": "^9.1.0",
-        "wxt": "^0.20.11"
+        "vitest": "^3.2.6",
+        "web-ext": "^9.2.0",
+        "wxt": "^0.20.13"
     },
     "dependencies": {
-        "dompurify": "^3.3.0"
+        "dompurify": "^3.3.1"
     }
 }

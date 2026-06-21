@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Get the device ID from command line arguments
-const deviceId = process.argv[2];
+const deviceId: string | undefined = process.argv[2];
 if (!deviceId) {
   console.error('Usage: pnpm dev:android <device-id> [web-ext flags...]');
   console.error('Example: pnpm dev:android emulator-5554 --source-dir ./custom-dir');
@@ -16,10 +16,10 @@ if (!deviceId) {
 }
 
 // Get any additional flags to pass to web-ext
-const additionalFlags = process.argv.slice(3);
+const additionalFlags: string[] = process.argv.slice(3);
 
 // Extract custom source directory if provided
-let customSourceDir = null;
+let customSourceDir: string | null = null;
 const sourceDirIndex = additionalFlags.findIndex(flag => flag === '--source-dir' || flag === '-s');
 
 if (sourceDirIndex !== -1) {
@@ -38,7 +38,7 @@ const wxtOutDir = customSourceDir || '.output';
 const actualBuildDir = `${wxtOutDir}/firefox-mv2`;
 
 // Remove source-dir flags from additional flags (we'll set it ourselves)
-const filteredFlags = [];
+const filteredFlags: string[] = [];
 for (let i = 0; i < additionalFlags.length; i++) {
   const flag = additionalFlags[i];
   if (flag === '--source-dir' || flag === '-s') {
@@ -67,7 +67,7 @@ try {
 
   console.log(`Running on Android device ${deviceId}...`);
   execSync(webExtCommand, { stdio: 'inherit', cwd: path.dirname(__dirname) });
-} catch (error) {
+} catch (error: any) {
   console.error('Command failed:', error.message);
   process.exit(1);
 }

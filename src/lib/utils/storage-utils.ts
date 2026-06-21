@@ -1,8 +1,7 @@
 import { storage } from "wxt/utils/storage"
 import { DEFAULT_SELECTORS, getDefaults } from "~/lib/config/defaults"
 import type { ExtensionSettings } from "~/types/types"
-import { devLog } from "./logger"
-import { prefersReducedMotion } from "./platform"
+import { migrateV1toV2 } from "./migrations"
 
 /**
  * WXT storage utilities for extension settings with migration support
@@ -14,92 +13,23 @@ export const settingsStore = storage.defineItem<ExtensionSettings>(
     {
         fallback: {
             wordCount: 250,
-            enableJump: true, // Will be adjusted in getSettings() based on reduced motion
+            enableJump: true, // Jump is a core feature, always enabled by default
             scrollBehavior: "smooth" as ScrollBehavior,
             autoExpand: false,
-            // hasDetectedReducedMotion is undefined for fresh installs - this triggers detection
             ...DEFAULT_SELECTORS,
         },
         version: 2,
         migrations: {
-            2: (oldSettings: any) => {
-                // Migration from v1 to v2: smoothScroll -> enableJump & scrollBehavior
-                if ("smoothScroll" in oldSettings) {
-                    const migrated = {
-                        ...oldSettings,
-                        enableJump: oldSettings.smoothScroll === true,
-                        scrollBehavior: (oldSettings.smoothScroll
-                            ? "smooth"
-                            : "instant") as ScrollBehavior,
-                        // Migration: mark as having been detected so we don't override user's choice
-                        hasDetectedReducedMotion: true,
-                    } as ExtensionSettings
-
-                    // Remove the old property
-                    delete (migrated as any).smoothScroll
-
-                    devLog.log("WXT Migration v1→v2: smoothScroll ->", {
-                        enableJump: migrated.enableJump,
-                        scrollBehavior: migrated.scrollBehavior,
-                    })
-
-                    return migrated
-                }
-                return oldSettings as ExtensionSettings
-            },
+            2: migrateV1toV2,
         },
     },
 )
 
 /**
  * Get current settings from storage
- * Automatically performs first-time reduced motion detection if needed
  */
 export async function getSettings(): Promise<ExtensionSettings> {
-    const settings = await settingsStore.getValue()
-
-    // Skip if we've already done detection
-    if (settings?.hasDetectedReducedMotion) {
-        return settings
-    }
-
-    try {
-        const reducedMotion = prefersReducedMotion()
-
-        let updatedSettings = {
-            ...settings,
-            hasDetectedReducedMotion: true,
-        }
-
-        // For users without reduced motion preference, enable jump and animations by default if not already set
-        if (!reducedMotion) {
-            updatedSettings = {
-                ...updatedSettings,
-                enableJump: settings?.enableJump ?? true,
-                scrollBehavior:
-                    settings?.scrollBehavior ?? ("smooth" as ScrollBehavior),
-            }
-        } else {
-            // Respect reduced motion by ensuring instant scrolling and disabling animations
-            updatedSettings = {
-                ...updatedSettings,
-                scrollBehavior: "instant" as ScrollBehavior,
-            }
-        }
-
-        await settingsStore.setValue(updatedSettings)
-        return updatedSettings
-    } catch (error) {
-        devLog.log("Could not detect reduced motion preference:", error)
-    }
-
-    // Fallback: just mark as detected
-    const fallbackSettings = {
-        ...settings,
-        hasDetectedReducedMotion: true,
-    }
-    await settingsStore.setValue(fallbackSettings)
-    return fallbackSettings
+    return await settingsStore.getValue()
 }
 
 /**

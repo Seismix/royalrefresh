@@ -1,0 +1,53 @@
+/* Icon wrapper for non-interactive icons */
+.icon-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Shared icon styles */
+.icon {
+    display: block;
+    color: var(--color-text);
+    transition: color 0.2s;
+    width: var(--icon-size-base);
+    height: var(--icon-size-base);
+}
+
+/* Variant colors - apply to icon elements */
+.icon.variant-primary {
+    color: var(--color-primary);
+}
+
+.icon.variant-success {
+    color: var(--color-success);
+}
+
+.icon.variant-error {
+    color: var(--color-error);
+}
+
+.icon.variant-warning {
+    color: var(--color-warning);
+}
+
+.icon.variant-muted {
+    color: var(--color-text-muted);
+}
+
+@media (prefers-color-scheme: dark) {
+    .icon {
+        color: #ffffff;
+    }
+
+    /* Variants remain unchanged in dark mode - they use CSS variables */
+}
+
+/* Mobile touch target improvements */
+@media (hover: none) and (pointer: coarse) {
+    .icon {
+        width: var(--icon-size-touch);
+        height: var(--icon-size-touch);
+    }
+}

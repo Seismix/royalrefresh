@@ -8,6 +8,17 @@ import type { ExtensionSettings } from "~/types/types"
 /**
  * True if `chapter` is in the URL path, otherwise false.
  */
+export function isChapterUrl(url: string) {
+    try {
+        return new URL(url).pathname.split("/").includes("chapter")
+    } catch {
+        return false
+    }
+}
+
+/**
+ * True if the current document is a chapter page.
+ */
 export function documentIsChapterURL() {
     return window.location.pathname.split("/").includes("chapter")
 }
@@ -97,21 +108,24 @@ export function findFictionOverviewUrl(
 ): { data: string } | { error: string } {
     const fictionTitleElement = document.querySelector(settings.fictionTitle)
 
+    const layoutHint =
+        "RoyalRoad's layout may have changed — please report this with the Report button."
+
     if (!fictionTitleElement) {
         return {
-            error: "Could not find fiction title on current page.",
+            error: `Could not find the story title on this page. ${layoutHint}`,
         }
     }
 
     if (!(fictionTitleElement.parentElement instanceof HTMLAnchorElement)) {
         return {
-            error: "Fiction title found but is not linked to overview page.",
+            error: `Could not find a link to the story's overview page. ${layoutHint}`,
         }
     }
 
     if (!fictionTitleElement.parentElement.href) {
         return {
-            error: "Fiction title link found but has no URL.",
+            error: `The story's overview link is missing its address. ${layoutHint}`,
         }
     }
 

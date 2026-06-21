@@ -5,18 +5,23 @@
  */
 
 import { test as base, chromium, type BrowserContext } from "@playwright/test"
+import path from "path"
 
-// Modify the path to the extension directory if needed
-const chromeExtensionPath = "dist/chrome"
+// WXT builds the Chrome MV3 bundle here (run `pnpm build` first).
+const chromeExtensionPath = path.resolve(".output/chrome-mv3")
 
 export const test = base.extend<{
     context: BrowserContext
     extensionId: string
 }>({
     context: async ({}, use) => {
+        // Loading an unpacked extension requires a real Chromium with the new
+        // headless shell. `channel: "chromium"` ships that shell; set
+        // PWHEADED=1 to debug with a visible window.
         const context = await chromium.launchPersistentContext("", {
+            channel: "chromium",
+            headless: !process.env.PWHEADED,
             args: [
-                `--headless=new`,
                 `--disable-extensions-except=${chromeExtensionPath}`,
                 `--load-extension=${chromeExtensionPath}`,
             ],

@@ -1,0 +1,18 @@
+# Normalize line endings: store text as LF in the repo and in working trees,
+# regardless of each contributor's core.autocrlf setting.
+* text=auto eol=lf
+
+# Binary assets — never touch line endings
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.eot   binary
+*.zip   binary
+*.crx   binary
+*.xpi   binary

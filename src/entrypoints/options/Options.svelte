@@ -5,8 +5,8 @@
         BackButton,
         GitHubButton,
         PatchNotesButton,
-    } from "@/components/buttons"
-    import PatchNotes from "@/entrypoints/popup/PatchNotes.svelte"
+    } from "~/components/buttons"
+    import PatchNotes from "~/entrypoints/popup/PatchNotes.svelte"
     import { PageHeader } from "~/components/layout"
     import { AdvancedSettings, BasicSettings } from "~/components/settings"
     import { getDefaults } from "~/lib/config/defaults"

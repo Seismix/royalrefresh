@@ -1,14 +1,21 @@
-name: Prettier Check
+name: Unit Tests
 
 on:
     pull_request:
         branches: [main, dev]
         types: [opened, reopened, synchronize, ready_for_review]
+        paths:
+            - 'src/**'
+            - 'vitest.config.ts'
+            - 'package.json'
+            - 'pnpm-lock.yaml'
+            - 'wxt.config.ts'
 
 jobs:
-    prettier:
+    unit:
         if: ${{ github.event_name != 'pull_request' || github.event.pull_request.draft == false }}
         runs-on: ubuntu-latest
+        timeout-minutes: 10
 
         steps:
             - uses: actions/checkout@v4
@@ -18,7 +25,7 @@ jobs:
               with:
                   version: 10
 
-            - name: Setup Node.js
+            - name: Setup node.js
               uses: actions/setup-node@v4
               with:
                   node-version: lts/*
@@ -27,5 +34,5 @@ jobs:
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
 
-            - name: Run Prettier check
-              run: pnpm run format:check
+            - name: Run unit + component tests (Vitest)
+              run: pnpm test:unit

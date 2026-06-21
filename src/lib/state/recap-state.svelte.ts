@@ -1,4 +1,6 @@
-export type RecapState = "hidden" | "visible" | "error"
+import type { ContentType } from "~/types/types"
+
+export type RecapState = "hidden" | "visible" | "error" | "loading"
 
 /**
  * Reactive recap state using Svelte 5 runes - Pure UI state management
@@ -8,15 +10,24 @@ class RecapStateManager {
     visibility = $state<RecapState>("hidden")
     content = $state<string>("")
     error = $state<string | null>(null)
-    type = $state<"recap" | "blurb">("recap")
+    type = $state<ContentType>("recap")
 
     /**
      * Sets content and makes it visible
      */
-    setContent(content: string, type: "recap" | "blurb") {
+    setContent(content: string, type: ContentType) {
         this.content = content
         this.type = type
         this.visibility = "visible"
+        this.error = null
+    }
+
+    /**
+     * Marks content as loading. Keeps any existing content (e.g. during a
+     * word-count refresh) but clears errors and shows the loading indicator.
+     */
+    setLoading() {
+        this.visibility = "loading"
         this.error = null
     }
 
@@ -50,6 +61,7 @@ class RecapStateManager {
     // Computed properties using $derived
     toggleText = $derived(this.visibility === "visible" ? "Hide " : "Show ")
     isVisible = $derived(this.visibility === "visible")
+    isLoading = $derived(this.visibility === "loading")
     hasError = $derived(this.visibility === "error" && this.error !== null)
 }
 

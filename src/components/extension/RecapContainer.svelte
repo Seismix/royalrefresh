@@ -5,7 +5,7 @@
     import { ContentManager } from "~/lib/services/content-manager"
     import { getDefaults } from "~/lib/config/defaults"
     import { prefersReducedMotion } from "~/lib/utils/platform"
-    import type { ExtensionSettings } from "~/types/types"
+    import type { ContentType, ExtensionSettings } from "~/types/types"
 
     let { id = "recapContainer" }: { id?: string } = $props()
 
@@ -43,9 +43,14 @@
         })
     })
 
-    // Effect: Scroll into view when content becomes visible
+    // Effect: Scroll into view as soon as the recap is shown — including while
+    // it's still loading, so the reader is taken to the indicator immediately
+    // rather than waiting for the fetch to finish.
     $effect(() => {
-        if (recapState.isVisible && currentSettings?.enableJump) {
+        if (
+            (recapState.isVisible || recapState.isLoading) &&
+            currentSettings?.enableJump
+        ) {
             // Use scroll behavior, but override to instant if OS prefers reduced motion
             const behavior = prefersReducedMotion()
                 ? "instant"
@@ -66,13 +71,25 @@
         ) {
             // Store the word count before processing to maintain type safety
             const newWordCount = currentSettings.wordCount
+            const settings = currentSettings
 
-            // Try to refresh from cache first
-            const result = ContentManager.refreshRecapFromCache(currentSettings)
+            // Try to refresh from cache first (fast, no network)
+            const result = ContentManager.refreshRecapFromCache(settings)
 
             if ("error" in result) {
-                // If cache refresh fails, the user can manually refresh
-                console.warn("Could not refresh from cache:", result.error)
+                // Cache expired or missing — re-fetch so the new word count
+                // still takes effect instead of leaving stale content on screen
+                recapState.setLoading()
+                ContentManager.fetchRecap(settings).then((fetchResult) => {
+                    if ("error" in fetchResult) {
+                        recapState.setError(fetchResult.error)
+                    } else {
+                        recapState.setContent(
+                            fetchResult.content,
+                            fetchResult.type as ContentType,
+                        )
+                    }
+                })
             } else {
                 recapState.setContent(result.content, result.type)
             }
@@ -87,20 +104,22 @@
 
 <div
     {id}
-    style="display: {recapState.isVisible || recapState.hasError
+    style="display: {recapState.isVisible ||
+    recapState.hasError ||
+    recapState.isLoading
         ? 'block'
         : 'none'}">
-    {#if recapState.hasError}
-        <div class="error">{recapState.error}</div>
+    {#if recapState.isLoading}
+        <!-- Reuse RoyalRoad's Bootstrap utility classes so loading/error states
+         inherit the page theme (text-muted/text-danger read on light + dark) -->
+        <div class="text-center text-muted" style="padding: 1rem;">
+            Loading…
+        </div>
+    {:else if recapState.hasError}
+        <div class="text-center text-danger" style="padding: 1rem;">
+            {recapState.error}
+        </div>
     {:else if recapState.content}
         {@html recapState.content}
     {/if}
 </div>
-
-<style>
-    .error {
-        padding: 1rem;
-        text-align: center;
-        color: #ff4444;
-    }
-</style>

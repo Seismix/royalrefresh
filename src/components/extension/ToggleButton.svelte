@@ -2,11 +2,12 @@
     import { recapState } from "~/lib/state/recap-state.svelte"
     import { getSettings } from "~/lib/utils/storage-utils"
     import { ContentManager } from "~/lib/services/content-manager"
+    import type { ContentType } from "~/types/types"
 
     let {
         type = "recap",
     }: {
-        type?: "recap" | "blurb"
+        type?: ContentType
     } = $props()
 
     // Reference to the button element
@@ -16,6 +17,11 @@
         // Blur the button to remove focus/active state
         if (buttonElement) {
             buttonElement.blur()
+        }
+
+        // Ignore clicks while a fetch is already in flight
+        if (recapState.isLoading) {
+            return
         }
 
         // If we're currently visible, just toggle to hide
@@ -31,6 +37,7 @@
         }
 
         // If we don't have content, fetch it first then show
+        recapState.setLoading()
         const settings = await getSettings()
         const result =
             type === "recap"
@@ -40,16 +47,13 @@
         if ("error" in result) {
             recapState.setError(result.error)
         } else {
-            recapState.setContent(
-                result.content,
-                result.type as "recap" | "blurb",
-            )
+            recapState.setContent(result.content, result.type as ContentType)
         }
     }
 
-    const buttonText = type === "recap" ? "Recap" : "Blurb"
-    const iconName = type === "recap" ? "book" : "info-circle"
-    const buttonId = type === "recap" ? "recapButton" : "blurbButton"
+    let buttonText = $derived(type === "recap" ? "Recap" : "Blurb")
+    let iconName = $derived(type === "recap" ? "book" : "info-circle")
+    let buttonId = $derived(type === "recap" ? "recapButton" : "blurbButton")
 </script>
 
 <button
@@ -57,7 +61,12 @@
     class="btn btn-primary btn-circle"
     onclick={handleToggle}
     id={buttonId}
+    disabled={recapState.isLoading}
     style="outline: none !important;">
     <i class="fa fa-{iconName}" style="margin-right: 0.15em;"></i>
-    <span>{recapState.toggleText}</span>{buttonText}
+    {#if recapState.isLoading}
+        <span>Loading…</span>
+    {:else}
+        <span>{recapState.toggleText}</span>{buttonText}
+    {/if}
 </button>

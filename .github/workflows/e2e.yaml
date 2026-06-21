@@ -1,10 +1,5 @@
-name: CSS Selectors (live canary)
+name: E2E Tests
 
-# Hits live royalroad.com to verify our CSS selectors still match the real page
-# layout. It depends on a third-party site being up and unchanged, so it runs on
-# PRs into dev/main (where a layout drift would matter before a release) and on
-# demand. When it fails, refresh the selectors in src/lib/config/defaults.ts and
-# the fixtures in src/tests/fixtures/.
 on:
     pull_request:
         branches: [main, dev]
@@ -15,10 +10,9 @@ on:
             - 'package.json'
             - 'pnpm-lock.yaml'
             - 'wxt.config.ts'
-    workflow_dispatch:
 
 jobs:
-    css-selectors:
+    e2e:
         if: ${{ github.event_name != 'pull_request' || github.event.pull_request.draft == false }}
         runs-on: ubuntu-latest
         timeout-minutes: 15
@@ -46,12 +40,13 @@ jobs:
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
 
+            # The e2e fixture loads an unpacked extension, which needs a real
+            # Chromium with the new headless shell (channel: "chromium").
             - name: Install Playwright Browsers
               run: pnpm playwright install --with-deps chromium
 
-            # The shared fixture loads the unpacked extension, so build it first.
             - name: Build extension (Chrome MV3)
               run: pnpm build
 
-            - name: Run live selector canary
-              run: pnpm test:canary
+            - name: Run mocked-page E2E tests (Playwright)
+              run: pnpm test

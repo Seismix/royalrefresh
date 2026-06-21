@@ -8,6 +8,7 @@ export type ExtensionSelectors = {
     blurb: string
     blurbLabels: string
     closeButtonSelector: string
+    reportPlacement: string
 }
 
 export type ExtensionSettings = {
@@ -15,7 +16,6 @@ export type ExtensionSettings = {
     enableJump: boolean
     scrollBehavior: ScrollBehavior
     autoExpand: boolean
-    hasDetectedReducedMotion?: boolean
 } & ExtensionSelectors
 
 export type ExtensionSettingsKeys = keyof ExtensionSettings
@@ -29,3 +29,5 @@ export type RecapContainerStrings = {
 }
 
 export type DisplayMessageType = "success" | "restore" | "restoreSelectors"
+
+export type ContentType = "recap" | "blurb"

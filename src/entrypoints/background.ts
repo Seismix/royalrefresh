@@ -5,10 +5,9 @@ import { restoreSelectors, setSettings } from "~/lib/utils/storage-utils"
 export default defineBackground(() => {
     browser.runtime.onInstalled.addListener(async (details) => {
         if (details.reason === "install") {
-            // Use conservative defaults - first-time detection happens on UI side
+            // Use defaults
             await setSettings({
                 ...DEFAULTS,
-                hasDetectedReducedMotion: false, // Flag to trigger first-time detection
             })
         }
 
@@ -27,10 +26,9 @@ export default defineBackground(() => {
         if (typeof message !== "object" || message === null) return
 
         if ("request" in message && message.request === "getDefaultSettings") {
-            // Return basic defaults - first-time detection happens on UI side
+            // Return basic defaults
             return Promise.resolve({
                 ...DEFAULTS,
-                hasDetectedReducedMotion: false, // Flag to trigger first-time detection
             })
         }
 
