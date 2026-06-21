@@ -44,7 +44,7 @@
     },
     "homepage": "https://github.com/Seismix/royalrefresh#readme",
     "devDependencies": {
-        "@playwright/test": "^1.57.0",
+        "@playwright/test": "^1.61.0",
         "@tsconfig/svelte": "^5.0.6",
         "@types/firefox-webext-browser": "^143.0.0",
         "@types/node": "^25.0.9",
