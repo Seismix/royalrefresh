@@ -16,17 +16,29 @@ export default defineBackground(() => {
     // survive browser restarts and cookie expiry) and whenever settings change.
     // The user picks the layout in Settings, which requests the optional `cookies`
     // permission; this no-ops without it.
+    // Skip re-applying the cookie when an unrelated setting (word count, etc.)
+    // changes — only the betaCookie fields matter here.
+    let lastBetaCookieKey: string | null = null
+
     const syncBetaCookie = async (settings: ExtensionSettings) => {
         if (!(await hasCookiesPermission())) return
         await applyLayoutCookie(settings.betaCookie)
     }
 
-    const syncFromStorage = async () => syncBetaCookie(await getSettings())
+    const syncFromStorage = async () => {
+        const settings = await getSettings()
+        lastBetaCookieKey = JSON.stringify(settings.betaCookie)
+        await syncBetaCookie(settings)
+    }
 
     syncFromStorage()
     browser.runtime.onStartup.addListener(syncFromStorage)
     watchSettings((settings) => {
-        if (settings) syncBetaCookie(settings)
+        if (!settings) return
+        const key = JSON.stringify(settings.betaCookie)
+        if (key === lastBetaCookieKey) return
+        lastBetaCookieKey = key
+        syncBetaCookie(settings)
     })
 
     browser.runtime.onInstalled.addListener(async (details) => {

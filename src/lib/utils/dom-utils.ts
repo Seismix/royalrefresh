@@ -1,4 +1,4 @@
-import { Component, mount } from "svelte"
+import { Component, mount, unmount } from "svelte"
 import type { MountPosition } from "~/lib/adapters/types"
 
 /**
@@ -58,11 +58,11 @@ export function mountComponent<T extends Record<string, any>>(
         }
     }
 
-    // Return cleanup function
+    // Return cleanup function. `unmount` tears down the Svelte 5 component
+    // (running its cleanup/effects); `element?.remove()` is a harmless no-op if
+    // unmount already detached the node.
     return () => {
-        if (app && typeof app === "object" && "$destroy" in app) {
-            ;(app as any).$destroy()
-        }
+        unmount(app)
         element?.remove()
     }
 }
