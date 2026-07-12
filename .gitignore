@@ -13,3 +13,4 @@ web-ext-artifacts
 .wxt
 .output
 web-ext.config.ts
+.env.*
