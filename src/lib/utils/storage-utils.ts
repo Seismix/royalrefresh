@@ -1,7 +1,7 @@
 import { storage } from "wxt/utils/storage"
-import { DEFAULT_SELECTORS, getDefaults } from "~/lib/config/defaults"
+import { getDefaults } from "~/lib/config/defaults"
 import type { ExtensionSettings } from "~/types/types"
-import { migrateV1toV2 } from "./migrations"
+import { migrateV1toV2, migrateV2toV3, migrateV3toV4 } from "./migrations"
 
 /**
  * WXT storage utilities for extension settings with migration support
@@ -11,16 +11,12 @@ import { migrateV1toV2 } from "./migrations"
 export const settingsStore = storage.defineItem<ExtensionSettings>(
     "sync:settings",
     {
-        fallback: {
-            wordCount: 250,
-            enableJump: true, // Jump is a core feature, always enabled by default
-            scrollBehavior: "smooth" as ScrollBehavior,
-            autoExpand: false,
-            ...DEFAULT_SELECTORS,
-        },
-        version: 2,
+        fallback: getDefaults(),
+        version: 4,
         migrations: {
             2: migrateV1toV2,
+            3: migrateV2toV3,
+            4: migrateV3toV4,
         },
     },
 )
@@ -59,14 +55,13 @@ export async function restoreDefaults() {
 }
 
 /**
- * Restore only selector-related settings to defaults
+ * Restore selectors to defaults by clearing all per-UI overrides
  */
 export async function restoreSelectors() {
     const currentSettings = await getSettings()
-    const updatedSettings = {
+    const updatedSettings: ExtensionSettings = {
         ...currentSettings,
-        // Restore all selector-related settings to defaults
-        ...DEFAULT_SELECTORS,
+        selectorOverrides: { legacy: {}, redesign: {} },
     }
     await settingsStore.setValue(updatedSettings)
 }

@@ -43,14 +43,12 @@
         })
     })
 
-    // Effect: Scroll into view as soon as the recap is shown — including while
-    // it's still loading, so the reader is taken to the indicator immediately
-    // rather than waiting for the fetch to finish.
+    // Effect: Scroll into view when content becomes visible. We intentionally
+    // do NOT scroll on the loading state: jumping on button press and then
+    // filling content a moment later causes a jarring layout shift (CLS),
+    // especially with instant/reduced-motion scrolling.
     $effect(() => {
-        if (
-            (recapState.isVisible || recapState.isLoading) &&
-            currentSettings?.enableJump
-        ) {
+        if (recapState.isVisible && currentSettings?.enableJump) {
             // Use scroll behavior, but override to instant if OS prefers reduced motion
             const behavior = prefersReducedMotion()
                 ? "instant"

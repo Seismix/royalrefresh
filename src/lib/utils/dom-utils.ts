@@ -1,8 +1,13 @@
 import { Component, mount } from "svelte"
-import type { ExtensionSettings } from "~/types/types"
+import type { MountPosition } from "~/lib/adapters/types"
 
 /**
- * DOM and URL utility functions for the extension
+ * DOM and URL utility functions for the extension.
+ *
+ * Selector-driven page lookups (previous chapter, fiction overview, titles,
+ * blurb) live in the UI adapters (`~/lib/adapters`) so legacy/redesign DOM
+ * differences stay in one place. This module keeps only version-agnostic
+ * helpers.
  */
 
 /**
@@ -24,26 +29,13 @@ export function documentIsChapterURL() {
 }
 
 /**
- * True if the previous chapter button has a valid `href` attribute, otherwise false.
- */
-export function documentHasPreviousChapterURL(
-    extensionSettings: ExtensionSettings,
-) {
-    const hasPrevChapterURL = document.querySelector(
-        extensionSettings.prevChapterBtn,
-    )
-
-    return !!hasPrevChapterURL?.hasAttribute("href")
-}
-
-/**
  * Helper function to mount a Svelte component to a target element with proper cleanup
  */
 export function mountComponent<T extends Record<string, any>>(
     component: Component,
     target: Element,
     props?: T,
-    prepend = true,
+    position: MountPosition = "prepend",
 ) {
     // Create temporary container for mounting
     const tempContainer = document.createElement("div")
@@ -57,8 +49,10 @@ export function mountComponent<T extends Record<string, any>>(
     // Move the mounted element to the target
     const element = tempContainer.firstElementChild
     if (element) {
-        if (prepend) {
+        if (position === "prepend") {
             target.prepend(element)
+        } else if (position === "after") {
+            target.after(element)
         } else {
             target.appendChild(element)
         }
@@ -71,63 +65,4 @@ export function mountComponent<T extends Record<string, any>>(
         }
         element?.remove()
     }
-}
-
-/**
- * Finds the previous chapter URL from the current page DOM
- * @param settings - Extension settings containing selectors
- * @returns Previous chapter URL or error message
- */
-export function findPreviousChapterUrl(
-    settings: ExtensionSettings,
-): { data: string } | { error: string } {
-    const prevChapterBtn = document.querySelector(settings.prevChapterBtn)
-
-    if (!(prevChapterBtn instanceof HTMLAnchorElement)) {
-        return {
-            error: "Could not find previous chapter button. Make sure you're on a chapter page with a previous chapter.",
-        }
-    }
-
-    if (!prevChapterBtn.href) {
-        return {
-            error: "Previous chapter button found but has no link. This might be the first chapter.",
-        }
-    }
-
-    return { data: prevChapterBtn.href }
-}
-
-/**
- * Finds the fiction overview URL from the current page DOM
- * @param settings - Extension settings containing selectors
- * @returns Fiction overview URL or error message
- */
-export function findFictionOverviewUrl(
-    settings: ExtensionSettings,
-): { data: string } | { error: string } {
-    const fictionTitleElement = document.querySelector(settings.fictionTitle)
-
-    const layoutHint =
-        "RoyalRoad's layout may have changed — please report this with the Report button."
-
-    if (!fictionTitleElement) {
-        return {
-            error: `Could not find the story title on this page. ${layoutHint}`,
-        }
-    }
-
-    if (!(fictionTitleElement.parentElement instanceof HTMLAnchorElement)) {
-        return {
-            error: `Could not find a link to the story's overview page. ${layoutHint}`,
-        }
-    }
-
-    if (!fictionTitleElement.parentElement.href) {
-        return {
-            error: `The story's overview link is missing its address. ${layoutHint}`,
-        }
-    }
-
-    return { data: fictionTitleElement.parentElement.href }
 }

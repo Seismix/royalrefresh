@@ -1,5 +1,7 @@
 import { describe, expect, test } from "vitest"
-import { migrateV1toV2 } from "./migrations"
+import { migrateV1toV2, migrateV2toV3, migrateV3toV4 } from "./migrations"
+import { LEGACY_SELECTORS } from "~/lib/config/defaults"
+import { DEFAULT_BETA_COOKIE } from "~/lib/adapters"
 
 // Helper to simulate the full migration chain
 // As you add more versions, update this function
@@ -11,10 +13,15 @@ function migrateToLatest(settings: any, startVersion: number) {
         migrated = migrateV1toV2(migrated)
     }
 
-    // Future: v2 -> v3
-    // if (startVersion < 3) {
-    //    migrated = migrateV2toV3(migrated);
-    // }
+    // Chain: v2 -> v3
+    if (startVersion < 3) {
+        migrated = migrateV2toV3(migrated)
+    }
+
+    // Chain: v3 -> v4
+    if (startVersion < 4) {
+        migrated = migrateV3toV4(migrated)
+    }
 
     return migrated
 }
@@ -54,13 +61,50 @@ describe("Settings Migrations", () => {
             },
             shouldNotHave: ["smoothScroll"],
         },
-        // Example for future v3 test:
-        // {
-        //     name: 'v2 to Latest: simple update',
-        //     fromVersion: 2,
-        //     input: { ...v2State },
-        //     expected: { ...v3State }
-        // }
+        {
+            name: "v2 to Latest: customized selector -> selectorOverrides.legacy",
+            fromVersion: 2,
+            input: {
+                wordCount: 250,
+                enableJump: true,
+                scrollBehavior: "smooth",
+                autoExpand: false,
+                ...LEGACY_SELECTORS,
+                // user customized one selector
+                prevChapterBtn: "a.my-custom-prev",
+            },
+            expected: {
+                wordCount: 250,
+                enableJump: true,
+                selectorOverrides: {
+                    legacy: { prevChapterBtn: "a.my-custom-prev" },
+                    redesign: {},
+                },
+            },
+            // flat selector keys are removed
+            shouldNotHave: ["prevChapterBtn", "chapterContent", "blurb"],
+        },
+        {
+            name: "v3 to Latest: adds default betaCookie",
+            fromVersion: 3,
+            input: {
+                wordCount: 250,
+                enableJump: true,
+                scrollBehavior: "smooth",
+                autoExpand: false,
+                selectorOverrides: { legacy: {}, redesign: {} },
+            },
+            expected: {
+                wordCount: 250,
+                selectorOverrides: { legacy: {}, redesign: {} },
+                betaCookie: {
+                    mode: "classic",
+                    name: DEFAULT_BETA_COOKIE.name,
+                    betaValue: DEFAULT_BETA_COOKIE.betaValue,
+                    classicValue: DEFAULT_BETA_COOKIE.classicValue,
+                },
+            },
+        },
     ]
 
     for (const scenario of scenarios) {

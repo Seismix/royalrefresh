@@ -6,14 +6,25 @@
 
     let {
         type = "recap",
+        className = "btn btn-primary btn-circle",
     }: {
         type?: ContentType
+        className?: string
     } = $props()
 
     // Reference to the button element
     let buttonElement: HTMLButtonElement
 
     const handleToggle = async (event: MouseEvent) => {
+        // On the redesign the toggle is mounted inside RoyalRoad's `.rr-dialog`
+        // cluster, which toggles the Reading Preferences modal on a bubbled
+        // click. Stop propagation so our click doesn't also open that dialog.
+        // Harmless on legacy (no ancestor listens). This only works because the
+        // handler is attached natively (see `nativeClick`): Svelte's `onclick`
+        // is delegated to the app root, which runs AFTER the event has already
+        // bubbled through `.rr-dialog` — too late to stop it.
+        event.stopPropagation()
+
         // Blur the button to remove focus/active state
         if (buttonElement) {
             buttonElement.blur()
@@ -51,6 +62,16 @@
         }
     }
 
+    // Attach the click handler natively (target phase) instead of via Svelte's
+    // delegated `onclick`, so `event.stopPropagation()` in handleToggle runs
+    // before the click bubbles to RoyalRoad's `.rr-dialog` on the redesign.
+    const nativeClick = (node: HTMLButtonElement) => {
+        node.addEventListener("click", handleToggle)
+        return {
+            destroy: () => node.removeEventListener("click", handleToggle),
+        }
+    }
+
     let buttonText = $derived(type === "recap" ? "Recap" : "Blurb")
     let iconName = $derived(type === "recap" ? "book" : "info-circle")
     let buttonId = $derived(type === "recap" ? "recapButton" : "blurbButton")
@@ -58,8 +79,8 @@
 
 <button
     bind:this={buttonElement}
-    class="btn btn-primary btn-circle"
-    onclick={handleToggle}
+    use:nativeClick
+    class={className}
     id={buttonId}
     disabled={recapState.isLoading}
     style="outline: none !important;">

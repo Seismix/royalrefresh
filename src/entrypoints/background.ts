@@ -1,8 +1,34 @@
 import DEFAULTS from "~/lib/config/defaults"
 import { BrowserType, currentBrowser } from "~/lib/utils/platform"
-import { restoreSelectors, setSettings } from "~/lib/utils/storage-utils"
+import {
+    getSettings,
+    restoreSelectors,
+    setSettings,
+    watchSettings,
+} from "~/lib/utils/storage-utils"
+import { applyLayoutCookie, hasCookiesPermission } from "~/lib/adapters"
+import type { ExtensionSettings } from "~/types/types"
 
 export default defineBackground(() => {
+    // Keep RoyalRoad's gating cookie in sync with the user's saved layout choice.
+    // The redesign activates on its own from this cookie (no login needed), so the
+    // cookie is a pure effect of the setting: we apply it on startup/install (to
+    // survive browser restarts and cookie expiry) and whenever settings change.
+    // The user picks the layout in Settings, which requests the optional `cookies`
+    // permission; this no-ops without it.
+    const syncBetaCookie = async (settings: ExtensionSettings) => {
+        if (!(await hasCookiesPermission())) return
+        await applyLayoutCookie(settings.betaCookie)
+    }
+
+    const syncFromStorage = async () => syncBetaCookie(await getSettings())
+
+    syncFromStorage()
+    browser.runtime.onStartup.addListener(syncFromStorage)
+    watchSettings((settings) => {
+        if (settings) syncBetaCookie(settings)
+    })
+
     browser.runtime.onInstalled.addListener(async (details) => {
         if (details.reason === "install") {
             // Use defaults

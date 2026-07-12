@@ -1,14 +1,11 @@
 import ToggleButton from "~/components/extension/ToggleButton.svelte"
 import SettingsButton from "~/components/extension/SettingsButton.svelte"
-import ReportLink from "~/components/extension/ReportLink.svelte"
 import RecapContainer from "~/components/extension/RecapContainer.svelte"
-import {
-    documentIsChapterURL,
-    documentHasPreviousChapterURL,
-    mountComponent,
-} from "~/lib/utils/dom-utils"
+import { documentIsChapterURL, mountComponent } from "~/lib/utils/dom-utils"
+import { buildPageContext } from "~/lib/adapters"
 import { getSettings } from "~/lib/utils/storage-utils"
 import type { ContentType } from "~/types/types"
+import type { MountTarget } from "~/lib/adapters"
 
 export default defineContentScript({
     matches: ["*://*.royalroad.com/*"],
@@ -18,18 +15,33 @@ export default defineContentScript({
     main: async (ctx) => {
         if (!documentIsChapterURL()) return
 
-        // Get settings from storage
+        // Resolve the active UI adapter + selectors for this page
         const settings = await getSettings()
-        const hasPrevChapter = documentHasPreviousChapterURL(settings)
+        const page = buildPageContext(settings)
+
+        const hasPrevChapter = page.adapter.hasPreviousChapter(page.selectors)
         const contentType: ContentType = hasPrevChapter ? "recap" : "blurb"
 
-        // Create toggle button
-        const togglePlacement = document.querySelector(settings.togglePlacement)
-        if (togglePlacement) {
-            const cleanup = mountComponent(ToggleButton, togglePlacement, {
-                type: contentType,
-            })
+        const mounts = page.adapter.resolveMounts(page.selectors)
+        const hostClasses = page.adapter.hostClasses
+
+        // Helper: mount a component at a resolved mount target with cleanup
+        const mountAt = (
+            component: Parameters<typeof mountComponent>[0],
+            { target, position }: MountTarget,
+            props?: Record<string, any>,
+        ) => {
+            if (!target) return
+            const cleanup = mountComponent(component, target, props, position)
             ctx.onInvalidated(cleanup)
+        }
+
+        // Toggle button (recap/blurb)
+        if (mounts.toggle.target) {
+            mountAt(ToggleButton, mounts.toggle, {
+                type: contentType,
+                className: hostClasses.toggleButton,
+            })
 
             if (settings.autoExpand) {
                 const buttonId = `${contentType}Button`
@@ -41,33 +53,14 @@ export default defineContentScript({
             }
         }
 
-        const settingsPlacement = document.querySelector(
-            settings.settingsPlacement,
-        )
-        if (settingsPlacement) {
-            const cleanup = mountComponent(SettingsButton, settingsPlacement)
-            ctx.onInvalidated(cleanup)
-        }
+        // Settings button (mounts into RoyalRoad's settings dialog/modal).
+        // Reporting is handled by the extension popup, not an injected button.
+        mountAt(SettingsButton, mounts.settings, {
+            className: hostClasses.settingsButton,
+            version: page.adapter.id,
+        })
 
-        // Create report link (label/type matches what the toggle button shows)
-        const reportPlacement = document.querySelector(settings.reportPlacement)
-        if (reportPlacement) {
-            const cleanup = mountComponent(
-                ReportLink,
-                reportPlacement,
-                { type: contentType },
-                false,
-            )
-            ctx.onInvalidated(cleanup)
-        }
-
-        // Create content container
-        const chapterDiv = document.querySelector(settings.chapterContent)
-        if (chapterDiv) {
-            const cleanup = mountComponent(RecapContainer, chapterDiv, {
-                id: "recapContainer",
-            })
-            ctx.onInvalidated(cleanup)
-        }
+        // Content container
+        mountAt(RecapContainer, mounts.recap, { id: "recapContainer" })
     },
 })
