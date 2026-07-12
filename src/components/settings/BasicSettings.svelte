@@ -109,23 +109,23 @@
 {#if settings.enableJump}
     <label>
         <span>Scroll behavior</span>
+        {#if userPrefersReducedMotion && settings.scrollBehavior === "smooth"}
+            <div class="message info-message">
+                <p>
+                    <strong>System Reduced Motion Detected</strong>
+                </p>
+                <p>
+                    Your system has reduced motion enabled, so "Auto" will use
+                    instant scrolling. If you prefer not to jump at all, disable
+                    "Enable jump to recap" above.
+                </p>
+            </div>
+        {/if}
         <select class="form-control" bind:value={settings.scrollBehavior}>
             <option value="smooth">Auto (Recommended)</option>
             <option value="instant">Instant</option>
         </select>
     </label>
-    {#if userPrefersReducedMotion && settings.scrollBehavior === "smooth"}
-        <div class="message info-message">
-            <p>
-                <strong>System Reduced Motion Detected</strong>
-            </p>
-            <p>
-                Your system has reduced motion enabled, so "Auto" will use
-                instant scrolling. If you prefer not to jump at all, disable
-                "Enable jump to recap" above.
-            </p>
-        </div>
-    {/if}
 {/if}
 
 <label>
