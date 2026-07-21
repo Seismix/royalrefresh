@@ -18,6 +18,9 @@ import {
 const LEGACY_HOST_CLASSES: HostClasses = {
     toggleButton: "btn btn-primary btn-circle",
     settingsButton: "btn btn-primary btn-circle red",
+    // Neutral/secondary rather than a loud accent — the report link is a rarely
+    // used utility action and shouldn't compete with the recap toggle.
+    reportLink: "btn btn-block btn-default margin-bottom-5",
 }
 
 /** Host button classes per UI version, applied to the injected buttons. */
@@ -38,14 +41,17 @@ export const LEGACY_SELECTORS: ExtensionSelectors = {
     blurbLabels: ".portlet .text-center.font-red-sunglo",
     closeButtonSelector:
         "#settings > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > button:last-child",
+    reportPlacement: "div.col-lg-3:nth-child(3)",
 }
 
 /** Built-in default selectors per UI version. */
-export const DEFAULT_SELECTORS_BY_VERSION: Record<UiVersion, ExtensionSelectors> =
-    {
-        legacy: LEGACY_SELECTORS,
-        redesign: REDESIGN_SELECTORS,
-    }
+export const DEFAULT_SELECTORS_BY_VERSION: Record<
+    UiVersion,
+    ExtensionSelectors
+> = {
+    legacy: LEGACY_SELECTORS,
+    redesign: REDESIGN_SELECTORS,
+}
 
 const DEFAULTS: ExtensionSettings = {
     wordCount: 250,
@@ -112,6 +118,7 @@ export function getChapterPageSelectors(version: UiVersion = "legacy") {
         togglePlacement: s.togglePlacement,
         settingsPlacement: s.settingsPlacement,
         closeButtonSelector: s.closeButtonSelector,
+        reportPlacement: s.reportPlacement,
     }
 }
 

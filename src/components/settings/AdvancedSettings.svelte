@@ -20,12 +20,16 @@
         { key: "prevChapterBtn", label: "Previous chapter button:" },
         { key: "togglePlacement", label: "Recap button placement:" },
         { key: "settingsPlacement", label: "Settings button placement:" },
+        { key: "reportPlacement", label: "Report link placement:" },
         { key: "chapterContent", label: "Chapter content:" },
         { key: "chapterTitle", label: "Chapter title:" },
         { key: "fictionTitle", label: "Fiction title:" },
         { key: "blurb", label: "Story blurb:" },
         { key: "blurbLabels", label: "Story blurb labels:" },
-        { key: "closeButtonSelector", label: "Button to close settings modal:" },
+        {
+            key: "closeButtonSelector",
+            label: "Button to close settings modal:",
+        },
     ]
 
     // Built-in defaults for the selected version, shown as placeholders
@@ -39,8 +43,8 @@
 <p>
     The layout switch (in the main settings) works by setting RoyalRoad's
     <code>{DEFAULT_BETA_COOKIE.name}</code> cookie. Only change these if RoyalRoad
-    renames the cookie or changes the values it expects. Leave a field empty to
-    use the built-in default (shown as the placeholder).
+    renames the cookie or changes the values it expects. Leave a field empty to use
+    the built-in default (shown as the placeholder).
 </p>
 
 <label>

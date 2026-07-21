@@ -162,6 +162,10 @@ export abstract class BaseAdapter implements UiAdapter {
                 target: this.query(selectors.chapterContent),
                 position: "prepend",
             },
+            report: {
+                target: this.query(selectors.reportPlacement),
+                position: "append",
+            },
         }
     }
 

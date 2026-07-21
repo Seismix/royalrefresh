@@ -1,5 +1,6 @@
 import ToggleButton from "~/components/extension/ToggleButton.svelte"
 import SettingsButton from "~/components/extension/SettingsButton.svelte"
+import ReportLink from "~/components/extension/ReportLink.svelte"
 import RecapContainer from "~/components/extension/RecapContainer.svelte"
 import { documentIsChapterURL, mountComponent } from "~/lib/utils/dom-utils"
 import { buildPageContext } from "~/lib/adapters"
@@ -57,11 +58,18 @@ export default defineContentScript({
             }
         }
 
-        // Settings button (mounts into RoyalRoad's settings dialog/modal).
-        // Reporting is handled by the extension popup, not an injected button.
+        // Settings button (mounts into RoyalRoad's settings dialog/modal)
         mountAt(SettingsButton, mounts.settings, {
             className: hostClasses.settingsButton,
             version: page.adapter.id,
+        })
+
+        // Report link (label/type matches what the toggle button shows). The
+        // popup has its own report button; this one is the in-page shortcut.
+        mountAt(ReportLink, mounts.report, {
+            type: contentType,
+            className: hostClasses.reportLink,
+            style: hostClasses.reportLinkStyle ?? "",
         })
 
         // Content container

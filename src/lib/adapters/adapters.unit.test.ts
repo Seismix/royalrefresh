@@ -134,7 +134,8 @@ describe("RedesignAdapter.prepareMounts", () => {
                 </div>
                 <div class="chapter-inner"></div>
             </div>
-            <div id="dialog-content-reading-preferences"></div>`
+            <div id="dialog-content-reading-preferences"></div>
+            <a href="/report/chapter/123">Report this chapter</a>`
 
         const mounts = new RedesignAdapter().prepareMounts(REDESIGN_SELECTORS)
 
@@ -164,6 +165,12 @@ describe("RedesignAdapter.prepareMounts", () => {
             document.querySelector(".chapter-inner"),
         )
         expect(mounts.recap.position).toBe("prepend")
+
+        // Report link lands directly after RoyalRoad's own report link.
+        expect(mounts.report.target).toBe(
+            document.querySelector("a[href^='/report/chapter/']"),
+        )
+        expect(mounts.report.position).toBe("after")
     })
 
     it("cleanup() restores every host-page mutation", () => {

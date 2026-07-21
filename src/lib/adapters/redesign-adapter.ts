@@ -27,15 +27,24 @@ export const REDESIGN_SELECTORS: ExtensionSelectors = {
     // Content-warning labels location not yet pinned on the redesign; optional.
     blurbLabels: "",
     closeButtonSelector: "#dialog-content-reading-preferences > button",
+    // RoyalRoad's own "report this chapter" link — our report link is inserted
+    // directly after it so both reporting actions sit together.
+    reportPlacement: "a[href^='/report/chapter/']",
 }
+
+/** Structural (non-colour) utility classes shared by RoyalRoad's redesign
+ * buttons. Split out from the primary variant so a neutral variant can reuse the
+ * layout without inheriting the accent colours. */
+const REDESIGN_BTN_BASE =
+    "inline-flex items-center justify-center cursor-pointer" +
+    " rounded-theme font-medium tracking-wide text-center no-underline" +
+    " hover:brightness-110 hover:shadow-md" +
+    " disabled:opacity-55 disabled:cursor-not-allowed px-4 py-2 text-md gap-1"
 
 /** RoyalRoad's redesign primary-button utility classes (matches its Prev/Next
  * buttons) so injected buttons look native on the beta UI. */
 const REDESIGN_PRIMARY_BTN =
-    "inline-flex items-center justify-center cursor-pointer whitespace-nowrap" +
-    " rounded-theme font-medium tracking-wide text-center no-underline" +
-    " bg-primary text-on-primary hover:brightness-110 hover:shadow-md" +
-    " disabled:opacity-55 disabled:cursor-not-allowed px-4 py-2 text-md gap-1"
+    REDESIGN_BTN_BASE + " whitespace-nowrap bg-primary text-on-primary"
 
 /** Host button classes for the redesign, applied to the injected buttons. */
 export const REDESIGN_HOST_CLASSES: HostClasses = {
@@ -45,6 +54,32 @@ export const REDESIGN_HOST_CLASSES: HostClasses = {
     // prepareReadingPrefsCluster below.
     toggleButton: REDESIGN_PRIMARY_BTN + " w-full lg:w-auto",
     settingsButton: REDESIGN_PRIMARY_BTN,
+    // Deliberately NOT `whitespace-nowrap`: this column (`md:w-auto`) is
+    // shrink-to-fit, so an unwrappable label wider than RoyalRoad's own buttons
+    // widens the whole column. Verified live — with nowrap the column went
+    // 184px → 208px, stretching Fiction Page (`w-full`) while Report Chapter
+    // stayed at its own intrinsic width and so appeared to shrink.
+    reportLink: REDESIGN_BTN_BASE + " w-full",
+    // RoyalRoad's own secondary theme tokens rather than `color: inherit` — the
+    // action column inherits `color: black`, which was invisible against the dark
+    // theme's near-black background. These vars are theme-scoped (they resolve
+    // light-on-dark here and flip in light mode) and, being CSS custom properties
+    // rather than utility classes, can't be dropped by RoyalRoad's Tailwind purge.
+    // Colour + grid participation, no manual spacing. The link is a child of
+    // RoyalRoad's action column, which already sets `gap`, so it picks up the
+    // native buttons' rhythm automatically and follows any change to it.
+    //
+    // That column is a two-up `grid` on mobile and a `flex` column from `md`.
+    // `grid-column: 1 / -1` makes the link span the full row on mobile (rather
+    // than sitting half-width in one cell) and is simply ignored under flex, so
+    // one declaration covers both. Preferred over RoyalRoad's `col-span-2`
+    // utility: it can't be dropped by their Tailwind purge, and it stays correct
+    // if the column count ever changes.
+    reportLinkStyle:
+        "background: var(--color-secondary, rgba(127, 127, 127, 0.15));" +
+        " color: var(--color-on-secondary, inherit);" +
+        " border: 1px solid rgba(127, 127, 127, 0.35);" +
+        " grid-column: 1 / -1;",
 }
 
 /**
@@ -86,6 +121,8 @@ export class RedesignAdapter extends BaseAdapter {
             // Settings button goes at the end of the Reading Preferences dialog.
             settings: { target: base.settings.target, position: "append" },
             recap: base.recap,
+            // Sits directly after RoyalRoad's own report link rather than inside it.
+            report: { target: base.report.target, position: "after" },
             cleanup: toggle?.cleanup,
         }
     }

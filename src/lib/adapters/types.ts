@@ -24,6 +24,7 @@ export type MountSet = {
     toggle: MountTarget
     settings: MountTarget
     recap: MountTarget
+    report: MountTarget
     /** Undoes any host-page restyling `prepareMounts` performed. Present only
      * when an adapter actually mutated the page; register it with
      * `ctx.onInvalidated` so the page is left as found. */

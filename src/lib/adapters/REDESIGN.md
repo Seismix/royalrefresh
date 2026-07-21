@@ -22,6 +22,7 @@ Redesign-specific touchpoints:
 | ------- | -------- |
 | Selectors, host classes, primary-button CSS, default cookie | `redesign-adapter.ts` (exported consts — single source of truth) |
 | Nav-bar mount quirks + their teardown (`prepareReadingPrefsCluster`) | `redesign-adapter.ts` (`RedesignAdapter`) |
+| Report-link placement (after RoyalRoad's own `/report/chapter/` link) | `redesign-adapter.ts` (`REDESIGN_SELECTORS.reportPlacement`) |
 | Layout-cookie helpers (`applyLayoutCookie` etc.) | `beta-cookie.ts` |
 | Detection (`#chapterHeroData` sentinel + cookie fallback) | `resolve.ts` (`isRedesign`) |
 | By-version maps referencing redesign consts | `config/defaults.ts` (`HOST_CLASSES_BY_VERSION`, `DEFAULT_SELECTORS_BY_VERSION`) |
@@ -60,8 +61,9 @@ The cookie is applied purely from the saved setting (no dev auto-force).
    `HOST_CLASSES_BY_VERSION` / `DEFAULT_SELECTORS_BY_VERSION`; drop `betaCookie` from
    `DEFAULTS`.
 5. `types/types.ts`: remove `BetaCookieSettings` / `BetaLayoutMode` and the `betaCookie`
-   field; consider collapsing `UiVersion` to just `"legacy"` (then `selectorOverrides` is
-   single-keyed — add a flattening migration).
+   field, plus `HostClasses.reportLinkStyle` (redesign-only); consider collapsing
+   `UiVersion` to just `"legacy"` (then `selectorOverrides` is single-keyed — add a
+   flattening migration).
 6. `background.ts`: delete the `syncBetaCookie` block and its imports.
 7. `wxt.config.ts`: drop `optional_permissions: ["cookies"]`.
 8. `BasicSettings.svelte`: remove the "RoyalRoad layout" select + `onLayoutChange`.

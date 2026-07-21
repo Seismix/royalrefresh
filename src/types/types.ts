@@ -8,6 +8,7 @@ export type ExtensionSelectors = {
     blurb: string
     blurbLabels: string
     closeButtonSelector: string
+    reportPlacement: string
 }
 
 /** RoyalRoad UI variants the extension supports. */
@@ -21,6 +22,14 @@ export type UiVersion = "legacy" | "redesign"
 export type HostClasses = {
     toggleButton: string
     settingsButton: string
+    reportLink: string
+    /**
+     * Inline style for the report link. The redesign's Tailwind build is purged,
+     * so only colour utilities RoyalRoad itself ships would survive injection —
+     * inline styles can't be purged and win on specificity. Unset on legacy,
+     * which has real Bootstrap classes to lean on.
+     */
+    reportLinkStyle?: string
 }
 
 /** Per-version user overrides for the built-in adapter selectors. */
