@@ -10,13 +10,16 @@
     import { PageHeader } from "~/components/layout"
     import { AdvancedSettings, BasicSettings } from "~/components/settings"
     import { getDefaults } from "~/lib/config/defaults"
+    import { settingsAreValid } from "~/lib/config/validation"
     import { getSettings, watchSettings } from "~/lib/utils/storage-utils"
     import type { ExtensionSettings } from "~/types/types"
 
     type View = "settings" | "patch-notes"
 
     let localSettings = $state<ExtensionSettings | null>(null)
-    let isValid = $state<boolean>(true)
+    // Derived straight from the settings rather than pushed up from BasicSettings:
+    // validity is a pure function of them, so a callback would only add a lag.
+    const isValid = $derived(settingsAreValid(localSettings))
     let isFirefox = $state(import.meta.env.FIREFOX)
     let currentView = $state<View>("settings")
 
@@ -46,10 +49,6 @@
         })
     })
 
-    function handleValidationChange(valid: boolean) {
-        isValid = valid
-    }
-
     function showPatchNotes() {
         currentView = "patch-notes"
     }
@@ -70,9 +69,7 @@
         {#if !localSettings}
             <p>Loading settings...</p>
         {:else}
-            <BasicSettings
-                bind:settings={localSettings}
-                onValidationChange={handleValidationChange} />
+            <BasicSettings bind:settings={localSettings} />
 
             <AdvancedSettings bind:settings={localSettings} />
 

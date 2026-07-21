@@ -13,6 +13,7 @@
     import { PageHeader } from "~/components/layout"
     import { BasicSettings } from "~/components/settings"
     import { getDefaults } from "~/lib/config/defaults"
+    import { settingsAreValid } from "~/lib/config/validation"
     import { BrowserType, currentBrowser } from "~/lib/utils/platform"
     import { browser } from "wxt/browser"
     import { isChapterUrl } from "~/lib/utils/dom-utils"
@@ -22,7 +23,10 @@
     type View = "settings" | "patch-notes" | "advanced-settings"
 
     let localSettings = $state<ExtensionSettings | null>(null)
-    let isValid = $state<boolean>(true)
+    // Derived straight from the settings rather than pushed up from BasicSettings.
+    // This also keeps it correct in the advanced/patch-notes views, where
+    // BasicSettings is unmounted and could no longer report anything.
+    const isValid = $derived(settingsAreValid(localSettings))
     let currentView = $state<View>("settings")
     let activeTabUrl = $state("")
     const isAndroidFirefox = currentBrowser === BrowserType.AndroidFirefox
@@ -65,10 +69,6 @@
         })
     })
 
-    function handleValidationChange(valid: boolean) {
-        isValid = valid
-    }
-
     function showPatchNotes() {
         currentView = "patch-notes"
     }
@@ -102,9 +102,7 @@
             {#if !localSettings}
                 <p>Loading settings...</p>
             {:else}
-                <BasicSettings
-                    bind:settings={localSettings}
-                    onValidationChange={handleValidationChange} />
+                <BasicSettings bind:settings={localSettings} />
             {/if}
         </div>
 
