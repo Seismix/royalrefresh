@@ -6,7 +6,7 @@
         readBetaCookie,
         requestCookiesPermission,
     } from "~/lib/adapters"
-    import type { ExtensionSettings } from "~/types/types"
+    import type { BetaLayoutMode, ExtensionSettings } from "~/types/types"
 
     let {
         settings = $bindable(),
@@ -22,15 +22,33 @@
     // once settings are saved. Fine-tuned (name/values) in Advanced Settings.
     let betaLayoutError = $state("")
 
+    // The layout as it stood when this view opened (after seeding from the live
+    // cookie below). The "save and reload" hint only matters once the user
+    // actually picks a different layout — shown unconditionally it's just clutter.
+    let initialLayoutMode = $state<BetaLayoutMode | null>(null)
+    const layoutChanged = $derived(
+        initialLayoutMode !== null &&
+            settings.betaCookie.mode !== initialLayoutMode,
+    )
+
     // Seed the selector from the layout RoyalRoad is actually serving: read the
     // live cookie (if we can) so the dropdown reflects reality rather than a
     // possibly-stale stored value.
     onMount(async () => {
-        if (!(await hasCookiesPermission())) return
-        const value = await readBetaCookie(settings.betaCookie.name)
-        if (value === null) return
-        settings.betaCookie.mode =
-            value === settings.betaCookie.betaValue ? "redesign" : "classic"
+        if (await hasCookiesPermission()) {
+            const value = await readBetaCookie(settings.betaCookie.name)
+            // Only trust an exact match. Anything else (RoyalRoad changed its
+            // values, or set something we don't recognise) would otherwise be
+            // displayed as "Classic", which may be flatly wrong — leave the
+            // stored choice alone.
+            if (value === settings.betaCookie.betaValue) {
+                settings.betaCookie.mode = "redesign"
+            } else if (value === settings.betaCookie.classicValue) {
+                settings.betaCookie.mode = "classic"
+            }
+        }
+        // Baseline is taken after seeding, so seeding never counts as a change.
+        initialLayoutMode = settings.betaCookie.mode
     })
 
     async function onLayoutChange() {
@@ -146,7 +164,7 @@
 
 {#if betaLayoutError}
     <p class="message warning-message">{betaLayoutError}</p>
-{:else}
+{:else if layoutChanged}
     <p class="message info-message">
         Save, then reload a RoyalRoad page to apply. Adjust the cookie in
         Advanced Settings if RoyalRoad changes it.
