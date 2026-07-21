@@ -15,7 +15,10 @@ function liveCookieEquals(name: string, value: string): boolean {
     return document.cookie.split(";").some((entry) => {
         const eq = entry.indexOf("=")
         if (eq === -1) return false
-        return entry.slice(0, eq).trim() === name && entry.slice(eq + 1) === value
+        return (
+            entry.slice(0, eq).trim() === name &&
+            entry.slice(eq + 1).trim() === value
+        )
     })
 }
 
@@ -33,14 +36,22 @@ export function isRedesign(
     if (doc.querySelector("#chapterHeroData")) return true
 
     const isLiveDocument = typeof document !== "undefined" && doc === document
-    if (isLiveDocument && liveCookieEquals(betaCookie.name, betaCookie.betaValue)) {
+    if (
+        isLiveDocument &&
+        liveCookieEquals(betaCookie.name, betaCookie.betaValue)
+    ) {
         return true
     }
 
     return false
 }
 
-/** Resolve the adapter for a given document (defaults to the live page). */
+/** Resolve the adapter for a given document (defaults to the live page).
+ *
+ * NOTE: `#chapterHeroData` only exists on chapter pages, so passing a fetched
+ * *fiction overview* document here resolves to legacy even on the redesign.
+ * Callers should build the context from the live chapter page and reuse it for
+ * fetched documents — as `ContentManager` does. */
 export function resolveAdapter(
     doc: Document = document,
     betaCookie?: BetaCookieHint,
@@ -86,5 +97,8 @@ export function resolveActiveSelectors(
     settings: ExtensionSettings,
     doc: Document = document,
 ): ExtensionSelectors {
-    return getActiveSelectors(resolveAdapter(doc, settings.betaCookie), settings)
+    return getActiveSelectors(
+        resolveAdapter(doc, settings.betaCookie),
+        settings,
+    )
 }

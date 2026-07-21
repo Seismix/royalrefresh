@@ -24,6 +24,10 @@ export type MountSet = {
     toggle: MountTarget
     settings: MountTarget
     recap: MountTarget
+    /** Undoes any host-page restyling `prepareMounts` performed. Present only
+     * when an adapter actually mutated the page; register it with
+     * `ctx.onInvalidated` so the page is left as found. */
+    cleanup?: () => void
 }
 
 /** Extracted blurb pieces from a fiction overview document (labels optional). */
@@ -54,7 +58,10 @@ export interface UiAdapter {
     findFictionTitle(selectors: ExtensionSelectors): Result<string>
 
     /** Previous chapter's title from a fetched document. */
-    findChapterName(doc: Document, selectors: ExtensionSelectors): Result<string>
+    findChapterName(
+        doc: Document,
+        selectors: ExtensionSelectors,
+    ): Result<string>
     /** Previous chapter's content container from a fetched document. */
     findChapterContentEl(
         doc: Document,
@@ -63,6 +70,12 @@ export interface UiAdapter {
     /** Blurb (and optional labels) from a fetched overview document. */
     findBlurb(doc: Document, selectors: ExtensionSelectors): Result<BlurbParts>
 
-    /** Resolve mount points for injected UI on the live chapter page. */
-    resolveMounts(selectors: ExtensionSelectors): MountSet
+    /**
+     * Resolve mount points for injected UI on the live chapter page.
+     *
+     * Named `prepare` rather than `resolve` because an adapter may restyle the
+     * host page to make room for the injected UI (see `RedesignAdapter`). Any
+     * such mutation must be undone by the returned `MountSet.cleanup`.
+     */
+    prepareMounts(selectors: ExtensionSelectors): MountSet
 }

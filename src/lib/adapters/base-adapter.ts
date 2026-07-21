@@ -116,20 +116,26 @@ export abstract class BaseAdapter implements UiAdapter {
         return { data: el }
     }
 
-    findBlurb(doc: Document, selectors: ExtensionSelectors): Result<BlurbParts> {
+    findBlurb(
+        doc: Document,
+        selectors: ExtensionSelectors,
+    ): Result<BlurbParts> {
         // Labels are optional and may be unconfigured (empty selector) on some
         // UI versions — querySelector("") throws, so guard before querying.
         let labels: HTMLElement | null = null
         if (selectors.blurbLabels) {
             const labelsEl = doc.querySelector(selectors.blurbLabels)
-            if (labelsEl instanceof HTMLElement && labelsEl.textContent?.trim()) {
+            if (
+                labelsEl instanceof HTMLElement &&
+                labelsEl.textContent?.trim()
+            ) {
                 labels = labelsEl
             }
         }
 
         const blurbEl = doc.querySelector(selectors.blurb)
 
-        if (!blurbEl || !(blurbEl instanceof HTMLElement)) {
+        if (!(blurbEl instanceof HTMLElement)) {
             return {
                 error: `Could not find the story blurb on the overview page. ${LAYOUT_HINT}`,
             }
@@ -142,7 +148,7 @@ export abstract class BaseAdapter implements UiAdapter {
         return { data: { labels, blurb: blurbEl } }
     }
 
-    resolveMounts(selectors: ExtensionSelectors): MountSet {
+    prepareMounts(selectors: ExtensionSelectors): MountSet {
         return {
             toggle: {
                 target: this.query(selectors.togglePlacement),

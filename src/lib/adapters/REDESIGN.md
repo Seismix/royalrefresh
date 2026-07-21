@@ -11,12 +11,17 @@ either outcome is a short, mechanical change. This file is that checklist.
 Version-agnostic code (the `UiAdapter` interface, `BaseAdapter`, `LegacyAdapter`,
 `resolve.ts`, and all services/components) is **not** redesign-specific — it stays.
 
+`prepareMounts` is named `prepare`, not `resolve`, because an adapter may restyle the host
+page to make room for the injected UI. Anything it mutates must be undone by the
+`MountSet.cleanup` it returns — `content.ts` registers that with `ctx.onInvalidated`, so
+disabling or updating the extension leaves RoyalRoad's DOM as it was found.
+
 Redesign-specific touchpoints:
 
 | Concern | Location |
 | ------- | -------- |
 | Selectors, host classes, primary-button CSS, default cookie | `redesign-adapter.ts` (exported consts — single source of truth) |
-| Nav-bar mount quirks (`prepareReadingPrefsCluster`) | `redesign-adapter.ts` (`RedesignAdapter`) |
+| Nav-bar mount quirks + their teardown (`prepareReadingPrefsCluster`) | `redesign-adapter.ts` (`RedesignAdapter`) |
 | Layout-cookie helpers (`applyLayoutCookie` etc.) | `beta-cookie.ts` |
 | Detection (`#chapterHeroData` sentinel + cookie fallback) | `resolve.ts` (`isRedesign`) |
 | By-version maps referencing redesign consts | `config/defaults.ts` (`HOST_CLASSES_BY_VERSION`, `DEFAULT_SELECTORS_BY_VERSION`) |

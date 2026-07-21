@@ -22,8 +22,12 @@ export default defineContentScript({
         const hasPrevChapter = page.adapter.hasPreviousChapter(page.selectors)
         const contentType: ContentType = hasPrevChapter ? "recap" : "blurb"
 
-        const mounts = page.adapter.resolveMounts(page.selectors)
+        // May restyle the host page to make room for the injected UI, so its
+        // cleanup has to be registered alongside the component teardowns.
+        const mounts = page.adapter.prepareMounts(page.selectors)
         const hostClasses = page.adapter.hostClasses
+
+        if (mounts.cleanup) ctx.onInvalidated(mounts.cleanup)
 
         // Helper: mount a component at a resolved mount target with cleanup
         const mountAt = (

@@ -13,11 +13,13 @@ import type { MountSet, MountTarget } from "./types"
 
 /** Selectors for the "Redesign (beta)" RoyalRoad layout (codename remaster). */
 export const REDESIGN_SELECTORS: ExtensionSelectors = {
-    prevChapterBtn: "a:has(> i.fa-arrow-left)",
+    // Scoped to chapter links so an unrelated left-arrow anchor (breadcrumb,
+    // back-to-fiction) can't win on document order — mirrors the legacy selector.
+    prevChapterBtn: "a[href*='/chapter/']:has(> i.fa-arrow-left)",
     chapterContent: ".chapter-inner",
     chapterTitle: "#chapterHeroData h3",
     fictionTitle: "#chapterHeroData h4",
-    // Toggle mount: the chapter nav bar holding prev/select/next. resolveMounts()
+    // Toggle mount: the chapter nav bar holding prev/select/next. prepareMounts()
     // resolves this robustly in code; this string is the override hint.
     togglePlacement: ".chapter [class*='grid-cols-2']",
     settingsPlacement: "#dialog-content-reading-preferences",
@@ -64,8 +66,8 @@ export class RedesignAdapter extends BaseAdapter {
     readonly defaultSelectors: ExtensionSelectors = REDESIGN_SELECTORS
     readonly hostClasses: HostClasses = REDESIGN_HOST_CLASSES
 
-    resolveMounts(selectors: ExtensionSelectors): MountSet {
-        const base = super.resolveMounts(selectors)
+    prepareMounts(selectors: ExtensionSelectors): MountSet {
+        const base = super.prepareMounts(selectors)
 
         // The chapter nav bar is the `flex flex-col lg:flex-row` container holding
         // the select/prev/next grid AND the Reading Preferences cluster. The
@@ -77,11 +79,14 @@ export class RedesignAdapter extends BaseAdapter {
                 ?.closest("[class*='grid-cols-2']")?.parentElement ??
             document.querySelector("#chapterHeroData")
 
+        const toggle = this.resolveToggle(navBar)
+
         return {
-            toggle: this.resolveToggle(navBar) ?? base.toggle,
+            toggle: toggle?.target ?? base.toggle,
             // Settings button goes at the end of the Reading Preferences dialog.
             settings: { target: base.settings.target, position: "append" },
             recap: base.recap,
+            cleanup: toggle?.cleanup,
         }
     }
 
@@ -90,16 +95,26 @@ export class RedesignAdapter extends BaseAdapter {
      * desktop, directly beneath it on mobile. Prefers appending into the button's
      * own box (prepared as a responsive flex row/column); if that structure isn't
      * found, falls back to a standalone row below the whole nav bar.
+     *
+     * Returns the mount target plus, when the cluster was restyled, a cleanup
+     * that undoes those host-page mutations.
      */
-    private resolveToggle(navBar: Element | null): MountTarget | null {
+    private resolveToggle(
+        navBar: Element | null,
+    ): { target: MountTarget; cleanup?: () => void } | null {
         if (!navBar) return null
 
-        const box = this.prepareReadingPrefsCluster(navBar)
-        if (box) return { target: box, position: "append" }
+        const prepared = this.prepareReadingPrefsCluster(navBar)
+        if (prepared) {
+            return {
+                target: { target: prepared.box, position: "append" },
+                cleanup: prepared.cleanup,
+            }
+        }
 
         // Fallback: a full-width row below the nav bar (no overlap, but not
         // grouped with Reading Preferences).
-        return { target: navBar, position: "after" }
+        return { target: { target: navBar, position: "after" } }
     }
 
     /**
@@ -122,21 +137,54 @@ export class RedesignAdapter extends BaseAdapter {
      *    for the toggle beside it.
      *
      * Returns null if the expected structure is absent (RoyalRoad changed it),
-     * letting the caller fall back to a simpler placement.
+     * letting the caller fall back to a simpler placement. Otherwise returns the
+     * box to append into plus a `cleanup` that restores every mutation — the
+     * content script registers it with `ctx.onInvalidated` so disabling or
+     * updating the extension doesn't leave RoyalRoad's nav bar restyled.
      */
-    private prepareReadingPrefsCluster(navBar: Element): Element | null {
+    private prepareReadingPrefsCluster(
+        navBar: Element,
+    ): { box: Element; cleanup: () => void } | null {
         const wrapper = navBar.querySelector(".rr-dialog")
         const button = wrapper?.querySelector("button")
         const box = button?.parentElement
         if (!(wrapper instanceof HTMLElement) || !button || !box) return null
 
-        if (navBar instanceof HTMLElement) navBar.style.flexWrap = "wrap"
+        // Snapshot the inline styles we're about to overwrite so cleanup can put
+        // back exactly what was there (usually "", i.e. no inline style at all).
+        const navBarEl = navBar instanceof HTMLElement ? navBar : null
+        const prevFlexWrap = navBarEl?.style.flexWrap ?? ""
+        const prevPosition = wrapper.style.position
+        const prevDisplay = box.style.display
+        const prevGap = box.style.gap
+
+        // Only remove classes on cleanup that weren't already present, so we
+        // never strip a class RoyalRoad itself put there.
+        const boxClasses = [
+            "flex-col",
+            "lg:flex-row",
+            "lg:items-center",
+        ].filter((cls) => !box.classList.contains(cls))
+        const buttonClasses = ["lg:w-auto"].filter(
+            (cls) => !button.classList.contains(cls),
+        )
+
+        if (navBarEl) navBarEl.style.flexWrap = "wrap"
         wrapper.style.position = "static"
         box.style.display = "flex"
         box.style.gap = "8px"
-        box.classList.add("flex-col", "lg:flex-row", "lg:items-center")
-        button.classList.add("lg:w-auto")
+        box.classList.add(...boxClasses)
+        button.classList.add(...buttonClasses)
 
-        return box
+        const cleanup = () => {
+            if (navBarEl) navBarEl.style.flexWrap = prevFlexWrap
+            wrapper.style.position = prevPosition
+            box.style.display = prevDisplay
+            box.style.gap = prevGap
+            box.classList.remove(...boxClasses)
+            button.classList.remove(...buttonClasses)
+        }
+
+        return { box, cleanup }
     }
 }
