@@ -17,11 +17,8 @@
     const initSettings = async () => {
         try {
             const settings = await getSettings()
-            // Use untrack to prevent effect re-runs when updating state
-            untrack(() => {
-                currentSettings = settings
-                previousWordCount = settings.wordCount
-            })
+            currentSettings = settings
+            previousWordCount = settings.wordCount
         } catch (error) {
             console.error("Failed to load settings:", error)
         }
@@ -29,19 +26,17 @@
 
     initSettings()
 
-    // Effect: Watch for external settings changes (from other tabs/popups)
-    $effect(() => {
-        if (!currentSettings) return
-
-        return watchSettings((newSettings) => {
-            if (newSettings) {
-                // Use untrack to prevent infinite loops
-                untrack(() => {
-                    currentSettings = newSettings
-                })
-            }
-        })
-    })
+    // Effect: subscribe to external settings changes (other tabs/popups).
+    // Assigning state from the callback is correct here — this is push-based
+    // external data, not something `$derived` can express. The effect body reads
+    // no state on purpose, so it subscribes once for the component's lifetime;
+    // reading `currentSettings` here would make each incoming change invalidate
+    // the effect and tear down/re-create the subscription.
+    $effect(() =>
+        watchSettings((newSettings) => {
+            if (newSettings) currentSettings = newSettings
+        }),
+    )
 
     // Effect: Scroll into view when content becomes visible. We intentionally
     // do NOT scroll on the loading state: jumping on button press and then
@@ -92,7 +87,7 @@
                 recapState.setContent(result.content, result.type)
             }
 
-            // Update tracked value using untrack to prevent effect re-run
+            // Update the tracked value without re-triggering this effect
             untrack(() => {
                 previousWordCount = newWordCount
             })
@@ -118,6 +113,11 @@
             {recapState.error}
         </div>
     {:else if recapState.content}
+        <!-- eslint-disable-next-line svelte/no-at-html-tags -- Content is fetched
+             from RoyalRoad and passed through DOMPurify in HtmlSanitizer (see
+             ContentProcessor.createRecap/createBlurb) before ever reaching state,
+             with a strict tag/attribute allowlist. Rendering it as markup is the
+             feature: the recap must keep RoyalRoad's paragraph formatting. -->
         {@html recapState.content}
     {/if}
 </div>

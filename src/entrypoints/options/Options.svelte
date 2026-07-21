@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { untrack } from "svelte"
     import {
         ActionButtons,
         BackButton,
@@ -35,19 +34,14 @@
 
     initSettings()
 
-    // Effect: Watch for external settings changes (from other tabs/popups)
-    $effect(() => {
-        if (!localSettings) return
-
-        return watchSettings((newValue) => {
-            if (newValue) {
-                // Use untrack to prevent infinite loops when updating state in effect
-                untrack(() => {
-                    localSettings = newValue
-                })
-            }
-        })
-    })
+    // Effect: subscribe to external settings changes (other tabs/popups).
+    // Reads no state on purpose, so it subscribes once rather than tearing the
+    // subscription down and rebuilding it on every incoming change.
+    $effect(() =>
+        watchSettings((newValue) => {
+            if (newValue) localSettings = newValue
+        }),
+    )
 
     function showPatchNotes() {
         currentView = "patch-notes"

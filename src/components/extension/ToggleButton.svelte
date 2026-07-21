@@ -12,24 +12,7 @@
         className?: string
     } = $props()
 
-    // Reference to the button element
-    let buttonElement: HTMLButtonElement
-
-    const handleToggle = async (event: MouseEvent) => {
-        // On the redesign the toggle is mounted inside RoyalRoad's `.rr-dialog`
-        // cluster, which toggles the Reading Preferences modal on a bubbled
-        // click. Stop propagation so our click doesn't also open that dialog.
-        // Harmless on legacy (no ancestor listens). This only works because the
-        // handler is attached natively (see `nativeClick`): Svelte's `onclick`
-        // is delegated to the app root, which runs AFTER the event has already
-        // bubbled through `.rr-dialog` — too late to stop it.
-        event.stopPropagation()
-
-        // Blur the button to remove focus/active state
-        if (buttonElement) {
-            buttonElement.blur()
-        }
-
+    const toggle = async () => {
         // Ignore clicks while a fetch is already in flight
         if (recapState.isLoading) {
             return
@@ -62,14 +45,26 @@
         }
     }
 
-    // Attach the click handler natively (target phase) instead of via Svelte's
-    // delegated `onclick`, so `event.stopPropagation()` in handleToggle runs
-    // before the click bubbles to RoyalRoad's `.rr-dialog` on the redesign.
+    /**
+     * Attach the click handler natively (target phase) rather than via Svelte's
+     * `onclick`. This is load-bearing, not a style choice: on the redesign the
+     * toggle mounts inside RoyalRoad's `.rr-dialog` cluster, which opens the
+     * Reading Preferences modal on a bubbled click. Svelte delegates `onclick`
+     * to the app root, so a delegated handler's `stopPropagation` would run
+     * AFTER the event had already bubbled through `.rr-dialog` — too late.
+     * A native target-phase listener stops it in time. Harmless on legacy,
+     * where no ancestor listens.
+     */
     const nativeClick = (node: HTMLButtonElement) => {
-        node.addEventListener("click", handleToggle)
-        return {
-            destroy: () => node.removeEventListener("click", handleToggle),
+        const onClick = (event: MouseEvent) => {
+            event.stopPropagation()
+            // Remove focus/active state left behind by the click
+            node.blur()
+            void toggle()
         }
+
+        node.addEventListener("click", onClick)
+        return () => node.removeEventListener("click", onClick)
     }
 
     let buttonText = $derived(type === "recap" ? "Recap" : "Blurb")
@@ -78,8 +73,7 @@
 </script>
 
 <button
-    bind:this={buttonElement}
-    use:nativeClick
+    {@attach nativeClick}
     class={className}
     id={buttonId}
     disabled={recapState.isLoading}

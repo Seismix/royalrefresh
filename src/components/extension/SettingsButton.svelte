@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { onMount } from "svelte"
     import { getSettings } from "~/lib/utils/storage-utils"
     import { resolveActiveSelectors } from "~/lib/adapters"
     import type { UiVersion } from "~/types/types"
@@ -12,8 +11,6 @@
         version?: UiVersion
     } = $props()
 
-    let buttonElement = $state<HTMLButtonElement>()
-
     const handleClick = async () => {
         browser.runtime.sendMessage({ action: "openExtensionSettings" })
 
@@ -21,24 +18,42 @@
         // for the active UI version)
         const settings = await getSettings()
         const selectors = resolveActiveSelectors(settings)
-        const closeButton = document.querySelector(selectors.closeButtonSelector)
+        const closeButton = document.querySelector(
+            selectors.closeButtonSelector,
+        )
         if (closeButton && closeButton instanceof HTMLButtonElement) {
             closeButton.click()
         }
     }
 
-    onMount(() => {
-        // Legacy only: lay out the host modal footer so the button sits inline
-        // with RoyalRoad's own footer controls. The redesign uses its own
-        // wrapper (below) and must NOT restyle the host dialog.
-        if (version !== "legacy") return
-        const parent = buttonElement?.parentElement
-        if (parent && parent instanceof HTMLElement) {
-            parent.style.display = "flex"
-            parent.style.justifyContent = "space-between"
-            parent.style.alignItems = "center"
+    /**
+     * Lay out RoyalRoad's modal footer so the button sits inline with its own
+     * controls, restoring the footer's original inline styles on teardown.
+     *
+     * Attached to the legacy button itself rather than run in `onMount`, so the
+     * redesign branch structurally cannot restyle the host dialog — no version
+     * guard needed.
+     */
+    const layoutHostFooter = (node: HTMLButtonElement) => {
+        const parent = node.parentElement
+        if (!(parent instanceof HTMLElement)) return
+
+        const previous = {
+            display: parent.style.display,
+            justifyContent: parent.style.justifyContent,
+            alignItems: parent.style.alignItems,
         }
-    })
+
+        parent.style.display = "flex"
+        parent.style.justifyContent = "space-between"
+        parent.style.alignItems = "center"
+
+        return () => {
+            parent.style.display = previous.display
+            parent.style.justifyContent = previous.justifyContent
+            parent.style.alignItems = previous.alignItems
+        }
+    }
 </script>
 
 <!-- Inline styles for browser-extension UI injection to keep specificity high
@@ -49,13 +64,13 @@
     <div
         style="display: flex; justify-content: center; padding: 16px 24px 20px; margin-top: 8px; border-top: 1px solid rgba(127, 127, 127, 0.25);">
         <button id="settingsButton" class={className} onclick={handleClick}>
-            <i class="fa-solid fa-gear" style="margin-right: 0.4em;"></i>RoyalRefresh
-            Settings
+            <i class="fa-solid fa-gear" style="margin-right: 0.4em;"></i
+            >RoyalRefresh Settings
         </button>
     </div>
 {:else}
     <button
-        bind:this={buttonElement}
+        {@attach layoutHostFooter}
         id="settingsButton"
         class={className}
         style="margin-right: auto; margin-left: 0px;"
