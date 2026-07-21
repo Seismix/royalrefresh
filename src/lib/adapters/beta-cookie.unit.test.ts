@@ -1,9 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { fakeBrowser } from "wxt/testing"
 import {
-    applyBetaCookie,
     applyLayoutCookie,
-    clearBetaCookie,
     hasCookiesPermission,
     readBetaCookie,
 } from "./beta-cookie"
@@ -38,11 +36,11 @@ afterEach(() => {
 })
 
 describe("beta-cookie helpers", () => {
-    it("applyBetaCookie writes the RoyalRoad cookie", async () => {
+    it("writes the RoyalRoad cookie domain-wide", async () => {
         const cookies = cookiesMock()
         ;(fakeBrowser as any).cookies = cookies
 
-        await applyBetaCookie({ name: "beta-ui-v2", value: "always" })
+        await applyLayoutCookie(cookie("redesign"))
 
         expect(cookies.set).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -54,7 +52,7 @@ describe("beta-cookie helpers", () => {
         )
     })
 
-    it("applyBetaCookie clears a competing scope (RoyalRoad's own cookie) first", async () => {
+    it("clears a competing scope (RoyalRoad's own cookie) before setting ours", async () => {
         // Host-only cookie RoyalRoad's server would set — must be removed so ours wins.
         const cookies = cookiesMock([
             {
@@ -67,7 +65,7 @@ describe("beta-cookie helpers", () => {
         ])
         ;(fakeBrowser as any).cookies = cookies
 
-        await applyBetaCookie({ name: "beta-ui-v2", value: "never" })
+        await applyLayoutCookie(cookie("classic"))
 
         expect(cookies.remove).toHaveBeenCalledWith({
             url: "https://www.royalroad.com/",
@@ -78,34 +76,12 @@ describe("beta-cookie helpers", () => {
         )
     })
 
-    it("clearBetaCookie removes every scope and sets nothing", async () => {
-        const cookies = cookiesMock([
-            {
-                name: "beta-ui-v2",
-                value: "always",
-                domain: ".royalroad.com",
-                path: "/",
-                secure: true,
-            },
-        ])
-        ;(fakeBrowser as any).cookies = cookies
-
-        await clearBetaCookie({ name: "beta-ui-v2" })
-
-        expect(cookies.remove).toHaveBeenCalledWith({
-            url: "https://royalroad.com/",
-            name: "beta-ui-v2",
-        })
-        expect(cookies.set).not.toHaveBeenCalled()
-    })
-
     it("does not throw when the cookies API is unavailable", async () => {
         ;(fakeBrowser as any).cookies = undefined
 
         await expect(
-            applyBetaCookie({ name: "x", value: "y" }),
+            applyLayoutCookie(cookie("redesign")),
         ).resolves.toBeUndefined()
-        await expect(clearBetaCookie({ name: "x" })).resolves.toBeUndefined()
     })
 
     it("applyLayoutCookie sets the redesign value for mode=redesign", async () => {
@@ -148,7 +124,6 @@ describe("beta-cookie helpers", () => {
     it("readBetaCookie returns null when unset or unreadable", async () => {
         ;(fakeBrowser as any).cookies = cookiesMock([])
         expect(await readBetaCookie("beta-ui-v2")).toBeNull()
-
         ;(fakeBrowser as any).cookies = undefined
         expect(await readBetaCookie("beta-ui-v2")).toBeNull()
     })
@@ -158,7 +133,6 @@ describe("beta-cookie helpers", () => {
             contains: vi.fn().mockResolvedValue(true),
         }
         expect(await hasCookiesPermission()).toBe(true)
-
         ;(fakeBrowser as any).permissions = {
             contains: vi.fn().mockResolvedValue(false),
         }

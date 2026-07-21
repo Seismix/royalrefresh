@@ -66,8 +66,8 @@ async function removeAllScopes(name: string) {
 }
 
 /** Set the gating cookie to a specific value (clearing any other scope first).
- * No-op without permission. */
-export async function applyBetaCookie(cookie: { name: string; value: string }) {
+ * No-op without permission. Internal — callers use `applyLayoutCookie`. */
+async function applyBetaCookie(cookie: { name: string; value: string }) {
     if (!browser.cookies?.set || !cookie.name) return
     await removeAllScopes(cookie.name)
     try {
@@ -81,12 +81,6 @@ export async function applyBetaCookie(cookie: { name: string; value: string }) {
     } catch {
         // Missing permission or blocked — nothing to do.
     }
-}
-
-/** Remove the gating cookie (all scopes), reverting to RoyalRoad's own choice. */
-export async function clearBetaCookie(cookie: { name: string }) {
-    if (!cookie.name) return
-    await removeAllScopes(cookie.name)
 }
 
 /**

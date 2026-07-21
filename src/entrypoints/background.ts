@@ -17,27 +17,32 @@ export default defineBackground(() => {
     // The user picks the layout in Settings, which requests the optional `cookies`
     // permission; this no-ops without it.
     // Skip re-applying the cookie when an unrelated setting (word count, etc.)
-    // changes — only the betaCookie fields matter here.
-    let lastBetaCookieKey: string | null = null
+    // changes — only the betaCookie fields matter here. `syncBetaCookie` is the
+    // sole owner of the dedupe key so the startup read and the settings watcher
+    // can't race each other into a stale value.
+    //
+    // This resets on every MV3 service-worker wake, so the cookie is re-applied
+    // once per cold start. That's intentional: it's idempotent, and it's what
+    // makes the choice survive cookie expiry.
+    let lastAppliedKey: string | null = null
 
     const syncBetaCookie = async (settings: ExtensionSettings) => {
+        const key = JSON.stringify(settings.betaCookie)
+        if (key === lastAppliedKey) return
+        // Not recording the key without permission, so this retries once granted.
         if (!(await hasCookiesPermission())) return
+        lastAppliedKey = key
         await applyLayoutCookie(settings.betaCookie)
     }
 
     const syncFromStorage = async () => {
-        const settings = await getSettings()
-        lastBetaCookieKey = JSON.stringify(settings.betaCookie)
-        await syncBetaCookie(settings)
+        await syncBetaCookie(await getSettings())
     }
 
     syncFromStorage()
     browser.runtime.onStartup.addListener(syncFromStorage)
     watchSettings((settings) => {
         if (!settings) return
-        const key = JSON.stringify(settings.betaCookie)
-        if (key === lastBetaCookieKey) return
-        lastBetaCookieKey = key
         syncBetaCookie(settings)
     })
 

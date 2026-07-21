@@ -8,8 +8,6 @@ export {
     DEFAULT_BETA_COOKIE,
 } from "./redesign-adapter"
 export {
-    applyBetaCookie,
-    clearBetaCookie,
     applyLayoutCookie,
     readBetaCookie,
     hasCookiesPermission,
