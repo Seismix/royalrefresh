@@ -1,6 +1,53 @@
-import type { ExtensionSelectors, ExtensionSettings } from "~/types/types"
-import { getDefaults, LEGACY_SELECTORS } from "~/lib/config/defaults"
+import type { ExtensionSettings } from "~/types/types"
 import { devLog } from "./logger"
+
+/**
+ * Migrations deliberately do NOT import from `config/defaults`.
+ *
+ * A migration describes a fixed historical transform: "settings shaped like vN
+ * become settings shaped like vN+1". Reading today's defaults would let a future
+ * edit retroactively change how old data migrates — and did: because the live
+ * defaults already contained `betaCookie`, `migrateV2toV3` produced it too, so
+ * `migrateV3toV4`'s guard short-circuited and the v4 migration never ran on its
+ * real path. The frozen snapshots below pin each step to its own schema instead.
+ */
+
+/** Legacy selector defaults as they stood at schema v2. */
+const V2_LEGACY_SELECTORS = {
+    prevChapterBtn: "a[href*='/chapter/']:has(> i.fa-chevron-double-left)",
+    chapterContent: ".chapter-inner",
+    chapterTitle: "h1.font-white",
+    fictionTitle: "h2.font-white",
+    togglePlacement: ".chapter > div > .actions",
+    settingsPlacement: "#settings div.modal-footer",
+    blurb: ".description .hidden-content",
+    blurbLabels: ".portlet .text-center.font-red-sunglo",
+    closeButtonSelector:
+        "#settings > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > button:last-child",
+    reportPlacement: "div.col-lg-3:nth-child(3)",
+} as const
+
+/** The flat selector keys that existed on the v2 settings object. */
+const V2_SELECTOR_KEYS = Object.keys(
+    V2_LEGACY_SELECTORS,
+) as (keyof typeof V2_LEGACY_SELECTORS)[]
+
+/** Non-selector settings defaults as they stood at schema v3 — note there is no
+ * `betaCookie` here; that arrives in v4. */
+const V3_DEFAULTS = {
+    wordCount: 250,
+    enableJump: true,
+    scrollBehavior: "smooth" as ScrollBehavior,
+    autoExpand: false,
+} as const
+
+/** The `betaCookie` defaults as introduced by schema v4. */
+const V4_BETA_COOKIE = {
+    mode: "classic",
+    name: "beta-ui-v2",
+    betaValue: "always",
+    classicValue: "never",
+} as const
 
 export function migrateV1toV2(oldSettings: any): ExtensionSettings {
     // Migration from v1 to v2: smoothScroll -> enableJump & scrollBehavior
@@ -24,18 +71,6 @@ export function migrateV1toV2(oldSettings: any): ExtensionSettings {
     return oldSettings as ExtensionSettings
 }
 
-const SELECTOR_KEYS: (keyof ExtensionSelectors)[] = [
-    "prevChapterBtn",
-    "chapterContent",
-    "chapterTitle",
-    "fictionTitle",
-    "togglePlacement",
-    "settingsPlacement",
-    "blurb",
-    "blurbLabels",
-    "closeButtonSelector",
-]
-
 /**
  * Migration v2→v3: flat selectors -> per-UI `selectorOverrides`.
  *
@@ -49,18 +84,18 @@ export function migrateV2toV3(oldSettings: any): ExtensionSettings {
         return oldSettings as ExtensionSettings
     }
 
-    const legacyOverrides: Partial<ExtensionSelectors> = {}
-    for (const key of SELECTOR_KEYS) {
+    const legacyOverrides: Record<string, string> = {}
+    for (const key of V2_SELECTOR_KEYS) {
         const value = oldSettings?.[key]
-        if (typeof value === "string" && value !== LEGACY_SELECTORS[key]) {
+        if (typeof value === "string" && value !== V2_LEGACY_SELECTORS[key]) {
             legacyOverrides[key] = value
         }
     }
 
     // Preserve all non-selector fields (including unknown/future props), drop
     // the flat selector keys, and add the namespaced overrides.
-    const migrated: any = { ...getDefaults(), ...oldSettings }
-    for (const key of SELECTOR_KEYS) {
+    const migrated: any = { ...V3_DEFAULTS, ...oldSettings }
+    for (const key of V2_SELECTOR_KEYS) {
         delete migrated[key]
     }
     migrated.selectorOverrides = { legacy: legacyOverrides, redesign: {} }
@@ -83,8 +118,8 @@ export function migrateV3toV4(oldSettings: any): ExtensionSettings {
         return oldSettings as ExtensionSettings
     }
 
-    const { betaCookie } = getDefaults()
-    const migrated = { ...oldSettings, betaCookie: { ...betaCookie } }
+    const betaCookie = { ...V4_BETA_COOKIE }
+    const migrated = { ...oldSettings, betaCookie }
 
     devLog.log("WXT Migration v3→v4: added betaCookie", { betaCookie })
 

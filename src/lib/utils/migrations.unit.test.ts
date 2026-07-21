@@ -85,6 +85,50 @@ describe("Settings Migrations", () => {
             shouldNotHave: ["prevChapterBtn", "chapterContent", "blurb"],
         },
         {
+            name: "v2 to Latest: chain runs all the way to v4 (betaCookie added)",
+            fromVersion: 2,
+            // Regression guard: migrations must not read live defaults. When
+            // migrateV2toV3 spread today's getDefaults() it emitted betaCookie
+            // itself, so migrateV3toV4's guard short-circuited and the v4 step
+            // silently never ran for anyone coming from v2.
+            input: {
+                wordCount: 250,
+                enableJump: true,
+                scrollBehavior: "smooth",
+                autoExpand: false,
+                ...LEGACY_SELECTORS,
+            },
+            expected: {
+                selectorOverrides: { legacy: {}, redesign: {} },
+                betaCookie: {
+                    mode: "classic",
+                    name: DEFAULT_BETA_COOKIE.name,
+                    betaValue: DEFAULT_BETA_COOKIE.betaValue,
+                    classicValue: DEFAULT_BETA_COOKIE.classicValue,
+                },
+            },
+            shouldNotHave: ["prevChapterBtn", "reportPlacement"],
+        },
+        {
+            name: "v2 to Latest: customized reportPlacement survives as an override",
+            fromVersion: 2,
+            input: {
+                wordCount: 250,
+                enableJump: true,
+                scrollBehavior: "smooth",
+                autoExpand: false,
+                ...LEGACY_SELECTORS,
+                reportPlacement: "div.my-custom-sidebar",
+            },
+            expected: {
+                selectorOverrides: {
+                    legacy: { reportPlacement: "div.my-custom-sidebar" },
+                    redesign: {},
+                },
+            },
+            shouldNotHave: ["reportPlacement"],
+        },
+        {
             name: "v3 to Latest: adds default betaCookie",
             fromVersion: 3,
             input: {

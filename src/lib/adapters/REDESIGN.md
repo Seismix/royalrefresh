@@ -63,7 +63,8 @@ The cookie is applied purely from the saved setting (no dev auto-force).
 5. `types/types.ts`: remove `BetaCookieSettings` / `BetaLayoutMode` and the `betaCookie`
    field, plus `HostClasses.reportLinkStyle` (redesign-only); consider collapsing
    `UiVersion` to just `"legacy"` (then `selectorOverrides` is single-keyed — add a
-   flattening migration).
+   flattening migration). Leave `migrations.ts` alone: its snapshots are frozen historical
+   schemas, not live defaults.
 6. `background.ts`: delete the `syncBetaCookie` block and its imports.
 7. `wxt.config.ts`: drop `optional_permissions: ["cookies"]`.
 8. `BasicSettings.svelte`: remove the "RoyalRoad layout" select + `onLayoutChange`.
