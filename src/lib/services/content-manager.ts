@@ -51,7 +51,10 @@ export class ContentManager {
         ContentCache.setRecap(prevChapterUrl, fetchResult.data)
 
         // 5. Process the content
-        const processResult = ContentProcessor.createRecap(fetchResult.data, ctx)
+        const processResult = ContentProcessor.createRecap(
+            fetchResult.data,
+            ctx,
+        )
         if ("error" in processResult) {
             return processResult
         }
@@ -85,7 +88,10 @@ export class ContentManager {
         }
 
         // 3. Process the content
-        const processResult = ContentProcessor.createBlurb(fetchResult.data, ctx)
+        const processResult = ContentProcessor.createBlurb(
+            fetchResult.data,
+            ctx,
+        )
         if ("error" in processResult) {
             return processResult
         }

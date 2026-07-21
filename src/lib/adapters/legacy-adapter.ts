@@ -1,5 +1,8 @@
 import type { ExtensionSelectors, HostClasses } from "~/types/types"
-import { HOST_CLASSES_BY_VERSION, LEGACY_SELECTORS } from "~/lib/config/defaults"
+import {
+    HOST_CLASSES_BY_VERSION,
+    LEGACY_SELECTORS,
+} from "~/lib/config/defaults"
 import { BaseAdapter } from "./base-adapter"
 
 /** Adapter for the legacy (pre-redesign) RoyalRoad layout. */

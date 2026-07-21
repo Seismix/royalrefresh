@@ -112,10 +112,7 @@ describe("ContentProcessor.createBlurb", () => {
     })
 
     it("extracts the blurb body and labels, with a Blurb heading", () => {
-        const result = ContentProcessor.createBlurb(
-            fictionOverviewHtml,
-            ctx(),
-        )
+        const result = ContentProcessor.createBlurb(fictionOverviewHtml, ctx())
         if ("error" in result) throw new Error(result.error)
 
         expect(result.content).toContain("Blurb: Test Story")
@@ -126,10 +123,7 @@ describe("ContentProcessor.createBlurb", () => {
     })
 
     it("strips <script> from the blurb via the sanitizer", () => {
-        const result = ContentProcessor.createBlurb(
-            fictionOverviewHtml,
-            ctx(),
-        )
+        const result = ContentProcessor.createBlurb(fictionOverviewHtml, ctx())
         if ("error" in result) throw new Error(result.error)
 
         expect(result.content).not.toContain("<script")
@@ -160,10 +154,7 @@ describe("ContentProcessor.createBlurb", () => {
 
     it("returns {error} when the fiction title is missing", () => {
         document.body.innerHTML = "<div>no title</div>"
-        const result = ContentProcessor.createBlurb(
-            fictionOverviewHtml,
-            ctx(),
-        )
+        const result = ContentProcessor.createBlurb(fictionOverviewHtml, ctx())
 
         expect("error" in result).toBe(true)
         if ("content" in result) throw new Error("expected error")
