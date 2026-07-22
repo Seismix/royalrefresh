@@ -1,12 +1,10 @@
 import { afterEach, describe, expect, it } from "vitest"
-import {
-    getActiveSelectors,
-    isRedesign,
-    LegacyAdapter,
-    RedesignAdapter,
-    REDESIGN_SELECTORS,
-    resolveAdapter,
-} from "./index"
+import { ADAPTERS, FALLBACK_ADAPTER, getActiveSelectors } from "./index"
+// Concrete adapters are imported from their own modules, not the barrel: those
+// files disappear together if a layout is ever dropped.
+import { LegacyAdapter } from "./legacy-adapter"
+import { RedesignAdapter, REDESIGN_SELECTORS } from "./redesign-adapter"
+import { resolveAdapter } from "./resolve"
 import { getDefaults } from "~/lib/config/defaults"
 import type { ExtensionSettings } from "~/types/types"
 
@@ -14,16 +12,32 @@ afterEach(() => {
     document.body.innerHTML = ""
 })
 
+describe("adapter registry", () => {
+    it("ends with an adapter that accepts any document", () => {
+        // resolveAdapter() walks ADAPTERS in order and falls back to the last
+        // entry, so that one has to match everything — otherwise a page no
+        // adapter claims would silently get the wrong layout's selectors.
+        document.body.innerHTML = "<div>nothing recognisable</div>"
+        expect(FALLBACK_ADAPTER).toBe(ADAPTERS[ADAPTERS.length - 1])
+        expect(FALLBACK_ADAPTER.detect(document)).toBe(true)
+    })
+
+    it("gives every adapter a distinct id", () => {
+        // Ids key the stored selector overrides; a collision would silently
+        // merge two layouts' customisations.
+        const ids = ADAPTERS.map((adapter) => adapter.id)
+        expect(new Set(ids).size).toBe(ids.length)
+    })
+})
+
 describe("detection", () => {
     it("resolves the legacy adapter on a plain document", () => {
         document.body.innerHTML = "<div class='chapter-inner'></div>"
-        expect(isRedesign()).toBe(false)
         expect(resolveAdapter().id).toBe("legacy")
     })
 
     it("resolves the redesign adapter when #chapterHeroData is present", () => {
         document.body.innerHTML = "<div id='chapterHeroData'></div>"
-        expect(isRedesign()).toBe(true)
         expect(resolveAdapter().id).toBe("redesign")
     })
 
@@ -33,7 +47,6 @@ describe("detection", () => {
         document.body.innerHTML = "<div class='chapter-inner'></div>"
         document.cookie = "beta-ui-v2=always"
         try {
-            expect(isRedesign()).toBe(false)
             expect(resolveAdapter().id).toBe("legacy")
         } finally {
             document.cookie =
@@ -260,5 +273,35 @@ describe("LegacyAdapter", () => {
         const adapter = new LegacyAdapter()
         expect(adapter.id).toBe("legacy")
         expect(adapter.defaultSelectors.chapterTitle).toBe("h1.font-white")
+    })
+
+    it("lays the settings-modal footer out as a row, and restores it", () => {
+        document.body.innerHTML = `
+            <div id="settings">
+                <div class="modal-footer" style="color: red;"></div>
+            </div>`
+
+        const footer = document.querySelector<HTMLElement>(".modal-footer")!
+        const adapter = new LegacyAdapter()
+        const mounts = adapter.prepareMounts(adapter.defaultSelectors)
+
+        expect(mounts.settings.target).toBe(footer)
+        expect(footer.style.display).toBe("flex")
+        expect(footer.style.justifyContent).toBe("space-between")
+
+        mounts.cleanup!()
+
+        expect(footer.style.display).toBe("")
+        expect(footer.style.justifyContent).toBe("")
+        // Styles we never touched must survive untouched.
+        expect(footer.style.color).toBe("red")
+    })
+
+    it("has nothing to undo when the settings modal is absent", () => {
+        document.body.innerHTML = "<div class='chapter-inner'></div>"
+        const adapter = new LegacyAdapter()
+        expect(
+            adapter.prepareMounts(adapter.defaultSelectors).cleanup,
+        ).toBeUndefined()
     })
 })

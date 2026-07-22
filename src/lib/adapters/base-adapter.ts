@@ -1,4 +1,4 @@
-import type { ExtensionSelectors, HostClasses, UiVersion } from "~/types/types"
+import type { ExtensionSelectors, HostChrome } from "~/types/types"
 import {
     LAYOUT_HINT,
     type BlurbParts,
@@ -13,9 +13,12 @@ import {
  * (e.g. redesign mount resolution).
  */
 export abstract class BaseAdapter implements UiAdapter {
-    abstract readonly id: UiVersion
+    abstract readonly id: string
+    abstract readonly label: string
     abstract readonly defaultSelectors: ExtensionSelectors
-    abstract readonly hostClasses: HostClasses
+    abstract readonly chrome: HostChrome
+
+    abstract detect(doc: Document): boolean
 
     findPreviousChapterUrl(selectors: ExtensionSelectors): Result<string> {
         const prevChapterBtn = document.querySelector(selectors.prevChapterBtn)

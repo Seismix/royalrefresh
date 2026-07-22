@@ -26,7 +26,7 @@ export default defineContentScript({
         // May restyle the host page to make room for the injected UI, so its
         // cleanup has to be registered alongside the component teardowns.
         const mounts = page.adapter.prepareMounts(page.selectors)
-        const hostClasses = page.adapter.hostClasses
+        const chrome = page.adapter.chrome
 
         if (mounts.cleanup) ctx.onInvalidated(mounts.cleanup)
 
@@ -45,7 +45,7 @@ export default defineContentScript({
         if (mounts.toggle.target) {
             mountAt(ToggleButton, mounts.toggle, {
                 type: contentType,
-                className: hostClasses.toggleButton,
+                className: chrome.toggleButton.className,
             })
 
             if (settings.autoExpand) {
@@ -60,16 +60,15 @@ export default defineContentScript({
 
         // Settings button (mounts into RoyalRoad's settings dialog/modal)
         mountAt(SettingsButton, mounts.settings, {
-            className: hostClasses.settingsButton,
-            version: page.adapter.id,
+            ui: chrome.settingsButton,
         })
 
         // Report link (label/type matches what the toggle button shows). The
         // popup has its own report button; this one is the in-page shortcut.
         mountAt(ReportLink, mounts.report, {
             type: contentType,
-            className: hostClasses.reportLink,
-            style: hostClasses.reportLinkStyle ?? "",
+            className: chrome.reportLink.className,
+            style: chrome.reportLink.style ?? "",
         })
 
         // Content container

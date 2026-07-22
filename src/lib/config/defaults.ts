@@ -1,63 +1,21 @@
-import {
-    ExtensionSelectors,
-    ExtensionSettings,
-    HostClasses,
-    UiVersion,
-} from "~/types/types"
+import { ExtensionSettings } from "~/types/types"
 import { prefersReducedMotion } from "../utils/platform"
-// Redesign-only values live with the redesign adapter (single source of truth,
-// easy to remove — see src/lib/adapters/REDESIGN.md). Imported here only to
-// assemble the by-version maps below.
+// Per-layout values (selectors, button look) live with their adapter, and the
+// registry is the only module that names the shipped layouts. Nothing here
+// mentions one, so adding or dropping a layout doesn't touch this file.
 import {
-    REDESIGN_HOST_CLASSES,
-    REDESIGN_SELECTORS,
-} from "~/lib/adapters/redesign-adapter"
-
-/** Host button classes for the legacy (pre-redesign) RoyalRoad layout. */
-const LEGACY_HOST_CLASSES: HostClasses = {
-    toggleButton: "btn btn-primary btn-circle",
-    settingsButton: "btn btn-primary btn-circle red",
-    // Neutral/secondary rather than a loud accent — the report link is a rarely
-    // used utility action and shouldn't compete with the recap toggle.
-    reportLink: "btn btn-block btn-default margin-bottom-5",
-}
-
-/** Host button classes per UI version, applied to the injected buttons. */
-export const HOST_CLASSES_BY_VERSION: Record<UiVersion, HostClasses> = {
-    legacy: LEGACY_HOST_CLASSES,
-    redesign: REDESIGN_HOST_CLASSES,
-}
-
-/** Selectors for the legacy (pre-redesign) RoyalRoad layout. */
-export const LEGACY_SELECTORS: ExtensionSelectors = {
-    prevChapterBtn: "a[href*='/chapter/']:has(> i.fa-chevron-double-left)",
-    chapterContent: ".chapter-inner",
-    chapterTitle: "h1.font-white",
-    fictionTitle: "h2.font-white",
-    togglePlacement: ".chapter > div > .actions",
-    settingsPlacement: "#settings div.modal-footer",
-    blurb: ".description .hidden-content",
-    blurbLabels: ".portlet .text-center.font-red-sunglo",
-    closeButtonSelector:
-        "#settings > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > button:last-child",
-    reportPlacement: "div.col-lg-3:nth-child(3)",
-}
-
-/** Built-in default selectors per UI version. */
-export const DEFAULT_SELECTORS_BY_VERSION: Record<
-    UiVersion,
-    ExtensionSelectors
-> = {
-    legacy: LEGACY_SELECTORS,
-    redesign: REDESIGN_SELECTORS,
-}
+    DEFAULT_SELECTORS_BY_VERSION,
+    emptyOverrides,
+    FALLBACK_ADAPTER,
+    type UiVersion,
+} from "~/lib/adapters/registry"
 
 const DEFAULTS: ExtensionSettings = {
     wordCount: 250,
     enableJump: true,
     scrollBehavior: "smooth" as ScrollBehavior,
     autoExpand: false,
-    selectorOverrides: { legacy: {}, redesign: {} },
+    selectorOverrides: emptyOverrides(),
 }
 
 /**
@@ -79,7 +37,7 @@ export function getDefaults(existingSettings?: Partial<ExtensionSettings>) {
 
     return {
         ...DEFAULTS,
-        selectorOverrides: { legacy: {}, redesign: {} },
+        selectorOverrides: emptyOverrides(),
     }
 }
 
@@ -93,7 +51,9 @@ export function hasReducedMotionOverride(): boolean {
 /**
  * Get selectors that should be present on chapter pages for a given UI version
  */
-export function getChapterPageSelectors(version: UiVersion = "legacy") {
+export function getChapterPageSelectors(
+    version: UiVersion = FALLBACK_ADAPTER.id,
+) {
     const s = DEFAULT_SELECTORS_BY_VERSION[version]
     return {
         prevChapterBtn: s.prevChapterBtn,
@@ -110,7 +70,9 @@ export function getChapterPageSelectors(version: UiVersion = "legacy") {
 /**
  * Get selectors that should be present on fiction/story pages for a UI version
  */
-export function getFictionPageSelectors(version: UiVersion = "legacy") {
+export function getFictionPageSelectors(
+    version: UiVersion = FALLBACK_ADAPTER.id,
+) {
     const s = DEFAULT_SELECTORS_BY_VERSION[version]
     return {
         blurb: s.blurb,

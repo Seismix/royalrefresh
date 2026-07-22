@@ -1,10 +1,11 @@
 <script lang="ts">
-    import type {
-        ExtensionSelectors,
-        ExtensionSettings,
-        UiVersion,
-    } from "~/types/types"
-    import { DEFAULT_SELECTORS_BY_VERSION } from "~/lib/config/defaults"
+    import type { ExtensionSelectors, ExtensionSettings } from "~/types/types"
+    import {
+        ADAPTERS,
+        DEFAULT_SELECTORS_BY_VERSION,
+        FALLBACK_ADAPTER,
+        type UiVersion,
+    } from "~/lib/adapters"
 
     let {
         settings = $bindable(),
@@ -12,8 +13,14 @@
         settings: ExtensionSettings
     } = $props()
 
-    // Which UI version's selectors are being edited
-    let version = $state<UiVersion>("legacy")
+    // Which layout's selectors are being edited
+    let version = $state<UiVersion>(FALLBACK_ADAPTER.id)
+
+    // Overrides are keyed by adapter id and stored settings can predate a
+    // layout, so make sure every shipped layout has a bucket to bind into.
+    for (const adapter of ADAPTERS) {
+        settings.selectorOverrides[adapter.id] ??= {}
+    }
 
     const fields: { key: keyof ExtensionSelectors; label: string }[] = [
         { key: "prevChapterBtn", label: "Previous chapter button:" },
@@ -31,7 +38,7 @@
         },
     ]
 
-    // Built-in defaults for the selected version, shown as placeholders
+    // Built-in defaults for the selected layout, shown as placeholders
     let defaults = $derived(DEFAULT_SELECTORS_BY_VERSION[version])
 </script>
 
@@ -56,13 +63,18 @@
     you want to edit below.
 </p>
 
-<label>
-    <span>Royal Road layout:</span>
-    <select class="form-control" bind:value={version}>
-        <option value="legacy">Legacy (classic)</option>
-        <option value="redesign">Redesign (beta)</option>
-    </select>
-</label>
+<!-- Nothing to pick when only one layout ships, so the control hides itself
+     rather than needing to be removed by hand. -->
+{#if ADAPTERS.length > 1}
+    <label>
+        <span>Royal Road layout:</span>
+        <select class="form-control" bind:value={version}>
+            {#each ADAPTERS as adapter (adapter.id)}
+                <option value={adapter.id}>{adapter.label}</option>
+            {/each}
+        </select>
+    </label>
+{/if}
 
 {#each fields as field (field.key)}
     <label>

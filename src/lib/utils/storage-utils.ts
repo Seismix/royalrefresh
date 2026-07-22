@@ -1,4 +1,5 @@
 import { storage } from "wxt/utils/storage"
+import { emptyOverrides } from "~/lib/adapters/registry"
 import { getDefaults } from "~/lib/config/defaults"
 import type { ExtensionSettings } from "~/types/types"
 import {
@@ -61,13 +62,16 @@ export async function restoreDefaults() {
 }
 
 /**
- * Restore selectors to defaults by clearing all per-UI overrides
+ * Restore selectors to defaults by clearing all per-layout overrides.
+ *
+ * Replaces the whole map rather than emptying each bucket, so overrides left
+ * behind by a layout the extension no longer ships get dropped here too.
  */
 export async function restoreSelectors() {
     const currentSettings = await getSettings()
     const updatedSettings: ExtensionSettings = {
         ...currentSettings,
-        selectorOverrides: { legacy: {}, redesign: {} },
+        selectorOverrides: emptyOverrides(),
     }
     await settingsStore.setValue(updatedSettings)
 }

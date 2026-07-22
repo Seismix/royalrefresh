@@ -1,15 +1,23 @@
-import type { ExtensionSelectors, HostClasses } from "~/types/types"
+import type { ExtensionSelectors, HostChrome } from "~/types/types"
 import { BaseAdapter } from "./base-adapter"
 import type { MountSet, MountTarget } from "./types"
 
 // ---------------------------------------------------------------------------
 // Redesign-only constants (single source of truth).
 //
-// Everything RoyalRoad-redesign-specific lives here so the feature can be
-// removed by deleting this module and following src/lib/adapters/REDESIGN.md.
-// `defaults.ts` imports these to build its by-version maps — it does not define
-// any redesign values itself.
+// Everything RoyalRoad-redesign-specific lives here — selectors, button look,
+// detection and mount quirks — so the layout can be dropped by deleting this
+// module and its line in `registry.ts`.
 // ---------------------------------------------------------------------------
+
+/**
+ * Redesign-only element the layout is recognised by. RoyalRoad gates the beta
+ * on its own `beta-ui-v2` cookie, but this sentinel is what was actually
+ * rendered — a stale cookie could claim a layout the page isn't using.
+ *
+ * Only present on chapter pages (see `resolveAdapter`'s note).
+ */
+const REDESIGN_SENTINEL = "#chapterHeroData"
 
 /** Selectors for the "Redesign (beta)" RoyalRoad layout (codename remaster). */
 export const REDESIGN_SELECTORS: ExtensionSelectors = {
@@ -46,47 +54,69 @@ const REDESIGN_BTN_BASE =
 const REDESIGN_PRIMARY_BTN =
     REDESIGN_BTN_BASE + " whitespace-nowrap bg-primary text-on-primary"
 
-/** Host button classes for the redesign, applied to the injected buttons. */
-export const REDESIGN_HOST_CLASSES: HostClasses = {
+/** Look of the injected buttons on the redesign (RoyalRoad's Tailwind utilities). */
+export const REDESIGN_CHROME: HostChrome = {
     // Toggle sits beside Reading Preferences in its (now flex) box: full-width
     // stacked beneath it on mobile, content-width inline to its right on
     // desktop. `lg:` matches the nav bar's `lg:flex-row` breakpoint. See
     // prepareReadingPrefsCluster below.
-    toggleButton: REDESIGN_PRIMARY_BTN + " w-full lg:w-auto",
-    settingsButton: REDESIGN_PRIMARY_BTN,
-    // Deliberately NOT `whitespace-nowrap`: this column (`md:w-auto`) is
-    // shrink-to-fit, so an unwrappable label wider than RoyalRoad's own buttons
-    // widens the whole column. Verified live — with nowrap the column went
-    // 184px → 208px, stretching Fiction Page (`w-full`) while Report Chapter
-    // stayed at its own intrinsic width and so appeared to shrink.
-    reportLink: REDESIGN_BTN_BASE + " w-full",
-    // RoyalRoad's own secondary theme tokens rather than `color: inherit` — the
-    // action column inherits `color: black`, which was invisible against the dark
-    // theme's near-black background. These vars are theme-scoped (they resolve
-    // light-on-dark here and flip in light mode) and, being CSS custom properties
-    // rather than utility classes, can't be dropped by RoyalRoad's Tailwind purge.
-    // Colour + grid participation, no manual spacing. The link is a child of
-    // RoyalRoad's action column, which already sets `gap`, so it picks up the
-    // native buttons' rhythm automatically and follows any change to it.
-    //
-    // That column is a two-up `grid` on mobile and a `flex` column from `md`.
-    // `grid-column: 1 / -1` makes the link span the full row on mobile (rather
-    // than sitting half-width in one cell) and is simply ignored under flex, so
-    // one declaration covers both. Preferred over RoyalRoad's `col-span-2`
-    // utility: it can't be dropped by their Tailwind purge, and it stays correct
-    // if the column count ever changes.
-    reportLinkStyle:
-        "background: var(--color-secondary, rgba(127, 127, 127, 0.15));" +
-        " color: var(--color-on-secondary, inherit);" +
-        " border: 1px solid rgba(127, 127, 127, 0.35);" +
-        " grid-column: 1 / -1;",
+    toggleButton: { className: REDESIGN_PRIMARY_BTN + " w-full lg:w-auto" },
+    settingsButton: {
+        className: REDESIGN_PRIMARY_BTN,
+        icon: "fa-solid fa-gear",
+        iconStyle: "margin-right: 0.4em;",
+        // Shorter than the legacy label: the Reading Preferences dialog is
+        // narrow and the surrounding context already says RoyalRefresh.
+        label: "RoyalRefresh Settings",
+        // Centred in a padded, separated footer so it reads as the last row of
+        // the dialog rather than another preference.
+        wrapperStyle:
+            "display: flex; justify-content: center;" +
+            " padding: 16px 24px 20px; margin-top: 8px;" +
+            " border-top: 1px solid rgba(127, 127, 127, 0.25);",
+    },
+    reportLink: {
+        // Deliberately NOT `whitespace-nowrap`: this column (`md:w-auto`) is
+        // shrink-to-fit, so an unwrappable label wider than RoyalRoad's own
+        // buttons widens the whole column. Verified live — with nowrap the column
+        // went 184px → 208px, stretching Fiction Page (`w-full`) while Report
+        // Chapter stayed at its own intrinsic width and so appeared to shrink.
+        className: REDESIGN_BTN_BASE + " w-full",
+        // RoyalRoad's own secondary theme tokens rather than `color: inherit` —
+        // the action column inherits `color: black`, which was invisible against
+        // the dark theme's near-black background. These vars are theme-scoped
+        // (they resolve light-on-dark here and flip in light mode) and, being CSS
+        // custom properties rather than utility classes, can't be dropped by
+        // RoyalRoad's Tailwind purge.
+        //
+        // Colour + grid participation, no manual spacing. The link is a child of
+        // RoyalRoad's action column, which already sets `gap`, so it picks up the
+        // native buttons' rhythm automatically and follows any change to it.
+        //
+        // That column is a two-up `grid` on mobile and a `flex` column from `md`.
+        // `grid-column: 1 / -1` makes the link span the full row on mobile
+        // (rather than sitting half-width in one cell) and is simply ignored
+        // under flex, so one declaration covers both. Preferred over RoyalRoad's
+        // `col-span-2` utility: it can't be dropped by their Tailwind purge, and
+        // it stays correct if the column count ever changes.
+        style:
+            "background: var(--color-secondary, rgba(127, 127, 127, 0.15));" +
+            " color: var(--color-on-secondary, inherit);" +
+            " border: 1px solid rgba(127, 127, 127, 0.35);" +
+            " grid-column: 1 / -1;",
+    },
 }
 
 /** Adapter for the "Redesign (beta)" RoyalRoad layout (codename remaster). */
 export class RedesignAdapter extends BaseAdapter {
     readonly id = "redesign" as const
+    readonly label = "Redesign (beta)"
     readonly defaultSelectors: ExtensionSelectors = REDESIGN_SELECTORS
-    readonly hostClasses: HostClasses = REDESIGN_HOST_CLASSES
+    readonly chrome: HostChrome = REDESIGN_CHROME
+
+    detect(doc: Document): boolean {
+        return !!doc.querySelector(REDESIGN_SENTINEL)
+    }
 
     prepareMounts(selectors: ExtensionSelectors): MountSet {
         const base = super.prepareMounts(selectors)
@@ -99,7 +129,7 @@ export class RedesignAdapter extends BaseAdapter {
             document
                 .querySelector("#chapterSelect")
                 ?.closest("[class*='grid-cols-2']")?.parentElement ??
-            document.querySelector("#chapterHeroData")
+            document.querySelector(REDESIGN_SENTINEL)
 
         const toggle = this.resolveToggle(navBar)
 

@@ -98,6 +98,11 @@ export function migrateV2toV3(oldSettings: any): ExtensionSettings {
     for (const key of V2_SELECTOR_KEYS) {
         delete migrated[key]
     }
+    // Layout keys spelled out on purpose — do NOT derive these from the adapter
+    // registry. Migrations describe a schema as it stood at a point in time; if
+    // they tracked the live adapter list, adding or removing a layout would
+    // retroactively change what this migration did for existing users. Stale
+    // keys are harmless: `selectorOverrides` is read by adapter id.
     migrated.selectorOverrides = { legacy: legacyOverrides, redesign: {} }
 
     devLog.log("WXT Migration v2→v3: flat selectors -> selectorOverrides", {

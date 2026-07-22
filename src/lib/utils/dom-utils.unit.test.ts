@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { isChapterUrl } from "./dom-utils"
-import { LegacyAdapter } from "~/lib/adapters"
-import { LEGACY_SELECTORS } from "~/lib/config/defaults"
+import { LegacyAdapter, LEGACY_SELECTORS } from "~/lib/adapters/legacy-adapter"
 
 const adapter = new LegacyAdapter()
 const sel = LEGACY_SELECTORS

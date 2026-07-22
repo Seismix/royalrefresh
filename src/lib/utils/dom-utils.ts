@@ -32,7 +32,10 @@ export function documentIsChapterURL() {
  * Helper function to mount a Svelte component to a target element with proper cleanup
  */
 export function mountComponent<T extends Record<string, any>>(
-    component: Component,
+    // `Component<any>` rather than the default `Component<{}>`: injected
+    // components take required props (the active adapter's chrome), which a
+    // no-props component type would reject.
+    component: Component<any>,
     target: Element,
     props?: T,
     position: MountPosition = "prepend",
