@@ -27,11 +27,14 @@ describe("detection", () => {
         expect(resolveAdapter().id).toBe("redesign")
     })
 
-    it("falls back to the beta cookie on the live page", () => {
+    it("ignores the beta cookie and trusts the rendered page", () => {
+        // A stale `beta-ui-v2=always` must not force the redesign adapter onto a
+        // page RoyalRoad actually served as legacy — the sentinel is the truth.
+        document.body.innerHTML = "<div class='chapter-inner'></div>"
         document.cookie = "beta-ui-v2=always"
         try {
-            expect(isRedesign()).toBe(true)
-            expect(resolveAdapter().id).toBe("redesign")
+            expect(isRedesign()).toBe(false)
+            expect(resolveAdapter().id).toBe("legacy")
         } finally {
             document.cookie =
                 "beta-ui-v2=; expires=Thu, 01 Jan 1970 00:00:00 GMT"

@@ -5,14 +5,7 @@ export {
     RedesignAdapter,
     REDESIGN_SELECTORS,
     REDESIGN_HOST_CLASSES,
-    DEFAULT_BETA_COOKIE,
 } from "./redesign-adapter"
-export {
-    applyLayoutCookie,
-    readBetaCookie,
-    hasCookiesPermission,
-    requestCookiesPermission,
-} from "./beta-cookie"
 export {
     isRedesign,
     resolveAdapter,

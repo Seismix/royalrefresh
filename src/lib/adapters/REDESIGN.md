@@ -1,8 +1,16 @@
 # RoyalRoad "Redesign (beta)" support — map & removal guide
 
-RoyalRoad is rolling out a Tailwind-based redesign (codename *remaster*), gated by the
-`beta-ui-v2=always` cookie and detected via the `#chapterHeroData` element. This support
-is **temporary**: eventually the redesign becomes the only UI (legacy dies) or is
+RoyalRoad is rolling out a Tailwind-based redesign (codename *remaster*), gated on their
+side by the `beta-ui-v2` cookie and detected here via the `#chapterHeroData` element.
+
+The extension does **not** choose which layout RoyalRoad serves — it detects whichever one
+arrived and mounts the matching adapter. An earlier build could force the layout by writing
+that cookie, which needed the `cookies` permission; that was removed because the permission
+is effectively ungrantable on Firefox for Android (no prompt, no reachable UI for a
+temporarily-installed add-on), leaving the feature dead there. Users switch layout with
+RoyalRoad's own control instead.
+
+This support is **temporary**: eventually the redesign becomes the only UI (legacy dies) or is
 reverted (redesign dies). Everything redesign-specific is deliberately concentrated so
 either outcome is a short, mechanical change. This file is that checklist.
 
@@ -23,53 +31,34 @@ Redesign-specific touchpoints:
 | Selectors, host classes, primary-button CSS, default cookie | `redesign-adapter.ts` (exported consts — single source of truth) |
 | Nav-bar mount quirks + their teardown (`prepareReadingPrefsCluster`) | `redesign-adapter.ts` (`RedesignAdapter`) |
 | Report-link placement (after RoyalRoad's own `/report/chapter/` link) | `redesign-adapter.ts` (`REDESIGN_SELECTORS.reportPlacement`) |
-| Layout-cookie helpers (`applyLayoutCookie` etc.) | `beta-cookie.ts` |
-| Detection (`#chapterHeroData` sentinel + cookie fallback) | `resolve.ts` (`isRedesign`) |
+| Detection (`#chapterHeroData` sentinel) | `resolve.ts` (`isRedesign`) |
 | By-version maps referencing redesign consts | `config/defaults.ts` (`HOST_CLASSES_BY_VERSION`, `DEFAULT_SELECTORS_BY_VERSION`) |
-| `betaCookie` setting + startup/watch sync | `types/types.ts`, `config/defaults.ts` (`DEFAULTS`), `entrypoints/background.ts` |
-| Optional `cookies` permission | `wxt.config.ts` (`optional_permissions`) |
-| Layout switch (main settings) | `components/settings/BasicSettings.svelte` (mode select + permission request) |
-| Editable cookie name/values (advanced) | `components/settings/AdvancedSettings.svelte` |
-| Migration adding `betaCookie` | `utils/migrations.ts` (`migrateV3toV4`) |
-| Tests | `adapters/adapters.unit.test.ts`, `adapters/beta-cookie.unit.test.ts`, redesign rows in other unit tests |
+| Tests | `adapters/adapters.unit.test.ts`, redesign rows in other unit tests |
 
-### The gating cookie (verified live 2026-07-12)
+### The gating cookie (informational)
 
-RoyalRoad reads `beta-ui-v2`: value `always` → redesign, `never` → classic. Its own
-"Revert To Legacy UI" link hits `/home/reverttolegacyui` which sets `never` — so simply
-**removing** the cookie does *not* revert (RoyalRoad may keep serving the beta); you must
-set `never` to force classic. Hence the two `betaCookie.mode`s: `redesign` (`always`) and
-`classic` (`never`). Values live in `DEFAULT_BETA_COOKIE` and are user-editable in
-Advanced Settings. `BasicSettings` seeds the selector from the live cookie on open
-(`readBetaCookie`), so it reflects what RoyalRoad is actually serving rather than a stale
-stored value.
+RoyalRoad reads `beta-ui-v2`: `always` → redesign, `never` → classic (what its own "Revert
+To Legacy UI" link sets, via `/home/reverttolegacyui`). Removing the cookie does *not*
+reliably revert — RoyalRoad may keep serving the beta. The extension only ever reads the
+rendered page, never this cookie, so none of that is our concern; it is recorded here
+because it is how you put a browser into the redesign to test against.
 
-**Scope matters.** RoyalRoad's server sets its own *host-only* `beta-ui-v2` cookie that
-out-ranks a single domain-scoped cookie we write (verified: a lingering host-only
-`always` keeps the redesign on even after we set domain `never`). So `beta-cookie.ts`
-enumerates and removes **every** `beta-ui-v2` scope via `cookies.getAll`/`remove` before
-setting ours — that's why the feature needs `cookies.getAll`, not just `set`/`remove`.
-The cookie is applied purely from the saved setting (no dev auto-force).
+The cookie is not HttpOnly, so `document.cookie = "beta-ui-v2=always"` on royalroad.com
+followed by a reload is enough to switch a dev browser over, logged out included.
 
 ## Scenario A — redesign is reverted (delete it)
 
-1. Delete `redesign-adapter.ts` and `beta-cookie.ts`.
-2. `index.ts`: drop the `RedesignAdapter` / redesign-const / beta-cookie re-exports.
+1. Delete `redesign-adapter.ts`.
+2. `index.ts`: drop the `RedesignAdapter` / redesign-const re-exports.
 3. `resolve.ts`: collapse `isRedesign` to always-`false` (or inline `LegacyAdapter`) and
-   remove the `#chapterHeroData` / cookie checks.
+   remove the `#chapterHeroData` check.
 4. `config/defaults.ts`: remove the redesign imports and the `redesign` entries from
-   `HOST_CLASSES_BY_VERSION` / `DEFAULT_SELECTORS_BY_VERSION`; drop `betaCookie` from
-   `DEFAULTS`.
-5. `types/types.ts`: remove `BetaCookieSettings` / `BetaLayoutMode` and the `betaCookie`
-   field, plus `HostClasses.reportLinkStyle` (redesign-only); consider collapsing
-   `UiVersion` to just `"legacy"` (then `selectorOverrides` is single-keyed — add a
-   flattening migration). Leave `migrations.ts` alone: its snapshots are frozen historical
-   schemas, not live defaults.
-6. `background.ts`: delete the `syncBetaCookie` block and its imports.
-7. `wxt.config.ts`: drop `optional_permissions: ["cookies"]`.
-8. `BasicSettings.svelte`: remove the "RoyalRoad layout" select + `onLayoutChange`.
-   `AdvancedSettings.svelte`: remove the "Redesign (beta) cookie" section.
-9. Delete redesign rows/cases in the unit tests, and delete this file.
+   `HOST_CLASSES_BY_VERSION` / `DEFAULT_SELECTORS_BY_VERSION`.
+5. `types/types.ts`: remove `HostClasses.reportLinkStyle` (redesign-only); consider
+   collapsing `UiVersion` to just `"legacy"` (then `selectorOverrides` is single-keyed —
+   add a flattening migration). Leave `migrations.ts` alone: its snapshots are frozen
+   historical schemas, not live defaults.
+6. Delete redesign rows/cases in the unit tests, and delete this file.
 
 ## Scenario B — redesign becomes the only UI
 
@@ -78,13 +67,14 @@ The cookie is applied purely from the saved setting (no dev auto-force).
 2. Fold `RedesignAdapter`'s overrides into `BaseAdapter` (or make it the base) and
    simplify `resolveAdapter` to always return it.
 3. Collapse `UiVersion` to a single value; flatten `selectorOverrides` with a migration.
-4. Keep `beta-cookie.ts` + the `betaCookie` setting only if forcing the cookie is still
-   useful; otherwise remove per Scenario A steps 6–8.
+4. `resolve.ts`: `isRedesign` can become a constant `true`.
 
 ## Updating (not removing)
 
 If RoyalRoad only tweaks the redesign DOM, edit **one** const block
 (`REDESIGN_SELECTORS`) and, for nav-bar layout changes, `prepareReadingPrefsCluster` in
-`redesign-adapter.ts`. If it renames the gating cookie or changes its values, users can
-fix it live via the editable cookie name / redesign value / classic value in Advanced
-Settings; update `DEFAULT_BETA_COOKIE` for the next release.
+`redesign-adapter.ts`. Users can also patch selectors live from Advanced Settings, which
+keeps a separate set per layout.
+
+If RoyalRoad changes the `#chapterHeroData` sentinel, update `isRedesign` in `resolve.ts` —
+that is the single point of detection, and picking the wrong adapter is what breaks first.

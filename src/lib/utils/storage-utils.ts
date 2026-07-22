@@ -1,7 +1,12 @@
 import { storage } from "wxt/utils/storage"
 import { getDefaults } from "~/lib/config/defaults"
 import type { ExtensionSettings } from "~/types/types"
-import { migrateV1toV2, migrateV2toV3, migrateV3toV4 } from "./migrations"
+import {
+    migrateV1toV2,
+    migrateV2toV3,
+    migrateV3toV4,
+    migrateV4toV5,
+} from "./migrations"
 
 /**
  * WXT storage utilities for extension settings with migration support
@@ -12,11 +17,12 @@ export const settingsStore = storage.defineItem<ExtensionSettings>(
     "sync:settings",
     {
         fallback: getDefaults(),
-        version: 4,
+        version: 5,
         migrations: {
             2: migrateV1toV2,
             3: migrateV2toV3,
             4: migrateV3toV4,
+            5: migrateV4toV5,
         },
     },
 )

@@ -1,7 +1,11 @@
 import { describe, expect, test } from "vitest"
-import { migrateV1toV2, migrateV2toV3, migrateV3toV4 } from "./migrations"
+import {
+    migrateV1toV2,
+    migrateV2toV3,
+    migrateV3toV4,
+    migrateV4toV5,
+} from "./migrations"
 import { LEGACY_SELECTORS } from "~/lib/config/defaults"
-import { DEFAULT_BETA_COOKIE } from "~/lib/adapters"
 
 // Helper to simulate the full migration chain
 // As you add more versions, update this function
@@ -21,6 +25,11 @@ function migrateToLatest(settings: any, startVersion: number) {
     // Chain: v3 -> v4
     if (startVersion < 4) {
         migrated = migrateV3toV4(migrated)
+    }
+
+    // Chain: v4 -> v5
+    if (startVersion < 5) {
+        migrated = migrateV4toV5(migrated)
     }
 
     return migrated
@@ -85,12 +94,8 @@ describe("Settings Migrations", () => {
             shouldNotHave: ["prevChapterBtn", "chapterContent", "blurb"],
         },
         {
-            name: "v2 to Latest: chain runs all the way to v4 (betaCookie added)",
+            name: "v2 to Latest: chain runs through every step",
             fromVersion: 2,
-            // Regression guard: migrations must not read live defaults. When
-            // migrateV2toV3 spread today's getDefaults() it emitted betaCookie
-            // itself, so migrateV3toV4's guard short-circuited and the v4 step
-            // silently never ran for anyone coming from v2.
             input: {
                 wordCount: 250,
                 enableJump: true,
@@ -100,14 +105,9 @@ describe("Settings Migrations", () => {
             },
             expected: {
                 selectorOverrides: { legacy: {}, redesign: {} },
-                betaCookie: {
-                    mode: "classic",
-                    name: DEFAULT_BETA_COOKIE.name,
-                    betaValue: DEFAULT_BETA_COOKIE.betaValue,
-                    classicValue: DEFAULT_BETA_COOKIE.classicValue,
-                },
             },
-            shouldNotHave: ["prevChapterBtn", "reportPlacement"],
+            // betaCookie is added by v3→v4 and removed again by v4→v5
+            shouldNotHave: ["prevChapterBtn", "reportPlacement", "betaCookie"],
         },
         {
             name: "v2 to Latest: customized reportPlacement survives as an override",
@@ -129,7 +129,7 @@ describe("Settings Migrations", () => {
             shouldNotHave: ["reportPlacement"],
         },
         {
-            name: "v3 to Latest: adds default betaCookie",
+            name: "v3 to Latest: settings survive without gaining betaCookie",
             fromVersion: 3,
             input: {
                 wordCount: 250,
@@ -141,13 +141,30 @@ describe("Settings Migrations", () => {
             expected: {
                 wordCount: 250,
                 selectorOverrides: { legacy: {}, redesign: {} },
+            },
+            shouldNotHave: ["betaCookie"],
+        },
+        {
+            name: "v4 to Latest: an existing betaCookie is dropped",
+            fromVersion: 4,
+            input: {
+                wordCount: 250,
+                enableJump: true,
+                scrollBehavior: "smooth",
+                autoExpand: false,
+                selectorOverrides: { legacy: {}, redesign: {} },
                 betaCookie: {
-                    mode: "classic",
-                    name: DEFAULT_BETA_COOKIE.name,
-                    betaValue: DEFAULT_BETA_COOKIE.betaValue,
-                    classicValue: DEFAULT_BETA_COOKIE.classicValue,
+                    mode: "redesign",
+                    name: "beta-ui-v2",
+                    betaValue: "always",
+                    classicValue: "never",
                 },
             },
+            expected: {
+                wordCount: 250,
+                selectorOverrides: { legacy: {}, redesign: {} },
+            },
+            shouldNotHave: ["betaCookie"],
         },
     ]
 
@@ -166,6 +183,27 @@ describe("Settings Migrations", () => {
             }
         })
     }
+
+    test("v2→v3 emits no betaCookie, so v3→v4 stays reachable", () => {
+        // Regression guard for the hermetic-snapshot fix: when migrateV2toV3
+        // spread live defaults it emitted betaCookie itself, which tripped
+        // migrateV3toV4's "already migrated" guard and silently skipped that
+        // step for everyone coming from v2.
+        const v3 = migrateV2toV3({
+            wordCount: 250,
+            enableJump: true,
+            scrollBehavior: "smooth",
+            autoExpand: false,
+            ...LEGACY_SELECTORS,
+        })
+        expect(v3).not.toHaveProperty("betaCookie")
+
+        // v4 therefore still has work to do, which v5 then undoes.
+        expect(migrateV3toV4(v3)).toHaveProperty("betaCookie")
+        expect(migrateV4toV5(migrateV3toV4(v3))).not.toHaveProperty(
+            "betaCookie",
+        )
+    })
 
     test("should return input unchanged if already at latest version schema (idempotency check)", () => {
         const v2Settings = {

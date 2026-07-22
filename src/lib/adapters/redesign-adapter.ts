@@ -82,19 +82,6 @@ export const REDESIGN_HOST_CLASSES: HostClasses = {
         " grid-column: 1 / -1;",
 }
 
-/**
- * The cookie RoyalRoad uses to gate its redesign, plus the values that force
- * each layout. Verified live: `always` → redesign, `never` → classic (this is
- * what RoyalRoad's own "Revert To Legacy UI" link sets); removing the cookie
- * lets RoyalRoad decide. All user-editable (RoyalRoad may change them) — these
- * are the built-in defaults. See beta-cookie.ts.
- */
-export const DEFAULT_BETA_COOKIE = {
-    name: "beta-ui-v2",
-    betaValue: "always",
-    classicValue: "never",
-} as const
-
 /** Adapter for the "Redesign (beta)" RoyalRoad layout (codename remaster). */
 export class RedesignAdapter extends BaseAdapter {
     readonly id = "redesign" as const

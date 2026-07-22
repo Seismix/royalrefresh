@@ -125,3 +125,23 @@ export function migrateV3toV4(oldSettings: any): ExtensionSettings {
 
     return migrated as ExtensionSettings
 }
+
+/**
+ * Migration v4→v5: drop `betaCookie`.
+ *
+ * The extension no longer forces a RoyalRoad layout — it detects whichever one
+ * was served and adapts — so the cookie settings, and the `cookies` permission
+ * they needed, are gone. v4 is left in place above rather than deleted: settings
+ * still stored at v2 or v3 have to pass through it to reach this step.
+ */
+export function migrateV4toV5(oldSettings: any): ExtensionSettings {
+    if (!oldSettings || !("betaCookie" in oldSettings)) {
+        return oldSettings as ExtensionSettings
+    }
+
+    const { betaCookie, ...migrated } = oldSettings
+
+    devLog.log("WXT Migration v4→v5: removed betaCookie", { betaCookie })
+
+    return migrated as ExtensionSettings
+}

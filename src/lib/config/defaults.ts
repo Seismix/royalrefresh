@@ -9,7 +9,6 @@ import { prefersReducedMotion } from "../utils/platform"
 // easy to remove — see src/lib/adapters/REDESIGN.md). Imported here only to
 // assemble the by-version maps below.
 import {
-    DEFAULT_BETA_COOKIE,
     REDESIGN_HOST_CLASSES,
     REDESIGN_SELECTORS,
 } from "~/lib/adapters/redesign-adapter"
@@ -59,15 +58,6 @@ const DEFAULTS: ExtensionSettings = {
     scrollBehavior: "smooth" as ScrollBehavior,
     autoExpand: false,
     selectorOverrides: { legacy: {}, redesign: {} },
-    betaCookie: {
-        // Cosmetic until the user opts in: the layout is only forced once they
-        // pick it (granting the `cookies` permission). BasicSettings re-seeds this
-        // from the live cookie on open.
-        mode: "classic",
-        name: DEFAULT_BETA_COOKIE.name,
-        betaValue: DEFAULT_BETA_COOKIE.betaValue,
-        classicValue: DEFAULT_BETA_COOKIE.classicValue,
-    },
 }
 
 /**
@@ -84,17 +74,12 @@ export function getDefaults(existingSettings?: Partial<ExtensionSettings>) {
                 ...DEFAULTS.selectorOverrides,
                 ...existingSettings.selectorOverrides,
             },
-            betaCookie: {
-                ...DEFAULTS.betaCookie,
-                ...existingSettings.betaCookie,
-            },
         }
     }
 
     return {
         ...DEFAULTS,
         selectorOverrides: { legacy: {}, redesign: {} },
-        betaCookie: { ...DEFAULTS.betaCookie },
     }
 }
 

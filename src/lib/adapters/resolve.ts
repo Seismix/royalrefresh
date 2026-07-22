@@ -1,49 +1,22 @@
 import type { ExtensionSelectors, ExtensionSettings } from "~/types/types"
 import { LegacyAdapter } from "./legacy-adapter"
-import { DEFAULT_BETA_COOKIE, RedesignAdapter } from "./redesign-adapter"
+import { RedesignAdapter } from "./redesign-adapter"
 import type { UiAdapter } from "./types"
 
 const legacyAdapter = new LegacyAdapter()
 const redesignAdapter = new RedesignAdapter()
 
-/** The subset of the beta-cookie setting that identifies "redesign is on". */
-type BetaCookieHint = { name: string; betaValue: string }
-
-/** Whether the live (non-HttpOnly) cookies contain `name=value` exactly. */
-function liveCookieEquals(name: string, value: string): boolean {
-    if (typeof document === "undefined" || !name) return false
-    return document.cookie.split(";").some((entry) => {
-        const eq = entry.indexOf("=")
-        if (eq === -1) return false
-        return (
-            entry.slice(0, eq).trim() === name &&
-            entry.slice(eq + 1).trim() === value
-        )
-    })
-}
-
 /**
- * Detect whether a document uses the redesign UI. Primary signal is the
- * redesign-only `#chapterHeroData` element (value-agnostic, works on fetched
- * documents too); the gating cookie is a confirmatory fallback for the live
- * page. The cookie name/value come from settings (user-editable in Advanced
- * Settings) so this keeps working if RoyalRoad renames the cookie.
+ * Detect whether a document uses the redesign UI, from the redesign-only
+ * `#chapterHeroData` element. Value-agnostic and works on fetched documents too.
+ *
+ * The extension deliberately does NOT decide which layout RoyalRoad serves — it
+ * adapts to whichever one arrived. Detecting from the rendered page rather than
+ * from the `beta-ui-v2` cookie also avoids trusting a stale cookie: the sentinel
+ * reflects what was actually served, a cookie only what was once requested.
  */
-export function isRedesign(
-    doc: Document = document,
-    betaCookie: BetaCookieHint = DEFAULT_BETA_COOKIE,
-): boolean {
-    if (doc.querySelector("#chapterHeroData")) return true
-
-    const isLiveDocument = typeof document !== "undefined" && doc === document
-    if (
-        isLiveDocument &&
-        liveCookieEquals(betaCookie.name, betaCookie.betaValue)
-    ) {
-        return true
-    }
-
-    return false
+export function isRedesign(doc: Document = document): boolean {
+    return !!doc.querySelector("#chapterHeroData")
 }
 
 /** Resolve the adapter for a given document (defaults to the live page).
@@ -52,11 +25,8 @@ export function isRedesign(
  * *fiction overview* document here resolves to legacy even on the redesign.
  * Callers should build the context from the live chapter page and reuse it for
  * fetched documents — as `ContentManager` does. */
-export function resolveAdapter(
-    doc: Document = document,
-    betaCookie?: BetaCookieHint,
-): UiAdapter {
-    return isRedesign(doc, betaCookie) ? redesignAdapter : legacyAdapter
+export function resolveAdapter(doc: Document = document): UiAdapter {
+    return isRedesign(doc) ? redesignAdapter : legacyAdapter
 }
 
 /** Merge an adapter's built-in selectors with the user's per-version overrides.
@@ -87,7 +57,7 @@ export function buildPageContext(
     settings: ExtensionSettings,
     doc: Document = document,
 ): PageContext {
-    const adapter = resolveAdapter(doc, settings.betaCookie)
+    const adapter = resolveAdapter(doc)
     const selectors = getActiveSelectors(adapter, settings)
     return { settings, adapter, selectors }
 }
@@ -97,8 +67,5 @@ export function resolveActiveSelectors(
     settings: ExtensionSettings,
     doc: Document = document,
 ): ExtensionSelectors {
-    return getActiveSelectors(
-        resolveAdapter(doc, settings.betaCookie),
-        settings,
-    )
+    return getActiveSelectors(resolveAdapter(doc), settings)
 }
