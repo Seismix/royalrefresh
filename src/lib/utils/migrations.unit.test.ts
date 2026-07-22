@@ -5,7 +5,30 @@ import {
     migrateV3toV4,
     migrateV4toV5,
 } from "./migrations"
-import { LEGACY_SELECTORS } from "~/lib/config/defaults"
+
+/**
+ * The flat selectors as they stood at schema v2, frozen here on purpose.
+ *
+ * Earlier this spread the legacy adapter's *live* `LEGACY_SELECTORS`, which made
+ * the fixture track today's defaults while the code under test compares against
+ * its own frozen v2 snapshot. They happen to match today, so the tests passed —
+ * but editing a legacy selector would have silently turned these "user changed
+ * nothing" inputs into "user customised everything". It also tied the migration
+ * tests to a layout that may not always ship.
+ */
+const V2_SELECTORS = {
+    prevChapterBtn: "a[href*='/chapter/']:has(> i.fa-chevron-double-left)",
+    chapterContent: ".chapter-inner",
+    chapterTitle: "h1.font-white",
+    fictionTitle: "h2.font-white",
+    togglePlacement: ".chapter > div > .actions",
+    settingsPlacement: "#settings div.modal-footer",
+    blurb: ".description .hidden-content",
+    blurbLabels: ".portlet .text-center.font-red-sunglo",
+    closeButtonSelector:
+        "#settings > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > button:last-child",
+    reportPlacement: "div.col-lg-3:nth-child(3)",
+} as const
 
 // Helper to simulate the full migration chain
 // As you add more versions, update this function
@@ -78,7 +101,7 @@ describe("Settings Migrations", () => {
                 enableJump: true,
                 scrollBehavior: "smooth",
                 autoExpand: false,
-                ...LEGACY_SELECTORS,
+                ...V2_SELECTORS,
                 // user customized one selector
                 prevChapterBtn: "a.my-custom-prev",
             },
@@ -101,7 +124,7 @@ describe("Settings Migrations", () => {
                 enableJump: true,
                 scrollBehavior: "smooth",
                 autoExpand: false,
-                ...LEGACY_SELECTORS,
+                ...V2_SELECTORS,
             },
             expected: {
                 selectorOverrides: { legacy: {}, redesign: {} },
@@ -117,7 +140,7 @@ describe("Settings Migrations", () => {
                 enableJump: true,
                 scrollBehavior: "smooth",
                 autoExpand: false,
-                ...LEGACY_SELECTORS,
+                ...V2_SELECTORS,
                 reportPlacement: "div.my-custom-sidebar",
             },
             expected: {
@@ -194,7 +217,7 @@ describe("Settings Migrations", () => {
             enableJump: true,
             scrollBehavior: "smooth",
             autoExpand: false,
-            ...LEGACY_SELECTORS,
+            ...V2_SELECTORS,
         })
         expect(v3).not.toHaveProperty("betaCookie")
 
