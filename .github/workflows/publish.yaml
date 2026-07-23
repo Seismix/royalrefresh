@@ -20,7 +20,7 @@ jobs:
             has_chrome: ${{ steps.chrome.outputs.has_chrome }}
             version: ${{ steps.version.outputs.version }}
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
               with:
                   fetch-depth: 0
 
@@ -61,15 +61,15 @@ jobs:
         if: needs.check.outputs.should_publish == 'true'
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
 
             - name: Install pnpm
-              uses: pnpm/action-setup@v4
+              uses: pnpm/action-setup@v6
               with:
                   version: 10
 
             - name: Setup Node.js
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v7
               with:
                   node-version: lts/*
                   cache: "pnpm"
@@ -96,15 +96,15 @@ jobs:
         if: needs.check.outputs.should_publish == 'true' && needs.check.outputs.has_chrome == 'true'
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
 
             - name: Install pnpm
-              uses: pnpm/action-setup@v4
+              uses: pnpm/action-setup@v6
               with:
                   version: 10
 
             - name: Setup Node.js
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v7
               with:
                   node-version: lts/*
                   cache: "pnpm"
@@ -143,7 +143,7 @@ jobs:
         env:
             VERSION: ${{ needs.check.outputs.version }}
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
 
             - name: Tag and create GitHub release
               env:

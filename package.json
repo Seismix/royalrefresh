@@ -16,6 +16,7 @@
         "zip": "wxt zip",
         "zip:firefox": "wxt zip -b firefox",
         "check": "svelte-check --tsconfig ./tsconfig.json",
+        "chrome:token": "node scripts/chrome-refresh-token.ts",
         "postinstall": "wxt prepare",
         "lint": "pnpm build && web-ext lint --source-dir .output/firefox-mv2",
         "test": "playwright test --project=e2e --reporter=list",

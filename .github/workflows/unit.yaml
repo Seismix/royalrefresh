@@ -1,15 +1,13 @@
 name: Unit Tests
 
+# No `paths:` filter on purpose. This is a required status check, and a
+# workflow that is skipped by a path filter never reports a status at all, so
+# the check sits on "Expected" and the PR can never merge. Running it on every
+# PR costs ~30s and keeps the gate honest.
 on:
     pull_request:
         branches: [main, dev]
         types: [opened, reopened, synchronize, ready_for_review]
-        paths:
-            - 'src/**'
-            - 'vitest.config.ts'
-            - 'package.json'
-            - 'pnpm-lock.yaml'
-            - 'wxt.config.ts'
 
 jobs:
     unit:
@@ -18,15 +16,15 @@ jobs:
         timeout-minutes: 10
 
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
 
             - name: Install pnpm
-              uses: pnpm/action-setup@v4
+              uses: pnpm/action-setup@v6
               with:
                   version: 10
 
             - name: Setup node.js
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v7
               with:
                   node-version: lts/*
                   cache: "pnpm"
