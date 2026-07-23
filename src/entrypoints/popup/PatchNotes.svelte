@@ -80,23 +80,19 @@
         ),
     )
 
-    // Store references to article elements
-    let articleRefs = $state<Record<string, HTMLElement | null>>({})
-
-    const toggleExpanded = async (version: string) => {
+    // The card to scroll is always the trigger's own <article> ancestor, so it's
+    // reached with `closest` rather than kept in a map of element refs.
+    const toggleExpanded = async (version: string, trigger: HTMLElement) => {
         const wasExpanded = expandedStates[version]
         expandedStates[version] = !expandedStates[version]
 
         // If we're expanding (not collapsing), scroll into view after the DOM updates
         if (!wasExpanded && settings) {
             await tick()
-            const article = articleRefs[version]
-            if (article) {
-                article.scrollIntoView({
-                    behavior: settings.scrollBehavior || "smooth",
-                    block: "nearest",
-                })
-            }
+            trigger.closest("article")?.scrollIntoView({
+                behavior: settings.scrollBehavior || "smooth",
+                block: "nearest",
+            })
         }
     }
 </script>
@@ -117,13 +113,12 @@
         {:else}
             {#each patchNotes as update (update.version)}
                 {@const isExpanded = expandedStates[update.version]}
-                <article
-                    class="update-card"
-                    bind:this={articleRefs[update.version]}>
+                <article class="update-card">
                     <button
                         type="button"
                         class="update-card__header"
-                        onclick={() => toggleExpanded(update.version)}
+                        onclick={(event) =>
+                            toggleExpanded(update.version, event.currentTarget)}
                         aria-expanded={isExpanded}
                         aria-label={isExpanded
                             ? `Collapse version ${update.version}`

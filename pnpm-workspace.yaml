@@ -1,3 +1,15 @@
 allowBuilds:
   esbuild: true
   spawn-sync: false
+
+# Security patches for transitive dev dependencies that their parents have not
+# picked up yet. All of these come in via build/dev tooling (mostly
+# wxt -> web-ext-run) and none of them ship in the extension bundle, but pinning
+# them keeps `pnpm audit` clean. Drop an entry once the parent bumps it itself.
+overrides:
+  shell-quote: ">=1.8.5"
+  adm-zip: ">=0.6.0"
+  tmp: ">=0.2.6"
+  uuid: ">=11.1.1"
+  yaml: ">=2.8.3"
+  esbuild: ">=0.28.1"

@@ -1,14 +1,14 @@
 import type { ExtensionSettings } from "~/types/types"
 import { fetchHtml } from "./"
 import { ContentCache, ContentProcessor } from "./"
-import {
-    findPreviousChapterUrl,
-    findFictionOverviewUrl,
-} from "~/lib/utils/dom-utils"
+import { buildPageContext } from "~/lib/adapters"
 
 /**
  * Content Manager Service - Orchestrates content fetching, caching, and processing
- * Returns result objects without side effects
+ * Returns result objects without side effects.
+ *
+ * Each entry point resolves a PageContext (active UI adapter + selectors) from
+ * the live page, then drives the version-agnostic fetch/cache/process flow.
  */
 export class ContentManager {
     /**
@@ -18,8 +18,12 @@ export class ContentManager {
      * @returns Processed recap content or error message
      */
     static async fetchRecap(settings: ExtensionSettings) {
+        const ctx = buildPageContext(settings)
+
         // 1. Find previous chapter URL from DOM
-        const prevChapterUrlResult = findPreviousChapterUrl(settings)
+        const prevChapterUrlResult = ctx.adapter.findPreviousChapterUrl(
+            ctx.selectors,
+        )
         if ("error" in prevChapterUrlResult) {
             return prevChapterUrlResult
         }
@@ -30,10 +34,7 @@ export class ContentManager {
         const cachedHtml = ContentCache.getRecap(prevChapterUrl)
         if (cachedHtml) {
             // Use cached content
-            const processResult = ContentProcessor.createRecap(
-                cachedHtml,
-                settings,
-            )
+            const processResult = ContentProcessor.createRecap(cachedHtml, ctx)
             if ("error" in processResult) {
                 return processResult
             }
@@ -52,7 +53,7 @@ export class ContentManager {
         // 5. Process the content
         const processResult = ContentProcessor.createRecap(
             fetchResult.data,
-            settings,
+            ctx,
         )
         if ("error" in processResult) {
             return processResult
@@ -68,8 +69,12 @@ export class ContentManager {
      * @returns Processed blurb content or error message
      */
     static async fetchBlurb(settings: ExtensionSettings) {
+        const ctx = buildPageContext(settings)
+
         // 1. Find fiction overview URL from DOM
-        const overviewUrlResult = findFictionOverviewUrl(settings)
+        const overviewUrlResult = ctx.adapter.findFictionOverviewUrl(
+            ctx.selectors,
+        )
         if ("error" in overviewUrlResult) {
             return overviewUrlResult
         }
@@ -85,7 +90,7 @@ export class ContentManager {
         // 3. Process the content
         const processResult = ContentProcessor.createBlurb(
             fetchResult.data,
-            settings,
+            ctx,
         )
         if ("error" in processResult) {
             return processResult
@@ -103,8 +108,12 @@ export class ContentManager {
     static refreshRecapFromCache(
         settings: ExtensionSettings,
     ): { content: string; type: "recap" } | { error: string } {
+        const ctx = buildPageContext(settings)
+
         // 1. Find previous chapter URL
-        const prevChapterUrlResult = findPreviousChapterUrl(settings)
+        const prevChapterUrlResult = ctx.adapter.findPreviousChapterUrl(
+            ctx.selectors,
+        )
         if ("error" in prevChapterUrlResult) {
             return prevChapterUrlResult
         }
@@ -120,7 +129,7 @@ export class ContentManager {
         }
 
         // 3. Process with new settings
-        const processResult = ContentProcessor.createRecap(cachedHtml, settings)
+        const processResult = ContentProcessor.createRecap(cachedHtml, ctx)
         if ("error" in processResult) {
             return processResult
         }
@@ -134,7 +143,10 @@ export class ContentManager {
      * @returns True if content is cached
      */
     static hasRecapInCache(settings: ExtensionSettings) {
-        const prevChapterUrlResult = findPreviousChapterUrl(settings)
+        const ctx = buildPageContext(settings)
+        const prevChapterUrlResult = ctx.adapter.findPreviousChapterUrl(
+            ctx.selectors,
+        )
         if ("error" in prevChapterUrlResult) {
             return false
         }

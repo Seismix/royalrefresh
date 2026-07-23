@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { untrack } from "svelte"
     import {
         ActionButtons,
         BackButton,
@@ -10,13 +9,16 @@
     import { PageHeader } from "~/components/layout"
     import { AdvancedSettings, BasicSettings } from "~/components/settings"
     import { getDefaults } from "~/lib/config/defaults"
+    import { settingsAreValid } from "~/lib/config/validation"
     import { getSettings, watchSettings } from "~/lib/utils/storage-utils"
     import type { ExtensionSettings } from "~/types/types"
 
     type View = "settings" | "patch-notes"
 
     let localSettings = $state<ExtensionSettings | null>(null)
-    let isValid = $state<boolean>(true)
+    // Derived straight from the settings rather than pushed up from BasicSettings:
+    // validity is a pure function of them, so a callback would only add a lag.
+    const isValid = $derived(settingsAreValid(localSettings))
     let isFirefox = $state(import.meta.env.FIREFOX)
     let currentView = $state<View>("settings")
 
@@ -32,23 +34,14 @@
 
     initSettings()
 
-    // Effect: Watch for external settings changes (from other tabs/popups)
-    $effect(() => {
-        if (!localSettings) return
-
-        return watchSettings((newValue) => {
-            if (newValue) {
-                // Use untrack to prevent infinite loops when updating state in effect
-                untrack(() => {
-                    localSettings = newValue
-                })
-            }
-        })
-    })
-
-    function handleValidationChange(valid: boolean) {
-        isValid = valid
-    }
+    // Effect: subscribe to external settings changes (other tabs/popups).
+    // Reads no state on purpose, so it subscribes once rather than tearing the
+    // subscription down and rebuilding it on every incoming change.
+    $effect(() =>
+        watchSettings((newValue) => {
+            if (newValue) localSettings = newValue
+        }),
+    )
 
     function showPatchNotes() {
         currentView = "patch-notes"
@@ -70,9 +63,7 @@
         {#if !localSettings}
             <p>Loading settings...</p>
         {:else}
-            <BasicSettings
-                bind:settings={localSettings}
-                onValidationChange={handleValidationChange} />
+            <BasicSettings bind:settings={localSettings} />
 
             <AdvancedSettings bind:settings={localSettings} />
 

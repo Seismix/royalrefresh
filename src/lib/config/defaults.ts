@@ -1,26 +1,21 @@
-import { ExtensionSelectors, ExtensionSettings } from "~/types/types"
+import { ExtensionSettings } from "~/types/types"
 import { prefersReducedMotion } from "../utils/platform"
-
-export const DEFAULT_SELECTORS: ExtensionSelectors = {
-    prevChapterBtn: "a[href*='/chapter/']:has(> i.fa-chevron-double-left)",
-    chapterContent: ".chapter-inner",
-    chapterTitle: "h1.font-white",
-    fictionTitle: "h2.font-white",
-    togglePlacement: ".chapter > div > .actions",
-    settingsPlacement: "#settings div.modal-footer",
-    blurb: ".description .hidden-content",
-    blurbLabels: ".portlet .text-center.font-red-sunglo",
-    closeButtonSelector:
-        "#settings > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > button:last-child",
-    reportPlacement: "div.col-lg-3:nth-child(3)",
-}
+// Per-layout values (selectors, button look) live with their adapter, and the
+// registry is the only module that names the shipped layouts. Nothing here
+// mentions one, so adding or dropping a layout doesn't touch this file.
+import {
+    DEFAULT_SELECTORS_BY_VERSION,
+    emptyOverrides,
+    FALLBACK_ADAPTER,
+    type UiVersion,
+} from "~/lib/adapters/registry"
 
 const DEFAULTS: ExtensionSettings = {
     wordCount: 250,
     enableJump: true,
     scrollBehavior: "smooth" as ScrollBehavior,
     autoExpand: false,
-    ...DEFAULT_SELECTORS,
+    selectorOverrides: emptyOverrides(),
 }
 
 /**
@@ -33,10 +28,17 @@ export function getDefaults(existingSettings?: Partial<ExtensionSettings>) {
         return {
             ...DEFAULTS,
             ...existingSettings,
+            selectorOverrides: {
+                ...DEFAULTS.selectorOverrides,
+                ...existingSettings.selectorOverrides,
+            },
         }
     }
 
-    return { ...DEFAULTS }
+    return {
+        ...DEFAULTS,
+        selectorOverrides: emptyOverrides(),
+    }
 }
 
 /**
@@ -47,28 +49,34 @@ export function hasReducedMotionOverride(): boolean {
 }
 
 /**
- * Get selectors that should be present on chapter pages
+ * Get selectors that should be present on chapter pages for a given UI version
  */
-export function getChapterPageSelectors() {
+export function getChapterPageSelectors(
+    version: UiVersion = FALLBACK_ADAPTER.id,
+) {
+    const s = DEFAULT_SELECTORS_BY_VERSION[version]
     return {
-        prevChapterBtn: DEFAULT_SELECTORS.prevChapterBtn,
-        chapterContent: DEFAULT_SELECTORS.chapterContent,
-        chapterTitle: DEFAULT_SELECTORS.chapterTitle,
-        fictionTitle: DEFAULT_SELECTORS.fictionTitle,
-        togglePlacement: DEFAULT_SELECTORS.togglePlacement,
-        settingsPlacement: DEFAULT_SELECTORS.settingsPlacement,
-        closeButtonSelector: DEFAULT_SELECTORS.closeButtonSelector,
-        reportPlacement: DEFAULT_SELECTORS.reportPlacement,
+        prevChapterBtn: s.prevChapterBtn,
+        chapterContent: s.chapterContent,
+        chapterTitle: s.chapterTitle,
+        fictionTitle: s.fictionTitle,
+        togglePlacement: s.togglePlacement,
+        settingsPlacement: s.settingsPlacement,
+        closeButtonSelector: s.closeButtonSelector,
+        reportPlacement: s.reportPlacement,
     }
 }
 
 /**
- * Get selectors that should be present on fiction/story pages
+ * Get selectors that should be present on fiction/story pages for a UI version
  */
-export function getFictionPageSelectors() {
+export function getFictionPageSelectors(
+    version: UiVersion = FALLBACK_ADAPTER.id,
+) {
+    const s = DEFAULT_SELECTORS_BY_VERSION[version]
     return {
-        blurb: DEFAULT_SELECTORS.blurb,
-        blurbLabels: DEFAULT_SELECTORS.blurbLabels,
+        blurb: s.blurb,
+        blurbLabels: s.blurbLabels,
     }
 }
 

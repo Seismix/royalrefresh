@@ -9,10 +9,10 @@
     } from "~/components/buttons"
     import AdvancedSettingsView from "~/entrypoints/popup/AdvancedSettingsView.svelte"
     import PatchNotes from "~/entrypoints/popup/PatchNotes.svelte"
-    import { untrack } from "svelte"
     import { PageHeader } from "~/components/layout"
     import { BasicSettings } from "~/components/settings"
     import { getDefaults } from "~/lib/config/defaults"
+    import { settingsAreValid } from "~/lib/config/validation"
     import { BrowserType, currentBrowser } from "~/lib/utils/platform"
     import { browser } from "wxt/browser"
     import { isChapterUrl } from "~/lib/utils/dom-utils"
@@ -22,7 +22,10 @@
     type View = "settings" | "patch-notes" | "advanced-settings"
 
     let localSettings = $state<ExtensionSettings | null>(null)
-    let isValid = $state<boolean>(true)
+    // Derived straight from the settings rather than pushed up from BasicSettings.
+    // This also keeps it correct in the advanced/patch-notes views, where
+    // BasicSettings is unmounted and could no longer report anything.
+    const isValid = $derived(settingsAreValid(localSettings))
     let currentView = $state<View>("settings")
     let activeTabUrl = $state("")
     const isAndroidFirefox = currentBrowser === BrowserType.AndroidFirefox
@@ -51,23 +54,14 @@
 
     init()
 
-    // Effect: Watch for external settings changes (from other tabs/popups)
-    $effect(() => {
-        if (!localSettings) return
-
-        return watchSettings((newValue) => {
-            if (newValue) {
-                // Use untrack to prevent infinite loops when updating state in effect
-                untrack(() => {
-                    localSettings = newValue
-                })
-            }
-        })
-    })
-
-    function handleValidationChange(valid: boolean) {
-        isValid = valid
-    }
+    // Effect: subscribe to external settings changes (other tabs/popups).
+    // Reads no state on purpose, so it subscribes once rather than tearing the
+    // subscription down and rebuilding it on every incoming change.
+    $effect(() =>
+        watchSettings((newValue) => {
+            if (newValue) localSettings = newValue
+        }),
+    )
 
     function showPatchNotes() {
         currentView = "patch-notes"
@@ -102,9 +96,7 @@
             {#if !localSettings}
                 <p>Loading settings...</p>
             {:else}
-                <BasicSettings
-                    bind:settings={localSettings}
-                    onValidationChange={handleValidationChange} />
+                <BasicSettings bind:settings={localSettings} />
             {/if}
         </div>
 

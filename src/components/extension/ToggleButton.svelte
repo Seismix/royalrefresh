@@ -6,19 +6,13 @@
 
     let {
         type = "recap",
+        className = "btn btn-primary btn-circle",
     }: {
         type?: ContentType
+        className?: string
     } = $props()
 
-    // Reference to the button element
-    let buttonElement: HTMLButtonElement
-
-    const handleToggle = async (event: MouseEvent) => {
-        // Blur the button to remove focus/active state
-        if (buttonElement) {
-            buttonElement.blur()
-        }
-
+    const toggle = async () => {
         // Ignore clicks while a fetch is already in flight
         if (recapState.isLoading) {
             return
@@ -51,15 +45,36 @@
         }
     }
 
+    /**
+     * Attach the click handler natively (target phase) rather than via Svelte's
+     * `onclick`. This is load-bearing, not a style choice: on the redesign the
+     * toggle mounts inside RoyalRoad's `.rr-dialog` cluster, which opens the
+     * Reading Preferences modal on a bubbled click. Svelte delegates `onclick`
+     * to the app root, so a delegated handler's `stopPropagation` would run
+     * AFTER the event had already bubbled through `.rr-dialog` — too late.
+     * A native target-phase listener stops it in time. Harmless on legacy,
+     * where no ancestor listens.
+     */
+    const nativeClick = (node: HTMLButtonElement) => {
+        const onClick = (event: MouseEvent) => {
+            event.stopPropagation()
+            // Remove focus/active state left behind by the click
+            node.blur()
+            void toggle()
+        }
+
+        node.addEventListener("click", onClick)
+        return () => node.removeEventListener("click", onClick)
+    }
+
     let buttonText = $derived(type === "recap" ? "Recap" : "Blurb")
     let iconName = $derived(type === "recap" ? "book" : "info-circle")
     let buttonId = $derived(type === "recap" ? "recapButton" : "blurbButton")
 </script>
 
 <button
-    bind:this={buttonElement}
-    class="btn btn-primary btn-circle"
-    onclick={handleToggle}
+    {@attach nativeClick}
+    class={className}
     id={buttonId}
     disabled={recapState.isLoading}
     style="outline: none !important;">

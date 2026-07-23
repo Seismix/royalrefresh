@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest"
 import { ContentProcessor } from "./content-processor"
 import { getDefaults } from "~/lib/config/defaults"
+import { buildPageContext } from "~/lib/adapters"
 import { prevChapterHtml, fictionOverviewHtml } from "~/tests/fixtures"
 import type { ExtensionSettings } from "~/types/types"
 
@@ -9,6 +10,11 @@ import type { ExtensionSettings } from "~/types/types"
 // seed document.body with the fiction title for the happy paths.
 const settings = (overrides: Partial<ExtensionSettings> = {}) =>
     getDefaults(overrides) as ExtensionSettings
+
+// The processor now takes a resolved PageContext. The seeded DOM has no
+// #chapterHeroData / beta cookie, so this resolves the legacy adapter.
+const ctx = (overrides: Partial<ExtensionSettings> = {}) =>
+    buildPageContext(settings(overrides))
 
 function seedFictionTitle(title = "Test Story") {
     document.body.innerHTML = `<a href="https://www.royalroad.com/fiction/1/x"><h2 class="font-white">${title}</h2></a>`
@@ -20,7 +26,7 @@ describe("ContentProcessor.createRecap", () => {
     })
 
     it("builds the recap heading, chapter name and word-count line", () => {
-        const result = ContentProcessor.createRecap(prevChapterHtml, settings())
+        const result = ContentProcessor.createRecap(prevChapterHtml, ctx())
         expect("content" in result).toBe(true)
         if ("error" in result) throw new Error(result.error)
 
@@ -32,7 +38,7 @@ describe("ContentProcessor.createRecap", () => {
     })
 
     it("strips <script> tags via the sanitizer", () => {
-        const result = ContentProcessor.createRecap(prevChapterHtml, settings())
+        const result = ContentProcessor.createRecap(prevChapterHtml, ctx())
         if ("error" in result) throw new Error(result.error)
 
         expect(result.content).not.toContain("<script")
@@ -45,7 +51,7 @@ describe("ContentProcessor.createRecap", () => {
         // the earlier paragraphs.
         const result = ContentProcessor.createRecap(
             prevChapterHtml,
-            settings({ wordCount: 10 }),
+            ctx({ wordCount: 10 }),
         )
         if ("error" in result) throw new Error(result.error)
 
@@ -59,7 +65,7 @@ describe("ContentProcessor.createRecap", () => {
         // prefixed with the "..." marker.
         const result = ContentProcessor.createRecap(
             prevChapterHtml,
-            settings({ wordCount: 4 }),
+            ctx({ wordCount: 4 }),
         )
         if ("error" in result) throw new Error(result.error)
 
@@ -70,7 +76,7 @@ describe("ContentProcessor.createRecap", () => {
 
     it("returns {error} when the fiction title selector is missing", () => {
         document.body.innerHTML = "<div>no title here</div>"
-        const result = ContentProcessor.createRecap(prevChapterHtml, settings())
+        const result = ContentProcessor.createRecap(prevChapterHtml, ctx())
 
         expect("error" in result).toBe(true)
         if ("content" in result) throw new Error("expected error")
@@ -80,7 +86,7 @@ describe("ContentProcessor.createRecap", () => {
     it("returns {error} when the previous chapter title selector is missing", () => {
         const result = ContentProcessor.createRecap(
             "<html><body><div class='chapter-inner'><p>x</p></div></body></html>",
-            settings(),
+            ctx(),
         )
 
         expect("error" in result).toBe(true)
@@ -91,7 +97,7 @@ describe("ContentProcessor.createRecap", () => {
     it("returns {error} when the chapter content selector is missing", () => {
         const result = ContentProcessor.createRecap(
             "<html><body><h1 class='font-white'>Chapter 1</h1></body></html>",
-            settings(),
+            ctx(),
         )
 
         expect("error" in result).toBe(true)
@@ -106,10 +112,7 @@ describe("ContentProcessor.createBlurb", () => {
     })
 
     it("extracts the blurb body and labels, with a Blurb heading", () => {
-        const result = ContentProcessor.createBlurb(
-            fictionOverviewHtml,
-            settings(),
-        )
+        const result = ContentProcessor.createBlurb(fictionOverviewHtml, ctx())
         if ("error" in result) throw new Error(result.error)
 
         expect(result.content).toContain("Blurb: Test Story")
@@ -120,10 +123,7 @@ describe("ContentProcessor.createBlurb", () => {
     })
 
     it("strips <script> from the blurb via the sanitizer", () => {
-        const result = ContentProcessor.createBlurb(
-            fictionOverviewHtml,
-            settings(),
-        )
+        const result = ContentProcessor.createBlurb(fictionOverviewHtml, ctx())
         if ("error" in result) throw new Error(result.error)
 
         expect(result.content).not.toContain("<script")
@@ -133,7 +133,7 @@ describe("ContentProcessor.createBlurb", () => {
     it("returns {error} when the blurb selector is missing", () => {
         const result = ContentProcessor.createBlurb(
             "<html><body><div>nothing</div></body></html>",
-            settings(),
+            ctx(),
         )
 
         expect("error" in result).toBe(true)
@@ -144,7 +144,7 @@ describe("ContentProcessor.createBlurb", () => {
     it("returns {error} when the blurb is present but empty", () => {
         const result = ContentProcessor.createBlurb(
             "<html><body><div class='description'><div class='hidden-content'>   </div></div></body></html>",
-            settings(),
+            ctx(),
         )
 
         expect("error" in result).toBe(true)
@@ -154,10 +154,7 @@ describe("ContentProcessor.createBlurb", () => {
 
     it("returns {error} when the fiction title is missing", () => {
         document.body.innerHTML = "<div>no title</div>"
-        const result = ContentProcessor.createBlurb(
-            fictionOverviewHtml,
-            settings(),
-        )
+        const result = ContentProcessor.createBlurb(fictionOverviewHtml, ctx())
 
         expect("error" in result).toBe(true)
         if ("content" in result) throw new Error("expected error")
