@@ -47,27 +47,27 @@
     },
     "homepage": "https://github.com/Seismix/royalrefresh#readme",
     "devDependencies": {
-        "@playwright/test": "^1.61.0",
-        "@sveltejs/vite-plugin-svelte": "^7.1.2",
-        "@testing-library/jest-dom": "^6.9.1",
-        "@testing-library/svelte": "^5.3.1",
-        "@tsconfig/svelte": "^5.0.6",
+        "@playwright/test": "^1.61.1",
+        "@sveltejs/vite-plugin-svelte": "^6.2.4",
+        "@testing-library/jest-dom": "^6.10.0",
+        "@testing-library/svelte": "^5.4.2",
+        "@tsconfig/svelte": "^5.0.8",
         "@types/firefox-webext-browser": "^143.0.0",
-        "@types/node": "^25.0.9",
-        "@vitest/coverage-v8": "^3.2.6",
-        "@wxt-dev/module-svelte": "^2.0.4",
-        "happy-dom": "^20.10.6",
-        "prettier": "^3.8.0",
-        "prettier-plugin-svelte": "^3.4.1",
-        "svelte": "^5.47.1",
-        "svelte-check": "^4.3.5",
+        "@types/node": "^25.9.5",
+        "@vitest/coverage-v8": "^3.2.7",
+        "@wxt-dev/module-svelte": "^2.0.5",
+        "jsdom": "^29.1.1",
+        "prettier": "^3.9.6",
+        "prettier-plugin-svelte": "^3.5.2",
+        "svelte": "^5.56.7",
+        "svelte-check": "^4.7.3",
         "tslib": "^2.8.1",
         "typescript": "^5.9.3",
-        "vitest": "^3.2.6",
-        "web-ext": "^9.2.0",
-        "wxt": "^0.20.13"
+        "vitest": "^3.2.7",
+        "web-ext": "^9.4.0",
+        "wxt": "^0.20.27"
     },
     "dependencies": {
-        "dompurify": "^3.3.1"
+        "dompurify": "^3.4.12"
     }
 }

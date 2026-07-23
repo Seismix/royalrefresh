@@ -22,11 +22,16 @@ export default defineConfig({
         WxtVitest(),
     ],
     resolve: {
-        // Use the browser build of Svelte (and deps) under happy-dom.
+        // Use the browser build of Svelte (and deps) in the test DOM.
         conditions: ["browser"],
     },
     test: {
-        environment: "happy-dom",
+        // jsdom, not happy-dom: DOMPurify (>=3.4) mis-walks the DOM under
+        // happy-dom and removes the wrong nodes, so <script> survives
+        // sanitization there while <p> gets stripped. The same input sanitizes
+        // correctly under jsdom and in real Chromium, so the sanitizer tests
+        // are only meaningful on jsdom.
+        environment: "jsdom",
         globals: true,
         include: ["src/**/*.unit.test.ts", "src/**/*.svelte.test.ts"],
         setupFiles: ["src/tests/setup/vitest-setup.ts"],
