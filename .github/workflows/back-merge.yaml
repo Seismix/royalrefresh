@@ -1,0 +1,57 @@
+name: Back-merge main into dev
+
+# `main` enforces linear history and the repo only allows squash merges, so
+# every dev -> main release lands as a single new commit with no ancestry link
+# back to dev. Without repair, the next release re-applies every commit main
+# already has and conflicts on every touched file.
+#
+# This records main as an ancestor of dev using `-s ours`, which keeps dev's
+# tree byte-for-byte and changes no files - it only fixes the history graph.
+#
+# Requires a BACKMERGE_TOKEN secret: a fine-grained PAT with Contents: read and
+# write on this repo. GITHUB_TOKEN cannot be used, because dev requires pull
+# requests and a PR opened by GITHUB_TOKEN does not trigger dev's required
+# checks, so it could never merge. Branch protection on dev has
+# enforce_admins disabled, so a PAT owned by an admin may push directly.
+
+on:
+    push:
+        branches: [main]
+    workflow_dispatch:
+
+jobs:
+    back-merge:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v7
+              with:
+                  ref: dev
+                  fetch-depth: 0
+                  token: ${{ secrets.BACKMERGE_TOKEN }}
+
+            - name: Reconcile main into dev
+              run: |
+                  git config user.name "github-actions[bot]"
+                  git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                  git fetch origin main
+
+                  if git merge-base --is-ancestor origin/main HEAD; then
+                      echo "main is already an ancestor of dev - nothing to reconcile."
+                      exit 0
+                  fi
+
+                  git merge -s ours origin/main -m "chore: reconcile squash-merged main into dev
+
+                  Automated by .github/workflows/back-merge.yaml. Records main as
+                  an ancestor of dev so the next release merges cleanly. Changes
+                  no files."
+
+                  # Guard against a bad merge: dev's tree must be untouched.
+                  if [ -n "$(git diff --stat origin/dev HEAD)" ]; then
+                      echo "Refusing to push - the merge changed files, which -s ours must never do."
+                      git diff --stat origin/dev HEAD
+                      exit 1
+                  fi
+
+                  git push origin dev
+                  echo "Reconciled. main is now an ancestor of dev."
