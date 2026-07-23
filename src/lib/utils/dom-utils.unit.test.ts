@@ -1,13 +1,9 @@
 import { describe, expect, it } from "vitest"
-import {
-    isChapterUrl,
-    findPreviousChapterUrl,
-    findFictionOverviewUrl,
-} from "./dom-utils"
-import { getDefaults } from "~/lib/config/defaults"
-import type { ExtensionSettings } from "~/types/types"
+import { isChapterUrl } from "./dom-utils"
+import { LegacyAdapter, LEGACY_SELECTORS } from "~/lib/adapters/legacy-adapter"
 
-const settings = getDefaults() as ExtensionSettings
+const adapter = new LegacyAdapter()
+const sel = LEGACY_SELECTORS
 
 describe("isChapterUrl", () => {
     it("is true when 'chapter' is a path segment", () => {
@@ -29,7 +25,7 @@ describe("isChapterUrl", () => {
     })
 })
 
-describe("findPreviousChapterUrl", () => {
+describe("LegacyAdapter.findPreviousChapterUrl", () => {
     it("returns the href when the prev-chapter button is a valid anchor", () => {
         document.body.innerHTML = `
             <div class="actions">
@@ -38,7 +34,7 @@ describe("findPreviousChapterUrl", () => {
                 </a>
             </div>`
 
-        const result = findPreviousChapterUrl(settings)
+        const result = adapter.findPreviousChapterUrl(sel)
         expect("data" in result).toBe(true)
         if ("error" in result) throw new Error(result.error)
         expect(result.data).toBe(
@@ -50,7 +46,7 @@ describe("findPreviousChapterUrl", () => {
         // No matching anchor at all -> querySelector returns null
         document.body.innerHTML = `<div class="actions"><span>no link</span></div>`
 
-        const result = findPreviousChapterUrl(settings)
+        const result = adapter.findPreviousChapterUrl(sel)
         expect("error" in result).toBe(true)
         if ("data" in result) throw new Error("expected error")
         expect(result.error).toMatch(/previous chapter button/i)
@@ -61,8 +57,8 @@ describe("findPreviousChapterUrl", () => {
         // "no href" branch we use a custom selector that matches an hrefless <a>.
         document.body.innerHTML = `<a id="prev"><i class="fa fa-chevron-double-left"></i></a>`
 
-        const result = findPreviousChapterUrl({
-            ...settings,
+        const result = adapter.findPreviousChapterUrl({
+            ...sel,
             prevChapterBtn: "#prev",
         })
         expect("error" in result).toBe(true)
@@ -71,14 +67,14 @@ describe("findPreviousChapterUrl", () => {
     })
 })
 
-describe("findFictionOverviewUrl", () => {
-    it("returns the parent anchor href on success", () => {
+describe("LegacyAdapter.findFictionOverviewUrl", () => {
+    it("returns the wrapping anchor href on success", () => {
         document.body.innerHTML = `
             <a href="https://www.royalroad.com/fiction/1/test-story">
                 <h2 class="font-white">Test Story</h2>
             </a>`
 
-        const result = findFictionOverviewUrl(settings)
+        const result = adapter.findFictionOverviewUrl(sel)
         expect("data" in result).toBe(true)
         if ("error" in result) throw new Error(result.error)
         expect(result.data).toBe(
@@ -89,16 +85,16 @@ describe("findFictionOverviewUrl", () => {
     it("errors when the fiction title element is missing", () => {
         document.body.innerHTML = `<div>nothing</div>`
 
-        const result = findFictionOverviewUrl(settings)
+        const result = adapter.findFictionOverviewUrl(sel)
         expect("error" in result).toBe(true)
         if ("data" in result) throw new Error("expected error")
         expect(result.error).toMatch(/story title/i)
     })
 
-    it("errors when the title's parent is not an anchor", () => {
+    it("errors when the title has no anchor ancestor", () => {
         document.body.innerHTML = `<div><h2 class="font-white">Test Story</h2></div>`
 
-        const result = findFictionOverviewUrl(settings)
+        const result = adapter.findFictionOverviewUrl(sel)
         expect("error" in result).toBe(true)
         if ("data" in result) throw new Error("expected error")
         expect(result.error).toMatch(/overview page/i)

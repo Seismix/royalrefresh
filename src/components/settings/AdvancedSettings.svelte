@@ -1,14 +1,50 @@
 <script lang="ts">
-    import type { ExtensionSettings } from "~/types/types"
+    import type { ExtensionSelectors, ExtensionSettings } from "~/types/types"
+    import {
+        ADAPTERS,
+        DEFAULT_SELECTORS_BY_VERSION,
+        FALLBACK_ADAPTER,
+        type UiVersion,
+    } from "~/lib/adapters"
 
     let {
         settings = $bindable(),
     }: {
         settings: ExtensionSettings
     } = $props()
+
+    // Which layout's selectors are being edited
+    let version = $state<UiVersion>(FALLBACK_ADAPTER.id)
+
+    // Overrides are keyed by adapter id and stored settings can predate a
+    // layout, so make sure every shipped layout has a bucket to bind into.
+    for (const adapter of ADAPTERS) {
+        settings.selectorOverrides[adapter.id] ??= {}
+    }
+
+    const fields: { key: keyof ExtensionSelectors; label: string }[] = [
+        { key: "prevChapterBtn", label: "Previous chapter button:" },
+        { key: "togglePlacement", label: "Recap button placement:" },
+        { key: "settingsPlacement", label: "Settings button placement:" },
+        { key: "reportPlacement", label: "Report link placement:" },
+        { key: "chapterContent", label: "Chapter content:" },
+        { key: "chapterTitle", label: "Chapter title:" },
+        { key: "fictionTitle", label: "Fiction title:" },
+        { key: "blurb", label: "Story blurb:" },
+        { key: "blurbLabels", label: "Story blurb labels:" },
+        {
+            key: "closeButtonSelector",
+            label: "Button to close settings modal:",
+        },
+    ]
+
+    // Built-in defaults for the selected layout, shown as placeholders
+    let defaults = $derived(DEFAULT_SELECTORS_BY_VERSION[version])
 </script>
 
 <h2>Advanced Settings</h2>
+
+<h3>CSS selectors</h3>
 
 <p>
     These settings allow you to customize CSS selectors used by the extension.
@@ -22,83 +58,34 @@
     "Restore Default Selectors" button below.
 </p>
 <p class="message info-message">
-    Custom CSS-Selectors are overwritten if an extension update changes the
-    default values.
+    Leave a field empty to use the built-in default (shown as the placeholder).
+    Selectors are kept separately for each Royal Road layout — pick the layout
+    you want to edit below.
 </p>
 
-<label>
-    <span>Previous chapter buttton:</span>
-    <input
-        type="text"
-        class="form-control"
-        bind:value={settings.prevChapterBtn} />
-</label>
+<!-- Nothing to pick when only one layout ships, so the control hides itself
+     rather than needing to be removed by hand. -->
+{#if ADAPTERS.length > 1}
+    <label>
+        <span>Royal Road layout:</span>
+        <select class="form-control" bind:value={version}>
+            {#each ADAPTERS as adapter (adapter.id)}
+                <option value={adapter.id}>{adapter.label}</option>
+            {/each}
+        </select>
+    </label>
+{/if}
 
-<label>
-    <span>Recap button placement:</span>
-    <input
-        type="text"
-        class="form-control"
-        bind:value={settings.togglePlacement} />
-</label>
-
-<label>
-    <span>Settings button placement:</span>
-    <input
-        type="text"
-        class="form-control"
-        bind:value={settings.settingsPlacement} />
-</label>
-
-<label>
-    <span>Report link placement:</span>
-    <input
-        type="text"
-        class="form-control"
-        bind:value={settings.reportPlacement} />
-</label>
-
-<label>
-    <span>Chapter content:</span>
-    <input
-        type="text"
-        class="form-control"
-        bind:value={settings.chapterContent} />
-</label>
-
-<label>
-    <span>Chapter title:</span>
-    <input
-        type="text"
-        class="form-control"
-        bind:value={settings.chapterTitle} />
-</label>
-
-<label>
-    <span>Fiction title:</span>
-    <input
-        type="text"
-        class="form-control"
-        bind:value={settings.fictionTitle} />
-</label>
-
-<label>
-    <span>Story blurb:</span>
-    <input type="text" class="form-control" bind:value={settings.blurb} />
-</label>
-
-<label>
-    <span>Story blurb labels:</span>
-    <input type="text" class="form-control" bind:value={settings.blurbLabels} />
-</label>
-
-<label>
-    <span>Button to close settings modal:</span>
-    <input
-        type="text"
-        class="form-control"
-        bind:value={settings.closeButtonSelector} />
-</label>
+{#each fields as field (field.key)}
+    <label>
+        <span>{field.label}</span>
+        <input
+            type="text"
+            class="form-control"
+            placeholder={defaults[field.key]}
+            bind:value={settings.selectorOverrides[version][field.key]} />
+    </label>
+{/each}
 
 <style>
     @import "~/lib/styles/forms.css";

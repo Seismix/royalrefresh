@@ -1,0 +1,15 @@
+{
+    "version": "1.8.0",
+    "releasedOn": "2026-07-22",
+    "summary": "Support for RoyalRoad's new beta layout, with nothing to set up.",
+    "new": [
+        "Recaps and blurbs now work on RoyalRoad's new beta layout as well as the classic one",
+        "RoyalRefresh detects which layout RoyalRoad served you and adapts on its own, so switching layouts with RoyalRoad's own control just works",
+        "Custom CSS selectors are now saved separately for each layout, so a tweak for one can't break the other"
+    ],
+    "fixes": [
+        "The page no longer jumps to the recap while it is still loading, which used to shift the text under you",
+        "The report link now sits next to RoyalRoad's own report button on the new layout, and is readable on both light and dark themes",
+        "The 'Reduced Motion detected' note now appears with the scroll setting it actually affects"
+    ]
+}

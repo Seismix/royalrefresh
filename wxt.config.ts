@@ -14,7 +14,10 @@ export default defineConfig({
     },
     outDir: process.env.WXT_OUT_DIR || ".output",
     modules: ["@wxt-dev/module-svelte"],
-    manifest: {
+    // No `cookies` permission: the extension detects whichever RoyalRoad layout
+    // was served and adapts to it, rather than forcing one. (`manifest` is a
+    // function purely for WXT's `data_collection_permissions` type inference.)
+    manifest: () => ({
         name: "RoyalRefresh",
         description:
             "A web extension for royalroad.com. For people who juggle multiple stories",
@@ -24,7 +27,6 @@ export default defineConfig({
         browser_specific_settings: {
             gecko: {
                 id: "royalrefresh.extension@example.com",
-                // @ts-expect-error - data_collection_permissions not yet in WXT types
                 data_collection_permissions: {
                     required: ["none"],
                 },
@@ -36,5 +38,5 @@ export default defineConfig({
             "96": "icons/royalroad_96.png",
             "128": "icons/royalroad_128.png",
         },
-    },
+    }),
 })

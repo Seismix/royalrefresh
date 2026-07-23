@@ -1,7 +1,6 @@
 <script lang="ts">
     import type { Snippet } from "svelte"
     import { ActionButtons } from "~/components/buttons"
-    import { GearIcon } from "~/components/icons"
     import { PageHeader } from "~/components/layout"
     import { AdvancedSettings } from "~/components/settings"
     import type { ExtensionSettings } from "~/types/types"

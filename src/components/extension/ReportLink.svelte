@@ -4,7 +4,17 @@
     import { currentBrowser } from "~/lib/utils/platform"
     import type { ContentType } from "~/types/types"
 
-    let { type = "recap" }: { type?: ContentType } = $props()
+    // `className`/`style` come from the active adapter's host classes so the link
+    // looks native on whichever RoyalRoad layout is being served.
+    let {
+        type = "recap",
+        className = "btn btn-block btn-default margin-bottom-5",
+        style = "",
+    }: {
+        type?: ContentType
+        className?: string
+        style?: string
+    } = $props()
 
     const formUrl = $derived(
         buildReportFormUrl({
@@ -14,13 +24,15 @@
             browserType: currentBrowser,
         }),
     )
-    const label = $derived(
-        type === "recap" ? "Report Broken Recap" : "Report Broken Blurb",
-    )
+    // Kept short so it fits on one line in the redesign's narrow (~184px) action
+    // column, where a wrapped label would make the button visibly taller than
+    // RoyalRoad's own. Unambiguous in context — it sits directly under the recap.
+    const label = $derived(type === "recap" ? "Report Recap" : "Report Blurb")
 </script>
 
 <a
-    class="btn btn-block yellow-gold margin-bottom-5"
+    class={className}
+    {style}
     href={formUrl}
     target="_blank"
     rel="noopener noreferrer">

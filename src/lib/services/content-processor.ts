@@ -1,45 +1,44 @@
-import type { ExtensionSettings } from "~/types/types"
+import type { PageContext } from "~/lib/adapters"
 import { HtmlSanitizer } from "./"
-
-/** Appended to selector-failure messages — these usually mean RoyalRoad
- * changed its page layout, which the user can flag via the Report button. */
-const LAYOUT_HINT =
-    "RoyalRoad's layout may have changed — please report this with the Report button."
 
 /**
  * Content Processing Service - Pure functions for processing HTML content
- * No side effects, returns result objects with processed content or errors
+ * No side effects, returns result objects with processed content or errors.
+ *
+ * Version-specific DOM extraction is delegated to the page context's adapter;
+ * the word-count truncation, fragment building and sanitizing below are shared
+ * across UI versions.
  */
 export class ContentProcessor {
     /**
      * Creates a recap from raw HTML content
      * @param html - The raw HTML from the previous chapter
-     * @param settings - Extension settings for processing
+     * @param ctx - Resolved page context (adapter + selectors + settings)
      * @returns Processed recap content or error message
      */
     static createRecap(
         html: string,
-        settings: ExtensionSettings,
+        ctx: PageContext,
     ): { content: string } | { error: string } {
         try {
+            const { adapter, selectors, settings } = ctx
             const parser = new DOMParser()
             const doc = parser.parseFromString(html, "text/html")
 
             // Extract fiction title from current document
-            const fictionTitle =
-                this.extractFictionTitleFromCurrentDocument(settings)
+            const fictionTitle = adapter.findFictionTitle(selectors)
             if ("error" in fictionTitle) {
                 return fictionTitle
             }
 
             // Extract chapter name from parsed document
-            const chapterName = this.extractChapterName(doc, settings)
+            const chapterName = adapter.findChapterName(doc, selectors)
             if ("error" in chapterName) {
                 return chapterName
             }
 
             // Extract and process chapter content
-            const chapterContent = this.extractChapterContent(doc, settings)
+            const chapterContent = this.extractChapterContent(doc, ctx)
             if ("error" in chapterContent) {
                 return chapterContent
             }
@@ -76,26 +75,26 @@ export class ContentProcessor {
     /**
      * Creates a blurb from raw HTML content
      * @param html - The raw HTML from the fiction overview page
-     * @param settings - Extension settings for processing
+     * @param ctx - Resolved page context (adapter + selectors + settings)
      * @returns Processed blurb content or error message
      */
     static createBlurb(
         html: string,
-        settings: ExtensionSettings,
+        ctx: PageContext,
     ): { content: string } | { error: string } {
         try {
+            const { adapter, selectors } = ctx
             const parser = new DOMParser()
             const doc = parser.parseFromString(html, "text/html")
 
             // Extract fiction title from current document
-            const fictionTitle =
-                this.extractFictionTitleFromCurrentDocument(settings)
+            const fictionTitle = adapter.findFictionTitle(selectors)
             if ("error" in fictionTitle) {
                 return fictionTitle
             }
 
             // Extract blurb content from overview document
-            const blurbContent = this.extractBlurb(doc, settings)
+            const blurbContent = this.extractBlurb(doc, ctx)
             if ("error" in blurbContent) {
                 return blurbContent
             }
@@ -128,105 +127,56 @@ export class ContentProcessor {
     }
 
     /**
-     * Extracts the fiction title from the current document
-     */
-    private static extractFictionTitleFromCurrentDocument(
-        settings: ExtensionSettings,
-    ): { data: string } | { error: string } {
-        const fictionTitleElement = document.querySelector(
-            settings.fictionTitle,
-        )
-
-        if (!fictionTitleElement || !fictionTitleElement.textContent) {
-            return {
-                error: `Could not find the story title on this page. ${LAYOUT_HINT}`,
-            }
-        }
-
-        return { data: fictionTitleElement.textContent.trim() }
-    }
-
-    /**
-     * Extracts the chapter name from a document
-     */
-    private static extractChapterName(
-        doc: Document,
-        settings: ExtensionSettings,
-    ): { data: string } | { error: string } {
-        const chapterTitleElement = doc.querySelector(settings.chapterTitle)
-
-        if (!chapterTitleElement || !chapterTitleElement.textContent) {
-            return {
-                error: `Could not find the previous chapter's title. ${LAYOUT_HINT}`,
-            }
-        }
-
-        return { data: chapterTitleElement.textContent.trim() }
-    }
-
-    /**
-     * Extracts the blurb from an overview document
+     * Extracts the blurb (and optional labels) from an overview document via
+     * the adapter, then assembles them into a single fragment container.
      */
     private static extractBlurb(
         overviewDoc: Document,
-        settings: ExtensionSettings,
+        ctx: PageContext,
     ): { data: HTMLElement } | { error: string } {
+        const blurbResult = ctx.adapter.findBlurb(overviewDoc, ctx.selectors)
+        if ("error" in blurbResult) {
+            return blurbResult
+        }
+
+        const { labels, blurb } = blurbResult.data
         const fragment = document.createElement("div")
 
-        // Extract blurb labels first (appears above)
-        const labelsElement = overviewDoc.querySelector(settings.blurbLabels)
-        if (
-            labelsElement instanceof HTMLElement &&
-            labelsElement.textContent?.trim()
-        ) {
-            fragment.appendChild(labelsElement.cloneNode(true) as HTMLElement)
+        // Labels appear above the blurb when present
+        if (labels) {
+            fragment.appendChild(labels.cloneNode(true) as HTMLElement)
         }
-
-        // Extract main blurb content
-        const blurbElement = overviewDoc.querySelector(settings.blurb)
-
-        if (!blurbElement || !(blurbElement instanceof HTMLElement)) {
-            return {
-                error: `Could not find the story blurb on the overview page. ${LAYOUT_HINT}`,
-            }
-        }
-
-        if (!blurbElement.textContent || !blurbElement.textContent.trim()) {
-            return { error: "The story blurb appears to be empty." }
-        }
-
-        fragment.appendChild(blurbElement.cloneNode(true) as HTMLElement)
+        fragment.appendChild(blurb.cloneNode(true) as HTMLElement)
 
         return { data: fragment }
     }
 
     /**
-     * Extracts chapter content and limits it to a word count
+     * Extracts chapter content via the adapter and limits it to a word count
      */
     private static extractChapterContent(
         chapterDoc: Document,
-        settings: ExtensionSettings,
+        ctx: PageContext,
     ): { data: HTMLElement } | { error: string } {
-        const chapterElement = chapterDoc.querySelector(settings.chapterContent)
-
-        if (!chapterElement) {
-            return {
-                error: `Could not find the previous chapter's content. ${LAYOUT_HINT}`,
-            }
+        const chapterResult = ctx.adapter.findChapterContentEl(
+            chapterDoc,
+            ctx.selectors,
+        )
+        if ("error" in chapterResult) {
+            return chapterResult
         }
 
-        if (!chapterElement.textContent?.trim()) {
-            return { error: "The previous chapter appears to be empty." }
-        }
-
-        const paragraphs = chapterElement.querySelectorAll("p")
+        const paragraphs = chapterResult.data.querySelectorAll("p")
         if (paragraphs.length === 0) {
             return {
-                error: `Could not read any text from the previous chapter. ${LAYOUT_HINT}`,
+                error: "Could not read any text from the previous chapter. RoyalRoad's layout may have changed — please report this with the Report button.",
             }
         }
 
-        return this.selectParagraphsByWordCount(paragraphs, settings.wordCount)
+        return this.selectParagraphsByWordCount(
+            paragraphs,
+            ctx.settings.wordCount,
+        )
     }
 
     /**

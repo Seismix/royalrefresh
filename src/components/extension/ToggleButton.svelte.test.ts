@@ -46,6 +46,23 @@ describe("ToggleButton", () => {
         expect(button.disabled).toBe(true)
     })
 
+    it("stops the click from bubbling to an ancestor (redesign dialog trigger)", async () => {
+        // On the redesign the toggle mounts inside RoyalRoad's `.rr-dialog`,
+        // whose bubbled click opens the Reading Preferences modal. The toggle
+        // must stop propagation so it doesn't also trigger that ancestor.
+        recapState.setContent("<p>cached recap</p>", "recap")
+        recapState.hide()
+
+        const { getByRole, container } = render(ToggleButton, {
+            props: { type: "recap" },
+        })
+        let ancestorClicked = false
+        container.addEventListener("click", () => (ancestorClicked = true))
+
+        await fireEvent.click(getByRole("button"))
+        expect(ancestorClicked).toBe(false)
+    })
+
     it("clicking with existing content toggles visibility (no fetch)", async () => {
         // Pre-seed content but hide it -> click should just show it
         recapState.setContent("<p>cached recap</p>", "recap")
