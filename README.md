@@ -159,8 +159,22 @@ pnpm zip:firefox
 
 `pnpm zip:firefox` also emits `royalrefresh-<version>-sources.zip`, the source
 archive AMO requires alongside the add-on. Reviewers rebuild from it, so it has
-to install and build on its own: unpack it into an empty directory and run
-`pnpm install --frozen-lockfile && pnpm zip:firefox` there before submitting.
+to install and build on its own. Check that before submitting:
+
+```bash
+pnpm verify:sources
+```
+
+This unpacks the source archive into a temporary directory, runs
+`pnpm install --frozen-lockfile && pnpm zip:firefox` there, and compares the
+SHA-256 of every file in the resulting extension against the one you are about
+to ship. It exits non-zero on any mismatch and keeps the work directory for
+inspection; pass `--keep` to keep it after a successful run too. It needs
+`unzip` on `PATH`.
+
+The zip *containers* may differ by a few dozen bytes even when every file
+matches — that is the DOS timestamp in each entry header, and two back-to-back
+builds of identical source differ the same way. Only the file hashes matter.
 
 ### Testing
 
