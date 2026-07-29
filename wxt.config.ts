@@ -5,7 +5,14 @@ export default defineConfig({
     srcDir: "src",
     zip: {
         exclude: ["**.env**"],
+        // WXT >=0.21 computes the sources zip as `includeSources -
+        // excludeSources` and honours .gitignore, so the build output that used
+        // to need listing here (dist/, web-ext-artifacts/) is already gone.
+        // What .gitignore does NOT cover is anything ignored globally
+        // (~/.gitignore_global): CLAUDE.local.md is a machine-local symlink
+        // senn drops into every worktree, and it would otherwise ship to AMO.
         excludeSources: [
+            "CLAUDE.local.md",
             "test-results/**",
             "blob-report/**",
             "playwright-report/**",

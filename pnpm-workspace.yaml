@@ -2,14 +2,62 @@ allowBuilds:
   esbuild: true
   spawn-sync: false
 
+# Added by pnpm as these landed: both were published within its default
+# release-age window (wxt 0.21.2 on 2026-07-28, the brace-expansion backport on
+# 2026-07-29), so `pnpm install` refuses them here and in CI without an
+# exemption. Safe to delete once each version has aged out — what actually
+# selects them is the pin in package.json / the override below.
+minimumReleaseAgeExclude:
+  - wxt@0.21.2
+  - brace-expansion@1.1.17
+
 # Security patches for transitive dev dependencies that their parents have not
-# picked up yet. All of these come in via build/dev tooling (mostly
-# wxt -> web-ext-run) and none of them ship in the extension bundle, but pinning
+# picked up yet. All of these come in via build/dev tooling (the first four via
+# web-ext, which WXT 0.21 made a peer dependency rather than bundling its own
+# web-ext-run fork) and none of them ship in the extension bundle, but pinning
 # them keeps `pnpm audit` clean. Drop an entry once the parent bumps it itself.
+#
+# `yaml` was dropped when web-ext-run went away with WXT 0.21: nothing pulls it
+# in any more except vite's OPTIONAL peer dependency, which is not installed.
+#
+# Each floor below is the advisory's first patched version, and each parent was
+# re-checked to still declare a vulnerable range:
+#   shell-quote  fx-runner pins 1.7.3              GHSA-395f-4hp3-45gv (#99)
+#   adm-zip      firefox-profile allows ~0.5.x     GHSA-xcpc-8h2w-3j85 (#97)
+#   tmp          web-ext pins 0.2.5                GHSA-ph9p-34f9-6g65 (#69)
+#   uuid         node-notifier allows ^8.3.2       GHSA-w5hq-g745-h8pq (#68)
+#   esbuild      tsx pins ~0.27.0                  GHSA-g7r4-m6w7-qqqr (#90)
+#   yauzl        addons-scanner-utils pins 3.2.0   GHSA-gmq8-994r-jv83 (#100)
+#   brace-exp.   see the per-major note below      GHSA-mh99-v99m-4gvg
+#
+# `yauzl@3` is scoped to the 3.x line on purpose: only 3.2.0 is affected, and
+# addons-linter separately depends on yauzl 2.10.0, which is not.
+#
+# brace-expansion MUST be pinned per major rather than with one `>=5.0.8`
+# floor. Three majors are in the tree at once (minimatch v3 wants ^1, minimatch
+# v9 wants ^2, minimatch v10 wants ^5) and v5 is not drop-in for the older
+# consumers: forcing it makes minimatch v9 throw
+# "(0, brace_expansion_1.default) is not a function" and breaks `vitest run
+# --coverage`. Upstream backported the same EXPANSION_MAX_LENGTH fix
+# (CVE-2026-14257) to 1.1.17 and 2.1.3, so each line gets its own floor.
 overrides:
-  shell-quote: ">=1.8.5"
+  shell-quote: ">=1.9.0"
   adm-zip: ">=0.6.0"
   tmp: ">=0.2.6"
   uuid: ">=11.1.1"
-  yaml: ">=2.8.3"
   esbuild: ">=0.28.1"
+  yauzl@3: ">=3.2.1"
+  brace-expansion@1: ">=1.1.17 <2"
+  brace-expansion@2: ">=2.1.3 <3"
+  brace-expansion@5: ">=5.0.8 <6"
+
+# GHSA-mh99-v99m-4gvg declares ONE collapsed affected range, `<=5.0.7`, which
+# spans every major — so the advisory keeps matching 1.1.17 and 2.1.3 even
+# though both carry the backported fix. Verified by unpacking the tarballs:
+# 1.1.16/2.1.2 have no `EXPANSION_MAX_LENGTH`, 1.1.17/2.1.3 do. The finding is
+# therefore an artefact of the advisory's metadata, not real exposure, and the
+# overrides above already floor all three lines at their patched release.
+# Re-check this if the advisory is ever split per major; drop the ignore then.
+auditConfig:
+  ignoreGhsas:
+    - GHSA-mh99-v99m-4gvg

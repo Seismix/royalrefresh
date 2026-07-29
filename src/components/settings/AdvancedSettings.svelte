@@ -83,7 +83,7 @@
             type="text"
             class="form-control"
             placeholder={defaults[field.key]}
-            bind:value={settings.selectorOverrides[version][field.key]} />
+            bind:value={settings.selectorOverrides[version]![field.key]} />
     </label>
 {/each}
 

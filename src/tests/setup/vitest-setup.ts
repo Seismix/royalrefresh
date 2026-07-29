@@ -1,7 +1,7 @@
 // Vitest global setup. Adds jest-dom matchers (toBeInTheDocument, etc.) and
 // resets the fake browser + DOM between tests so state never leaks across files.
 import "@testing-library/jest-dom/vitest"
-import { fakeBrowser } from "wxt/testing"
+import { fakeBrowser } from "wxt/testing/fake-browser"
 import { afterEach, beforeEach, vi } from "vitest"
 
 // jsdom does not implement scrollIntoView (it is layout-dependent), and
