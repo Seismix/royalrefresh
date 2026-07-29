@@ -1,4 +1,4 @@
-import { ExtensionSettings } from "~/types/types"
+import type { ExtensionSettings } from "~/types/types"
 import { prefersReducedMotion } from "../utils/platform"
 // Per-layout values (selectors, button look) live with their adapter, and the
 // registry is the only module that names the shipped layouts. Nothing here

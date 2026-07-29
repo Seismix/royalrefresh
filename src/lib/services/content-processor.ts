@@ -193,6 +193,7 @@ export class ContentProcessor {
         // Process paragraphs in reverse (from end of chapter)
         for (let i = paragraphs.length - 1; i >= 0; i--) {
             const paragraph = paragraphs[i]
+            if (!paragraph) continue
             const wordCount = this.countWordsInNode(paragraph)
 
             if (wordCount === 0) continue

@@ -118,7 +118,7 @@ export class RedesignAdapter extends BaseAdapter {
         return !!doc.querySelector(REDESIGN_SENTINEL)
     }
 
-    prepareMounts(selectors: ExtensionSelectors): MountSet {
+    override prepareMounts(selectors: ExtensionSelectors): MountSet {
         const base = super.prepareMounts(selectors)
 
         // The chapter nav bar is the `flex flex-col lg:flex-row` container holding

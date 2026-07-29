@@ -1,5 +1,5 @@
 import { defineConfig } from "vitest/config"
-import { WxtVitest } from "wxt/testing"
+import { WxtVitest } from "wxt/testing/vitest-plugin"
 import { svelte, vitePreprocess } from "@sveltejs/vite-plugin-svelte"
 import { svelteTesting } from "@testing-library/svelte/vite"
 

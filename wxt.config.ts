@@ -5,7 +5,23 @@ export default defineConfig({
     srcDir: "src",
     zip: {
         exclude: ["**.env**"],
+        // The sources zip is `includeSources - excludeSources`, globbed off the
+        // filesystem — .gitignore is NOT consulted, so being gitignored is not
+        // enough to keep a file out. WXT prepends its own defaults (node_modules,
+        // web-ext.config.ts, __tests__, *.test.*/*.spec.*, and .output) and skips
+        // dotfiles, which covers the rest. Everything below is a path that would
+        // otherwise ship to AMO whenever it happens to exist at zip time:
+        //   - coverage/, dist/, web-ext-artifacts/ are gitignored build output,
+        //     but gitignored is not excluded — `vitest --coverage` and
+        //     `web-ext build` both leave one of these behind.
+        //   - CLAUDE.local.md is a machine-local symlink senn drops into every
+        //     worktree; it is ignored via ~/.gitignore_global, and zipping
+        //     follows symlinks, so it would ship its target's contents.
         excludeSources: [
+            "CLAUDE.local.md",
+            "coverage/**",
+            "dist/**",
+            "web-ext-artifacts/**",
             "test-results/**",
             "blob-report/**",
             "playwright-report/**",

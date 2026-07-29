@@ -30,7 +30,7 @@ about what happened in the last chapter of the story I just opened. More and mor
 chapter and scroll all the way down just to re-read the last few paragraphs as a refresher. This is especially annoying
 while on mobile, where I often read while on the train.
 
-That's when decided on trying to implement this little idea implementing a refresh of what happened in the last chapter.
+That's when I decided on trying to implement this little idea — a refresh of what happened in the last chapter.
 
 ## What is it?
 
@@ -92,7 +92,7 @@ marked with the `contributions welcome` label.
 
 ### Prerequisites
 
-- Node.js (version 18 or higher)
+- Node.js (version 22 or higher, required by WXT 0.21)
 - pnpm (package manager)
 
 ### Installation
@@ -127,7 +127,7 @@ connected with USB debugging enabled. You can pass additional `web-ext run` flag
 pnpm dev:android <device-id>
 
 # With custom source directory
-pnpm dev:android <device-id> --s ./custom-output
+pnpm dev:android <device-id> -s ./custom-output
 
 # With additional web-ext flags
 pnpm dev:android <device-id> --adb-remove-old-artifacts
@@ -150,6 +150,62 @@ To build specifically for Firefox:
 pnpm build:firefox
 ```
 
+Both write to `.output/`. To produce the store-ready archives instead:
+
+```bash
+pnpm zip
+pnpm zip:firefox
+```
+
+`pnpm zip:firefox` also emits `royalrefresh-<version>-sources.zip`, the source
+archive AMO requires alongside the add-on. Reviewers rebuild from it, so it has
+to install and build on its own. Check that before submitting:
+
+```bash
+pnpm verify:sources
+```
+
+This unpacks the source archive into a temporary directory, runs
+`pnpm install --frozen-lockfile && pnpm zip:firefox` there, and compares the
+SHA-256 of every file in the resulting extension against the one you are about
+to ship. It exits non-zero on any mismatch and keeps the work directory for
+inspection; pass `--keep` to keep it after a successful run too. It needs
+`unzip` on `PATH`.
+
+The zip *containers* may differ by a few dozen bytes even when every file
+matches — that is the DOS timestamp in each entry header, and two back-to-back
+builds of identical source differ the same way. Only the file hashes matter.
+
+### Testing
+
+Unit and component tests (Vitest, jsdom):
+
+```bash
+pnpm test:unit
+```
+
+End-to-end tests, which load the built extension into a real browser against a
+mocked RoyalRoad:
+
+```bash
+pnpm test
+```
+
+The canary suite checks the CSS selectors against the live site — this is what
+catches a RoyalRoad redesign:
+
+```bash
+pnpm test:canary
+```
+
+Type checking, add-on linting and formatting:
+
+```bash
+pnpm check
+pnpm lint
+pnpm format
+```
+
 ### Browser Configuration
 
 You can configure browser startup options using `web-ext.config.ts` files. For more information, see WXT's
@@ -161,7 +217,7 @@ For example, to set custom browser binaries or startup URLs, create a `web-ext.c
 import { defineWebExtConfig } from 'wxt';
 
 export default defineWebExtConfig({
-  startUrl: [
+  startUrls: [
     "https://www.royalroad.com/",
     "about:addons"
   ],
@@ -170,5 +226,10 @@ export default defineWebExtConfig({
   },
 });
 ```
+
+The file is gitignored, so it stays machine-local — a fresh clone does not have
+one. WXT reads the same options from `$HOME/web-ext.config.ts` as well, as
+global defaults for every WXT project, which is handy if you keep several
+checkouts of this repo around.
 
 For a full list of options, see the [web-ext command reference](https://extensionworkshop.com/documentation/develop/web-ext-command-reference/).

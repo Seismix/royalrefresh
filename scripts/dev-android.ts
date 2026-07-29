@@ -24,12 +24,12 @@ const sourceDirIndex = additionalFlags.findIndex(flag => flag === '--source-dir'
 
 if (sourceDirIndex !== -1) {
   // Handle -s value or --source-dir value
-  customSourceDir = additionalFlags[sourceDirIndex + 1];
+  customSourceDir = additionalFlags[sourceDirIndex + 1] ?? null;
 } else {
   // Handle --source-dir=value
   const sourceDirFlag = additionalFlags.find(flag => flag.startsWith('--source-dir='));
   if (sourceDirFlag) {
-    customSourceDir = sourceDirFlag.split('=')[1];
+    customSourceDir = sourceDirFlag.split('=')[1] ?? null;
   }
 }
 
@@ -41,6 +41,7 @@ const actualBuildDir = `${wxtOutDir}/firefox-mv2`;
 const filteredFlags: string[] = [];
 for (let i = 0; i < additionalFlags.length; i++) {
   const flag = additionalFlags[i];
+  if (flag === undefined) continue;
   if (flag === '--source-dir' || flag === '-s') {
     i++; // Skip the next item (the value)
     continue;

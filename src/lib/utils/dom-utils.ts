@@ -1,4 +1,5 @@
-import { Component, mount, unmount } from "svelte"
+import { mount, unmount } from "svelte"
+import type { Component } from "svelte"
 import type { MountPosition } from "~/lib/adapters/types"
 
 /**
