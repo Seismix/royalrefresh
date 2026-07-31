@@ -99,11 +99,20 @@ export const REDESIGN_CHROME: HostChrome = {
         // under flex, so one declaration covers both. Preferred over RoyalRoad's
         // `col-span-2` utility: it can't be dropped by their Tailwind purge, and
         // it stays correct if the column count ever changes.
+        //
+        // `order` sorts the link behind every host button. RoyalRoad orders that
+        // column with `order-*` utilities (Donate is `order-2 col-span-2`, Report
+        // Chapter `order-1`), and DOM position alone gave the injected link the
+        // default `order: 0` — so it landed between Fiction Page and Report
+        // Chapter, breaking their shared mobile row and leaving two empty cells
+        // (verified live on a fiction with a Donate button). Sorting last means
+        // RoyalRoad's own buttons always pack exactly as they intend and the
+        // injected full-width row goes underneath, whatever they add next.
         style:
             "background: var(--color-secondary, rgba(127, 127, 127, 0.15));" +
             " color: var(--color-on-secondary, inherit);" +
             " border: 1px solid rgba(127, 127, 127, 0.35);" +
-            " grid-column: 1 / -1;",
+            " grid-column: 1 / -1; order: 99;",
     },
 }
 
