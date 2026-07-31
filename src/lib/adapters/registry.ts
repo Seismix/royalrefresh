@@ -18,8 +18,14 @@ import { RedesignAdapter } from "./redesign-adapter"
  */
 export const ADAPTERS = [new RedesignAdapter(), new LegacyAdapter()] as const
 
-/** The layout used when no adapter recognises the page. */
-export const FALLBACK_ADAPTER = ADAPTERS[ADAPTERS.length - 1]
+/** The layout used when no adapter recognises the page.
+ *
+ * The `!` is safe and not a shortcut: `ADAPTERS` is a non-empty `as const`
+ * tuple, so a last element always exists. TypeScript only loses that under
+ * `noUncheckedIndexedAccess` (on since WXT 0.21) because the index is computed
+ * rather than literal — and a literal index would defeat the point of deriving
+ * the fallback from the array's tail. */
+export const FALLBACK_ADAPTER = ADAPTERS[ADAPTERS.length - 1]!
 
 /** Ids of the layouts the extension currently ships, derived from `ADAPTERS`. */
 export type UiVersion = (typeof ADAPTERS)[number]["id"]

@@ -5,16 +5,14 @@ name: CSS Selectors (live canary)
 # PRs into dev/main (where a layout drift would matter before a release) and on
 # demand. When it fails, refresh the selectors in src/lib/config/defaults.ts and
 # the fixtures in src/tests/fixtures/.
+#
+# No `paths:` filter on purpose. This is a required status check, and a workflow
+# skipped by a path filter never reports a status at all, so the check sits on
+# "Expected" and a docs- or workflow-only PR can never merge.
 on:
     pull_request:
         branches: [main, dev]
         types: [opened, reopened, synchronize, ready_for_review]
-        paths:
-            - 'src/**'
-            - 'playwright.config.ts'
-            - 'package.json'
-            - 'pnpm-lock.yaml'
-            - 'wxt.config.ts'
     workflow_dispatch:
 
 jobs:
@@ -30,15 +28,15 @@ jobs:
             NEEDRESTART_SUSPEND: 1
 
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
 
             - name: Install pnpm
-              uses: pnpm/action-setup@v4
+              uses: pnpm/action-setup@v6
               with:
                   version: 10
 
             - name: Setup node.js
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v7
               with:
                   node-version: lts/*
                   cache: "pnpm"

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { render } from "@testing-library/svelte"
-import { fakeBrowser } from "wxt/testing"
+import { fakeBrowser } from "wxt/testing/fake-browser"
 import ReportLink from "./ReportLink.svelte"
 
 // ReportLink builds its href from window.location.href, the manifest version

@@ -1,0 +1,9 @@
+{
+    "version": "1.8.1",
+    "releasedOn": "2026-07-31",
+    "summary": "Layout fix for the report link on RoyalRoad's new beta layout.",
+    "new": [],
+    "fixes": [
+        "On the new beta layout, the report link no longer pushes RoyalRoad's own chapter buttons onto separate rows on mobile — it now sits in a row of its own underneath them"
+    ]
+}

@@ -63,7 +63,7 @@ export class LegacyAdapter extends BaseAdapter {
         return true
     }
 
-    prepareMounts(selectors: ExtensionSelectors): MountSet {
+    override prepareMounts(selectors: ExtensionSelectors): MountSet {
         const base = super.prepareMounts(selectors)
         return {
             ...base,
