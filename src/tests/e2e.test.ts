@@ -16,20 +16,27 @@ const CHAPTER_URL = `${ORIGIN}/fiction/1/test-story/chapter/2/the-climb`
 const PREV_CHAPTER_URL = `${ORIGIN}/fiction/1/test-story/chapter/1/the-start`
 const OVERVIEW_URL = `${ORIGIN}/fiction/1/test-story`
 
-// Structural fixtures — must satisfy the injection selectors in defaults.ts:
+// Structural fixtures — must satisfy the legacy adapter's injection selectors
+// (src/lib/adapters/legacy-adapter.ts):
 //   togglePlacement: ".chapter > div > .actions"
 //   chapterContent:  ".chapter-inner"
-//   fictionTitle:    "h2.font-white" (wrapped in an <a> for the overview link)
-//   chapterTitle:    "h1.font-white"
+//   fictionTitle:    ".fic-header a[href*='/fiction/'] :is(h1,…,h6)"
+//   chapterTitle:    ".fic-header h1"
 //   prevChapterBtn:  "a[href*='/chapter/']:has(> i.fa-chevron-double-left)"
+//
+// The .fic-header block carries an author heading as well, mirroring the real
+// page — a title selector that drifts onto it fails here.
 function chapterPage({ withPrev }: { withPrev: boolean }) {
     const prevButton = withPrev
         ? `<a href="${PREV_CHAPTER_URL}"><i class="fa fa-chevron-double-left"></i> Previous</a>`
         : ""
     return `<!doctype html><html><head><title>Chapter</title></head><body>
         <div class="chapter">
-            <a href="${OVERVIEW_URL}"><h2 class="font-white">Test Story</h2></a>
-            <h1 class="font-white">Chapter 2: The Climb</h1>
+            <div class="row fic-header">
+                <a href="${OVERVIEW_URL}"><h2 class="font-white">Test Story</h2></a>
+                <h3 class="font-white">Test Author</h3>
+                <h1 class="font-white">Chapter 2: The Climb</h1>
+            </div>
             <div>
                 <div class="actions">${prevButton}</div>
             </div>
@@ -43,7 +50,7 @@ function chapterPage({ withPrev }: { withPrev: boolean }) {
 
 const prevChapterPage = `<!doctype html><html><head><title>Prev</title></head><body>
     <div class="chapter">
-        <h1 class="font-white">Chapter 1: The Start</h1>
+        <div class="row fic-header"><h1 class="font-white">Chapter 1: The Start</h1></div>
         <div class="chapter-inner">
             <p>Alpha bravo charlie delta echo foxtrot golf hotel india juliet.</p>
             <p>Kilo lima mike november oscar papa quebec romeo sierra tango.</p>

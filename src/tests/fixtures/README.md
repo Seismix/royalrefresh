@@ -7,10 +7,16 @@ Small, hand-built, sanitized HTML snapshots used by the test suites.
 - `prev-chapter.html` — the previous chapter that gets fetched for a recap.
 - `fiction-overview.html` — the fiction overview page that gets fetched for a blurb.
 
-Each file is built to match the **exact selectors** in
-`src/lib/config/defaults.ts` (`DEFAULT_SELECTORS`). If RoyalRoad's layout
-changes and the live `selectors.test.ts` canary starts failing, refresh these
-fixtures so the unit/E2E suites keep testing realistic markup.
+Each file is built to match the **exact selectors** of one layout's adapter in
+`src/lib/adapters/` — today the legacy layout (`legacy-adapter.ts`). If
+RoyalRoad's layout changes and the live `selectors.test.ts` canary starts
+failing, refresh these fixtures so the unit/E2E suites keep testing realistic
+markup.
+
+Note the split in what covers what: the canary checks **every** registered
+layout against the live site, while these fixtures — and so the E2E suite —
+still only cover the legacy one. Redesign markup is exercised by the unit tests
+in `src/lib/adapters/adapters.unit.test.ts` instead.
 
 These are **representative** fixtures, not byte-for-byte copies of RoyalRoad —
 they are intentionally tiny so word-count / truncation behavior is easy to
