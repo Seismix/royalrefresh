@@ -1,0 +1,11 @@
+{
+    "version": "1.8.2",
+    "releasedOn": "2026-08-28",
+    "summary": "Recaps and blurbs work again on RoyalRoad's beta layout.",
+    "new": [],
+    "fixes": [
+        "Recaps on the beta layout no longer fail with \"Could not find the previous chapter's title\" — RoyalRoad rearranged its chapter header and RoyalRefresh was still looking for the old one",
+        "The blurb on the beta layout showed the author's profile text instead of the story's description",
+        "On the beta layout, a custom selector for where the Show Recap button goes is now actually used"
+    ]
+}
