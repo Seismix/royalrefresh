@@ -16,7 +16,8 @@ const CHAPTER_URL = `${ORIGIN}/fiction/1/test-story/chapter/2/the-climb`
 const PREV_CHAPTER_URL = `${ORIGIN}/fiction/1/test-story/chapter/1/the-start`
 const OVERVIEW_URL = `${ORIGIN}/fiction/1/test-story`
 
-// Structural fixtures — must satisfy the injection selectors in defaults.ts:
+// Structural fixtures — must satisfy the legacy adapter's injection selectors
+// (src/lib/adapters/legacy-adapter.ts):
 //   togglePlacement: ".chapter > div > .actions"
 //   chapterContent:  ".chapter-inner"
 //   fictionTitle:    "h2.font-white" (wrapped in an <a> for the overview link)
