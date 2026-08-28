@@ -74,16 +74,43 @@ jobs:
             # No extension build: unlike the e2e project, the canary reads live
             # pages and never loads the extension, so building it here would only
             # add a way for this job to fail for reasons unrelated to selectors.
+            #
+            # The JSON reporter is for the verdict step below: it records
+            # how many tests actually PASSED, which the list reporter's exit code
+            # alone cannot tell us.
             - name: Run live selector canary
-              run: pnpm test:canary
+              id: canary
+              env:
+                  PLAYWRIGHT_JSON_OUTPUT_NAME: canary-results.json
+              run: pnpm test:canary --reporter=list,json
+
+            # An outage makes every canary test call `test.skip()`, and Playwright
+            # exits 0 on an all-skipped run — so "the job went green" is NOT proof
+            # that a single selector was checked. Without this, one bad night for
+            # royalroad.com auto-closes a still-valid drift issue below.
+            - name: Did the canary check anything?
+              id: verdict
+              if: ${{ !cancelled() && github.event_name == 'schedule' }}
+              run: |
+                  passed=$(jq '.stats.expected // 0' canary-results.json 2>/dev/null || echo 0)
+                  echo "Canary tests passed: $passed"
+                  if [ "$passed" -gt 0 ]; then
+                      echo "executed=true" >> "$GITHUB_OUTPUT"
+                  else
+                      echo "executed=false" >> "$GITHUB_OUTPUT"
+                  fi
 
             # --- Scheduled-run reporting -----------------------------------
             # A red X on a cron run notifies nobody. These two steps turn the
             # result into an issue that does. PR runs are already visible on the
             # PR, so they skip this.
 
+            # Scoped to the canary step's own outcome, not the job's: a bare
+            # `failure()` also fires for a broken `pnpm install` or a Playwright
+            # download hiccup, which would file "RoyalRoad's layout drifted" and
+            # send someone hunting through the adapters for a CI problem.
             - name: Report drift as an issue
-              if: ${{ failure() && github.event_name == 'schedule' }}
+              if: ${{ !cancelled() && github.event_name == 'schedule' && steps.canary.outcome == 'failure' }}
               env:
                   GH_TOKEN: ${{ github.token }}
                   RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -110,7 +137,7 @@ jobs:
                   fi
 
             - name: Close the drift issue once green
-              if: ${{ success() && github.event_name == 'schedule' }}
+              if: ${{ !cancelled() && github.event_name == 'schedule' && steps.canary.outcome == 'success' && steps.verdict.outputs.executed == 'true' }}
               env:
                   GH_TOKEN: ${{ github.token }}
                   RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
