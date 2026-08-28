@@ -47,11 +47,11 @@ const LAYOUTS: Record<UiVersion, { cookie: string; served: string }> = {
  * (the redesign's `#chapterHeroData h4` began matching the author's name, not
  * the fiction's, and quietly pointed the blurb fetch at the author profile).
  *
- * The redesign renders its chapter nav bar both above and below the text, so
- * the previous-chapter button and the toggle's mount point are genuinely
- * duplicated — both copies point at the same chapter.
+ * The redesign renders its chapter nav bar both above and below the text, so the
+ * previous-chapter button is genuinely duplicated — both copies point at the
+ * same chapter.
  */
-const MAY_REPEAT = new Set(["prevChapterBtn", "togglePlacement"])
+const MAY_REPEAT = new Set(["prevChapterBtn"])
 
 /** The fiction the canary reads. Long-running and complete, so its chapter and
  * overview pages are stable targets. */

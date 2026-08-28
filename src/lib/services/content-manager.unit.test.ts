@@ -21,9 +21,11 @@ const settings = getDefaults() as ExtensionSettings
 // extraction inside ContentProcessor both succeed.
 function seedChapterPage() {
     document.body.innerHTML = `
-        <a href="https://www.royalroad.com/fiction/1/x">
-            <h2 class="font-white">Test Story</h2>
-        </a>
+        <div class="fic-header">
+            <a href="https://www.royalroad.com/fiction/1/x">
+                <h2 class="font-white">Test Story</h2>
+            </a>
+        </div>
         <div class="actions">
             <a href="https://www.royalroad.com/fiction/1/x/chapter/1/start">
                 <i class="fa fa-chevron-double-left"></i>
@@ -85,7 +87,7 @@ describe("ContentManager.fetchRecap", () => {
     })
 
     it("errors early (no fetch) when there is no previous chapter button", async () => {
-        document.body.innerHTML = `<a href="https://www.royalroad.com/fiction/1/x"><h2 class="font-white">Test Story</h2></a>`
+        document.body.innerHTML = `<div class="fic-header"><a href="https://www.royalroad.com/fiction/1/x"><h2 class="font-white">Test Story</h2></a></div>`
 
         const result = await ContentManager.fetchRecap(settings)
 

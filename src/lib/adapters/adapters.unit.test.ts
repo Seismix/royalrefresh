@@ -302,7 +302,7 @@ describe("LegacyAdapter", () => {
     it("uses the legacy default selectors", () => {
         const adapter = new LegacyAdapter()
         expect(adapter.id).toBe("legacy")
-        expect(adapter.defaultSelectors.chapterTitle).toBe("h1.font-white")
+        expect(adapter.defaultSelectors.chapterTitle).toBe(".fic-header h1")
     })
 
     it("lays the settings-modal footer out as a row, and restores it", () => {

@@ -21,9 +21,15 @@ const REDESIGN_SENTINEL = "#chapterHeroData"
 
 /** Selectors for the "Redesign (beta)" RoyalRoad layout (codename remaster). */
 export const REDESIGN_SELECTORS: ExtensionSelectors = {
-    // Scoped to chapter links so an unrelated left-arrow anchor (breadcrumb,
-    // back-to-fiction) can't win on document order — mirrors the legacy selector.
-    prevChapterBtn: "a[href*='/chapter/']:has(> i.fa-arrow-left)",
+    // Two independent hooks, either of which suffices: RoyalRoad's own
+    // `data-vt-direction` (view-transition plumbing on the nav buttons) and the
+    // Font Awesome arrow. Losing one — an icon-library bump, a rewrite of the
+    // transition code — leaves the other holding.
+    //
+    // Still scoped to chapter links so an unrelated left-arrow anchor
+    // (breadcrumb, back-to-fiction) can't win on document order.
+    prevChapterBtn:
+        "a[href*='/chapter/']:is([data-vt-direction='prev'], :has(> i.fa-arrow-left))",
     chapterContent: ".chapter-inner",
     // Both hero headings are matched by ROLE, not by heading level. RoyalRoad
     // renumbered them once already (chapter h3 -> h1, fiction h4 -> h2) and the
@@ -39,14 +45,20 @@ export const REDESIGN_SELECTORS: ExtensionSelectors = {
     // the blurb fetch at /profile/<id> instead of the fiction.
     fictionTitle:
         "#chapterHeroData a[href*='/fiction/'] :is(h1,h2,h3,h4,h5,h6)",
-    // Toggle mount: the chapter nav bar holding prev/select/next. prepareMounts()
-    // resolves this robustly in code; this string is the override hint.
-    togglePlacement: ".chapter [class*='grid-cols-2']",
+    // Toggle mount: the inner grid holding prev/select/next. Identified by the
+    // stable `#chapterSelect` it contains rather than by the Tailwind utility
+    // alone, which also matches the duplicate nav bar below the chapter text.
+    // This is the same element prepareMounts() resolves in code, so the override
+    // hint and the actual behaviour now agree.
+    togglePlacement: "[class*='grid-cols-2']:has(#chapterSelect)",
     settingsPlacement: "#dialog-content-reading-preferences",
     blurb: "#about-accordion [data-rr-show-more-content]",
     // Content-warning labels location not yet pinned on the redesign; optional.
     blurbLabels: "",
-    closeButtonSelector: "#dialog-content-reading-preferences > button",
+    // RoyalRoad's own dialog-dismissal contract, rather than "whichever button
+    // happens to be a direct child of the dialog".
+    closeButtonSelector:
+        "#dialog-content-reading-preferences button[data-rr-dialog-close]",
     // RoyalRoad's own "report this chapter" link — our report link is inserted
     // directly after it so both reporting actions sit together.
     reportPlacement: "a[href^='/report/chapter/']",
