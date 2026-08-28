@@ -120,16 +120,46 @@ describe("RedesignAdapter DOM accessors", () => {
         expect(result.data).toContain("/chapter/1/start")
     })
 
+    /**
+     * The hero as RoyalRoad renders it: the fiction title is an `<a>`-wrapped
+     * heading, the chapter title is a bare heading, and the author name is a
+     * SECOND `<a>`-wrapped heading. Levels are deliberately shuffled relative to
+     * what the site ships today — the selectors match on role, not level, so
+     * this markup must resolve the same way after a renumber.
+     */
+    const heroHtml = `
+        <div id="chapterHeroData">
+            <a href="https://www.royalroad.com/fiction/1/test-story">
+                <h2>Test Story</h2>
+            </a>
+            <h1>Chapter 2: The Climb</h1>
+            <a href="https://www.royalroad.com/profile/338123">
+                <h4>Test Author</h4>
+            </a>
+        </div>`
+
     it("derives the overview URL from the hero title's anchor", () => {
-        document.body.innerHTML = `
-            <div id="chapterHeroData">
-                <a href="https://www.royalroad.com/fiction/1/test-story">
-                    <h4>Test Story</h4>
-                </a>
-            </div>`
+        document.body.innerHTML = heroHtml
         const result = adapter.findFictionOverviewUrl(sel)
         if ("error" in result) throw new Error(result.error)
         expect(result.data).toContain("/fiction/1/test-story")
+    })
+
+    it("reads the fiction title from the hero, not the author name", () => {
+        // The author heading sits in the same hero and was what an unscoped
+        // heading selector picked up — silently titling the recap with the
+        // author and pointing the blurb fetch at /profile/<id>.
+        document.body.innerHTML = heroHtml
+        const title = adapter.findFictionTitle(sel)
+        if ("error" in title) throw new Error(title.error)
+        expect(title.data).toBe("Test Story")
+    })
+
+    it("reads the chapter title from the hero's only unlinked heading", () => {
+        document.body.innerHTML = heroHtml
+        const name = adapter.findChapterName(document, sel)
+        if ("error" in name) throw new Error(name.error)
+        expect(name.data).toBe("Chapter 2: The Climb")
     })
 })
 

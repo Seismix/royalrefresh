@@ -25,8 +25,20 @@ export const REDESIGN_SELECTORS: ExtensionSelectors = {
     // back-to-fiction) can't win on document order — mirrors the legacy selector.
     prevChapterBtn: "a[href*='/chapter/']:has(> i.fa-arrow-left)",
     chapterContent: ".chapter-inner",
-    chapterTitle: "#chapterHeroData h3",
-    fictionTitle: "#chapterHeroData h4",
+    // Both hero headings are matched by ROLE, not by heading level. RoyalRoad
+    // renumbered them once already (chapter h3 -> h1, fiction h4 -> h2) and the
+    // level-pinned selectors broke silently; these survive the next renumber.
+    //
+    // The chapter title is the only hero heading that is not inside a link — the
+    // fiction title and the author name both are.
+    chapterTitle: "#chapterHeroData :is(h1,h2,h3,h4,h5,h6):not(a *)",
+    // The fiction title is the heading inside the hero's link to the fiction.
+    // Scoping to that anchor matters beyond the text: findFictionOverviewUrl()
+    // walks `closest("a")` from this element to get the overview URL, and the
+    // unscoped `h4` used to land on the AUTHOR heading — which silently pointed
+    // the blurb fetch at /profile/<id> instead of the fiction.
+    fictionTitle:
+        "#chapterHeroData a[href*='/fiction/'] :is(h1,h2,h3,h4,h5,h6)",
     // Toggle mount: the chapter nav bar holding prev/select/next. prepareMounts()
     // resolves this robustly in code; this string is the override hint.
     togglePlacement: ".chapter [class*='grid-cols-2']",
