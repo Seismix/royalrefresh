@@ -1,4 +1,10 @@
-import { expect, test, type Browser, type Page } from "@playwright/test"
+import {
+    devices,
+    expect,
+    test,
+    type Browser,
+    type Page,
+} from "@playwright/test"
 import { ADAPTERS, type UiVersion } from "~/lib/adapters"
 import {
     getChapterPageSelectors,
@@ -53,6 +59,18 @@ const LAYOUTS: Record<UiVersion, { cookie: string; served: string }> = {
  */
 const MAY_REPEAT = new Set(["prevChapterBtn"])
 
+/**
+ * Title of the per-layout guard test. The selector tests skip against it: a page
+ * from the wrong layout makes every selector look drifted, and only this test
+ * names the actual cause.
+ */
+const SERVED_TEST = "RoyalRoad served this layout"
+
+/** Why a layout the canary asked for is not the layout it got. */
+function wrongLayoutMessage(version: UiVersion, label: string) {
+    return `RoyalRoad did not serve the ${label} layout for ${BETA_COOKIE}=${LAYOUTS[version].cookie}. The cookie may have been renamed, or this layout retired/promoted — that is a registry question, not a selector fix.`
+}
+
 /** The fiction the canary reads. Long-running and complete, so its chapter and
  * overview pages are stable targets. */
 const FICTION_URL = "https://www.royalroad.com/fiction/63759/super-supportive"
@@ -97,7 +115,12 @@ async function openAs(
     version: UiVersion,
     url: string,
 ): Promise<{ page: Page } | { unreachable: string }> {
-    const context = await browser.newContext()
+    // Spelled out because `browser.newContext()` does NOT inherit the project's
+    // `use` options — Playwright applies those in the `context`/`page` fixtures,
+    // which a shared per-describe navigation can't use. Without this the canary
+    // asks RoyalRoad for pages as `HeadlessChrome`, and any markup or challenge
+    // it varies on that would surface here as a selector drift.
+    const context = await browser.newContext({ ...devices["Desktop Chrome"] })
     await context.addCookies([
         {
             name: BETA_COOKIE,
@@ -107,20 +130,23 @@ async function openAs(
         },
     ])
 
-    const page = await context.newPage()
     try {
+        const page = await context.newPage()
         await page.goto(url, {
             waitUntil: "domcontentloaded",
             timeout: NAV_TIMEOUT,
         })
+        return { page }
     } catch (error) {
+        // Only the happy path hands a page back, and `afterAll` closes contexts
+        // through that page — so every other exit closes its own, or an outage
+        // leaks one context per describe per retry until the worker exits.
+        await context.close()
         if (isSiteUnreachable(error)) {
             return { unreachable: unreachableMessage(url, error) }
         }
         throw error
     }
-
-    return { page }
 }
 
 /** Assert a selector matches the page the way the extension relies on it to. */
@@ -141,6 +167,11 @@ for (const { id, label } of ADAPTERS) {
         // Set when the shared navigation in beforeAll hits an outage, so every
         // test in this block skips with the same message rather than erroring.
         let unreachable: string | null = null
+        // Set when RoyalRoad served the OTHER layout. Playwright tests are
+        // independent, so a failing guard test skips nothing by itself — this
+        // flag is what actually keeps the selector tests from reporting
+        // "drifted" against a page from the wrong layout.
+        let wrongLayout: string | null = null
 
         test.beforeAll(async ({ browser }) => {
             const opened = await openAs(browser, version, CHAPTER_URL)
@@ -149,6 +180,11 @@ for (const { id, label } of ADAPTERS) {
                 return
             }
             page = opened.page
+
+            const served = await page.locator(LAYOUTS[version].served).count()
+            if (served !== 1) {
+                wrongLayout = wrongLayoutMessage(version, label)
+            }
         })
 
         test.afterAll(async () => {
@@ -157,14 +193,18 @@ for (const { id, label } of ADAPTERS) {
 
         test.beforeEach(() => {
             test.skip(unreachable !== null, unreachable ?? "")
+            // Everything but the guard test itself, which has to stay reportable
+            // — it is the one test that names the real cause.
+            test.skip(
+                wrongLayout !== null && test.info().title !== SERVED_TEST,
+                wrongLayout ?? "",
+            )
         })
 
-        test("RoyalRoad served this layout", async () => {
-            // Guards every test below: if RoyalRoad stopped honouring the beta
-            // cookie, the selectors would all "fail" against the wrong page.
+        test(SERVED_TEST, async () => {
             await expect(
                 page.locator(LAYOUTS[version].served),
-                `RoyalRoad did not serve the ${label} layout for ${BETA_COOKIE}=${LAYOUTS[version].cookie}. The cookie may have been renamed, or this layout retired/promoted — that is a registry question, not a selector fix.`,
+                wrongLayoutMessage(version, label),
             ).toHaveCount(1)
         })
 
