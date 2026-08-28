@@ -17,7 +17,7 @@ const ctx = (overrides: Partial<ExtensionSettings> = {}) =>
     buildPageContext(settings(overrides))
 
 function seedFictionTitle(title = "Test Story") {
-    document.body.innerHTML = `<a href="https://www.royalroad.com/fiction/1/x"><h2 class="font-white">${title}</h2></a>`
+    document.body.innerHTML = `<div class="fic-header"><a href="https://www.royalroad.com/fiction/1/x"><h2 class="font-white">${title}</h2></a></div>`
 }
 
 describe("ContentProcessor.createRecap", () => {
@@ -96,7 +96,7 @@ describe("ContentProcessor.createRecap", () => {
 
     it("returns {error} when the chapter content selector is missing", () => {
         const result = ContentProcessor.createRecap(
-            "<html><body><h1 class='font-white'>Chapter 1</h1></body></html>",
+            "<html><body><div class='fic-header'><h1>Chapter 1</h1></div></body></html>",
             ctx(),
         )
 

@@ -10,19 +10,41 @@ import type { MountSet } from "./types"
 // `registry.ts`.
 // ---------------------------------------------------------------------------
 
-/** Selectors for the legacy (pre-redesign) RoyalRoad layout. */
+/** Selectors for the legacy (pre-redesign) RoyalRoad layout.
+ *
+ * Preferred anchoring, most durable first: a semantic id or data attribute the
+ * markup carries on purpose, then a structural class that names what the element
+ * IS (`.fic-header`, `.chapter-inner`), then — only where nothing better exists
+ * — a Bootstrap grid or colour utility class. Positional selectors (`nth-child`,
+ * long `>` chains) are a last resort: they encode where an element happens to sit
+ * today rather than what it is. */
 export const LEGACY_SELECTORS: ExtensionSelectors = {
     prevChapterBtn: "a[href*='/chapter/']:has(> i.fa-chevron-double-left)",
     chapterContent: ".chapter-inner",
-    chapterTitle: "h1.font-white",
-    fictionTitle: "h2.font-white",
+    // Scoped to the fiction header so the author's h3 and the page's other
+    // headings can't win, and matched on the h1 rather than on `.font-white` —
+    // a colour utility that says nothing about what the element holds.
+    chapterTitle: ".fic-header h1",
+    // The heading inside the header's link to the fiction. Scoping to that
+    // anchor is what makes findFictionOverviewUrl()'s `closest("a")` walk land
+    // on the overview page by construction rather than by luck of nesting.
+    fictionTitle: ".fic-header a[href*='/fiction/'] :is(h1,h2,h3,h4,h5,h6)",
     togglePlacement: ".chapter > div > .actions",
     settingsPlacement: "#settings div.modal-footer",
     blurb: ".description .hidden-content",
+    // `.font-red-sunglo` alone appears ~60 times on an overview page (stars,
+    // stats, review bylines); `.text-center` inside a portlet is what narrows it
+    // to the content-warning box. Ugly, but RoyalRoad gives the box no id, data
+    // attribute or semantic class to aim at.
     blurbLabels: ".portlet .text-center.font-red-sunglo",
-    closeButtonSelector:
-        "#settings > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > button:last-child",
-    reportPlacement: "div.col-lg-3:nth-child(3)",
+    // Bootstrap's own dismissal contract, scoped to the footer so this resolves
+    // to the "Close" button rather than the header's × (which carries the same
+    // attribute). Replaces a four-deep nth-child chain that any inserted div
+    // would have broken.
+    closeButtonSelector: "#settings .modal-footer button[data-dismiss='modal']",
+    // The button column, identified by the report link it contains rather than
+    // by its position in the Bootstrap grid.
+    reportPlacement: "div:has(> a[href^='/report/chapter/'])",
 }
 
 /** Look of the injected buttons on the legacy layout (Bootstrap classes). */

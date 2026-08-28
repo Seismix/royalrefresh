@@ -21,20 +21,48 @@ const REDESIGN_SENTINEL = "#chapterHeroData"
 
 /** Selectors for the "Redesign (beta)" RoyalRoad layout (codename remaster). */
 export const REDESIGN_SELECTORS: ExtensionSelectors = {
-    // Scoped to chapter links so an unrelated left-arrow anchor (breadcrumb,
-    // back-to-fiction) can't win on document order — mirrors the legacy selector.
-    prevChapterBtn: "a[href*='/chapter/']:has(> i.fa-arrow-left)",
+    // Two independent hooks, either of which suffices: RoyalRoad's own
+    // `data-vt-direction` (view-transition plumbing on the nav buttons) and the
+    // Font Awesome arrow. Losing one — an icon-library bump, a rewrite of the
+    // transition code — leaves the other holding.
+    //
+    // Still scoped to chapter links so an unrelated left-arrow anchor
+    // (breadcrumb, back-to-fiction) can't win on document order.
+    prevChapterBtn:
+        "a[href*='/chapter/']:is([data-vt-direction='prev'], :has(> i.fa-arrow-left))",
     chapterContent: ".chapter-inner",
-    chapterTitle: "#chapterHeroData h3",
-    fictionTitle: "#chapterHeroData h4",
-    // Toggle mount: the chapter nav bar holding prev/select/next. prepareMounts()
-    // resolves this robustly in code; this string is the override hint.
-    togglePlacement: ".chapter [class*='grid-cols-2']",
+    // Both hero headings are matched by ROLE, not by heading level. RoyalRoad
+    // renumbered them once already (chapter h3 -> h1, fiction h4 -> h2) and the
+    // level-pinned selectors broke silently; these survive the next renumber.
+    //
+    // The chapter title is the only hero heading that is not inside a link — the
+    // fiction title and the author name both are.
+    chapterTitle: "#chapterHeroData :is(h1,h2,h3,h4,h5,h6):not(a *)",
+    // The fiction title is the heading inside the hero's link to the fiction.
+    // Scoping to that anchor matters beyond the text: findFictionOverviewUrl()
+    // walks `closest("a")` from this element to get the overview URL, and the
+    // unscoped `h4` used to land on the AUTHOR heading — which silently pointed
+    // the blurb fetch at /profile/<id> instead of the fiction.
+    fictionTitle:
+        "#chapterHeroData a[href*='/fiction/'] :is(h1,h2,h3,h4,h5,h6)",
+    // Toggle mount: the inner grid holding prev/select/next. Identified by the
+    // stable `#chapterSelect` it contains rather than by the Tailwind utility
+    // alone, which also matches the duplicate nav bar below the chapter text.
+    //
+    // prepareMounts() reads this key FIRST and only falls back to walking up
+    // from `#chapterSelect`, so editing it really does move the toggle. What it
+    // has to match is that inner grid, NOT the final mount point: the toggle
+    // lands in the Reading Preferences box, which is found from this element's
+    // parent (the nav bar). See prepareReadingPrefsCluster.
+    togglePlacement: "[class*='grid-cols-2']:has(#chapterSelect)",
     settingsPlacement: "#dialog-content-reading-preferences",
     blurb: "#about-accordion [data-rr-show-more-content]",
     // Content-warning labels location not yet pinned on the redesign; optional.
     blurbLabels: "",
-    closeButtonSelector: "#dialog-content-reading-preferences > button",
+    // RoyalRoad's own dialog-dismissal contract, rather than "whichever button
+    // happens to be a direct child of the dialog".
+    closeButtonSelector:
+        "#dialog-content-reading-preferences button[data-rr-dialog-close]",
     // RoyalRoad's own "report this chapter" link — our report link is inserted
     // directly after it so both reporting actions sit together.
     reportPlacement: "a[href^='/report/chapter/']",
@@ -131,14 +159,21 @@ export class RedesignAdapter extends BaseAdapter {
         const base = super.prepareMounts(selectors)
 
         // The chapter nav bar is the `flex flex-col lg:flex-row` container holding
-        // the select/prev/next grid AND the Reading Preferences cluster. The
-        // stable `#chapterSelect` lives inside an inner `grid-cols-2` grid, so the
-        // nav bar is that grid's parent. Fall back to the hero header.
-        const navBar =
+        // the select/prev/next grid AND the Reading Preferences cluster, so it is
+        // that grid's parent.
+        //
+        // The configured `togglePlacement` is asked first — otherwise the key
+        // would be editable in Advanced Settings while changing nothing — and the
+        // walk up from the stable `#chapterSelect` is the fallback for when a
+        // user's (or a stale default's) selector stops matching. Both resolve to
+        // the same inner grid on today's markup. Last resort: the hero header.
+        const navGrid =
+            this.query(selectors.togglePlacement) ??
             document
                 .querySelector("#chapterSelect")
-                ?.closest("[class*='grid-cols-2']")?.parentElement ??
-            document.querySelector(REDESIGN_SENTINEL)
+                ?.closest("[class*='grid-cols-2']")
+        const navBar =
+            navGrid?.parentElement ?? document.querySelector(REDESIGN_SENTINEL)
 
         const toggle = this.resolveToggle(navBar)
 

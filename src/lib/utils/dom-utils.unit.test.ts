@@ -70,9 +70,11 @@ describe("LegacyAdapter.findPreviousChapterUrl", () => {
 describe("LegacyAdapter.findFictionOverviewUrl", () => {
     it("returns the wrapping anchor href on success", () => {
         document.body.innerHTML = `
-            <a href="https://www.royalroad.com/fiction/1/test-story">
-                <h2 class="font-white">Test Story</h2>
-            </a>`
+            <div class="fic-header">
+                <a href="https://www.royalroad.com/fiction/1/test-story">
+                    <h2 class="font-white">Test Story</h2>
+                </a>
+            </div>`
 
         const result = adapter.findFictionOverviewUrl(sel)
         expect("data" in result).toBe(true)
@@ -92,11 +94,40 @@ describe("LegacyAdapter.findFictionOverviewUrl", () => {
     })
 
     it("errors when the title has no anchor ancestor", () => {
-        document.body.innerHTML = `<div><h2 class="font-white">Test Story</h2></div>`
+        // The default selector is scoped to the header's fiction link, so it can
+        // no longer match a heading that has no anchor above it — this branch is
+        // now only reachable through a user's custom override, which is how it
+        // is exercised here.
+        document.body.innerHTML = `<div class="fic-header"><h2 class="font-white">Test Story</h2></div>`
 
-        const result = adapter.findFictionOverviewUrl(sel)
+        const result = adapter.findFictionOverviewUrl({
+            ...sel,
+            fictionTitle: ".fic-header h2",
+        })
         expect("error" in result).toBe(true)
         if ("data" in result) throw new Error("expected error")
         expect(result.error).toMatch(/overview page/i)
+    })
+
+    it("ignores a header heading that is not inside the fiction link", () => {
+        // RoyalRoad puts the author's name in the same header. An unscoped
+        // heading selector picks it up, and `closest("a")` then resolves the
+        // overview URL to the author's profile — the failure mode that hit the
+        // redesign. Scoping to the fiction link rules it out by construction.
+        document.body.innerHTML = `
+            <div class="fic-header">
+                <a href="https://www.royalroad.com/profile/1"><h2>Test Author</h2></a>
+                <a href="https://www.royalroad.com/fiction/1/test-story">
+                    <h2 class="font-white">Test Story</h2>
+                </a>
+            </div>`
+
+        const title = adapter.findFictionTitle(sel)
+        if ("error" in title) throw new Error(title.error)
+        expect(title.data).toBe("Test Story")
+
+        const result = adapter.findFictionOverviewUrl(sel)
+        if ("error" in result) throw new Error(result.error)
+        expect(result.data).toContain("/fiction/1/test-story")
     })
 })

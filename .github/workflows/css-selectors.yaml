@@ -1,10 +1,19 @@
 name: CSS Selectors (live canary)
 
 # Hits live royalroad.com to verify our CSS selectors still match the real page
-# layout. It depends on a third-party site being up and unchanged, so it runs on
-# PRs into dev/main (where a layout drift would matter before a release) and on
-# demand. When it fails, refresh the selectors in src/lib/config/defaults.ts and
-# the fixtures in src/tests/fixtures/.
+# layout, for EVERY layout in src/lib/adapters/registry.ts — the canary asks
+# RoyalRoad for each one via the `beta-ui-v2` cookie in turn. When it fails,
+# refresh that layout's selectors in its adapter and the fixtures in
+# src/tests/fixtures/.
+#
+# It runs on three triggers, for three different reasons:
+#
+#   pull_request      — a layout drift matters before a release. Required check.
+#   schedule (daily)  — RoyalRoad changes its markup on its own schedule, not
+#                       ours. Without this, drift is only discovered when
+#                       someone happens to open a PR, or when a user reports a
+#                       broken recap. A failing scheduled run files an issue.
+#   workflow_dispatch — on demand.
 #
 # No `paths:` filter on purpose. This is a required status check, and a workflow
 # skipped by a path filter never reports a status at all, so the check sits on
@@ -13,7 +22,20 @@ on:
     pull_request:
         branches: [main, dev]
         types: [opened, reopened, synchronize, ready_for_review]
+    schedule:
+        # Daily, off the hour so the run isn't queued behind GitHub's cron peak.
+        - cron: "17 5 * * *"
     workflow_dispatch:
+
+# Needed by the report step below, which opens/updates the drift issue.
+permissions:
+    contents: read
+    issues: write
+
+env:
+    # Marks the one issue this workflow owns, so repeated failures comment on it
+    # instead of filing a new issue every morning.
+    DRIFT_LABEL: selector-drift
 
 jobs:
     css-selectors:
@@ -41,15 +63,86 @@ jobs:
                   node-version: lts/*
                   cache: "pnpm"
 
+            # postinstall runs `wxt prepare`, which generates the tsconfig the
+            # canary's `~/...` imports resolve through.
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
 
             - name: Install Playwright Browsers
               run: pnpm playwright install --with-deps chromium
 
-            # The shared fixture loads the unpacked extension, so build it first.
-            - name: Build extension (Chrome MV3)
-              run: pnpm build
-
+            # No extension build: unlike the e2e project, the canary reads live
+            # pages and never loads the extension, so building it here would only
+            # add a way for this job to fail for reasons unrelated to selectors.
+            #
+            # The JSON reporter is for the verdict step below: it records
+            # how many tests actually PASSED, which the list reporter's exit code
+            # alone cannot tell us.
             - name: Run live selector canary
-              run: pnpm test:canary
+              id: canary
+              env:
+                  PLAYWRIGHT_JSON_OUTPUT_NAME: canary-results.json
+              run: pnpm test:canary --reporter=list,json
+
+            # An outage makes every canary test call `test.skip()`, and Playwright
+            # exits 0 on an all-skipped run — so "the job went green" is NOT proof
+            # that a single selector was checked. Without this, one bad night for
+            # royalroad.com auto-closes a still-valid drift issue below.
+            - name: Did the canary check anything?
+              id: verdict
+              if: ${{ !cancelled() && github.event_name == 'schedule' }}
+              run: |
+                  passed=$(jq '.stats.expected // 0' canary-results.json 2>/dev/null || echo 0)
+                  echo "Canary tests passed: $passed"
+                  if [ "$passed" -gt 0 ]; then
+                      echo "executed=true" >> "$GITHUB_OUTPUT"
+                  else
+                      echo "executed=false" >> "$GITHUB_OUTPUT"
+                  fi
+
+            # --- Scheduled-run reporting -----------------------------------
+            # A red X on a cron run notifies nobody. These two steps turn the
+            # result into an issue that does. PR runs are already visible on the
+            # PR, so they skip this.
+
+            # Scoped to the canary step's own outcome, not the job's: a bare
+            # `failure()` also fires for a broken `pnpm install` or a Playwright
+            # download hiccup, which would file "RoyalRoad's layout drifted" and
+            # send someone hunting through the adapters for a CI problem.
+            - name: Report drift as an issue
+              if: ${{ !cancelled() && github.event_name == 'schedule' && steps.canary.outcome == 'failure' }}
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+              run: |
+                  gh label create "$DRIFT_LABEL" --description "RoyalRoad's markup drifted away from our selectors" --color D93F0B 2>/dev/null || true
+                  existing=$(gh issue list --state open --label "$DRIFT_LABEL" --limit 1 --json number --jq '.[0].number // empty')
+                  if [ -n "$existing" ]; then
+                      gh issue comment "$existing" --body "Still failing as of $(date -u '+%Y-%m-%d'). Run: $RUN_URL"
+                  else
+                      body=$(cat <<BODY
+                  The daily live selector canary failed, which means at least one selector no longer matches royalroad.com. Users on the affected layout are seeing "RoyalRoad's layout may have changed" errors right now.
+
+                  Run: $RUN_URL
+
+                  The failing test names say which layout and which selector. Fix by updating that layout's adapter in \`src/lib/adapters/\`, then refresh \`src/tests/fixtures/\` to match.
+
+                  This issue is reused for repeated failures and closed automatically when the canary next passes.
+                  BODY
+                      )
+                      gh issue create \
+                          --title "Selector canary failing: RoyalRoad's layout drifted" \
+                          --label "$DRIFT_LABEL" \
+                          --body "$body"
+                  fi
+
+            - name: Close the drift issue once green
+              if: ${{ !cancelled() && github.event_name == 'schedule' && steps.canary.outcome == 'success' && steps.verdict.outputs.executed == 'true' }}
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+              run: |
+                  existing=$(gh issue list --state open --label "$DRIFT_LABEL" --limit 1 --json number --jq '.[0].number // empty')
+                  if [ -n "$existing" ]; then
+                      gh issue close "$existing" --comment "The selector canary is green again. Run: $RUN_URL"
+                  fi

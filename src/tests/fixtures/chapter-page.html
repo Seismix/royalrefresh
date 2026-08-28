@@ -1,11 +1,15 @@
 <!doctype html>
 <!--
   Representative, hand-built chapter page fixture for RoyalRefresh tests.
-  Matches the selectors in src/lib/config/defaults.ts:
-    - fictionTitle:   h2.font-white  (wrapped in an <a> so findFictionOverviewUrl works)
+  Matches the selectors in src/lib/adapters/legacy-adapter.ts:
+    - fictionTitle:   .fic-header a[href*='/fiction/'] :is(h1,…,h6)
     - prevChapterBtn: a[href*='/chapter/']:has(> i.fa-chevron-double-left)
-    - chapterTitle:   h1.font-white
+    - chapterTitle:   .fic-header h1
     - chapterContent: .chapter-inner
+
+  The .fic-header block mirrors RoyalRoad's real heading order — fiction title
+  inside the overview link, then the author, then the chapter title — so a
+  selector that drifts onto the author is caught here rather than in production.
   See README.md for how to refresh from a real page.
 -->
 <html lang="en">
@@ -14,10 +18,13 @@
     </head>
     <body>
         <div class="chapter">
-            <a href="https://www.royalroad.com/fiction/1/test-story">
-                <h2 class="font-white">Test Story</h2>
-            </a>
-            <h1 class="font-white">Chapter 2: The Climb</h1>
+            <div class="row fic-header">
+                <a href="https://www.royalroad.com/fiction/1/test-story">
+                    <h2 class="font-white">Test Story</h2>
+                </a>
+                <h3 class="font-white">Test Author</h3>
+                <h1 class="font-white">Chapter 2: The Climb</h1>
+            </div>
 
             <div class="actions">
                 <a

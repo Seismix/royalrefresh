@@ -2,7 +2,7 @@
 <!--
   Representative previous-chapter fixture (the page that gets fetched for a recap).
   ContentProcessor.createRecap reads from this parsed document:
-    - chapterTitle:   h1.font-white
+    - chapterTitle:   .fic-header h1
     - chapterContent: .chapter-inner  (paragraphs, last-N-words taken from the END)
   Includes a <script> tag to assert the sanitizer strips it.
 -->
@@ -12,7 +12,9 @@
     </head>
     <body>
         <div class="chapter">
-            <h1 class="font-white">Chapter 1: The Start</h1>
+            <div class="row fic-header">
+                <h1 class="font-white">Chapter 1: The Start</h1>
+            </div>
             <div class="chapter-inner">
                 <script>
                     window.__danger = "should be stripped"
