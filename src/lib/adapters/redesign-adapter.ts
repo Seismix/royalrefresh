@@ -48,8 +48,12 @@ export const REDESIGN_SELECTORS: ExtensionSelectors = {
     // Toggle mount: the inner grid holding prev/select/next. Identified by the
     // stable `#chapterSelect` it contains rather than by the Tailwind utility
     // alone, which also matches the duplicate nav bar below the chapter text.
-    // This is the same element prepareMounts() resolves in code, so the override
-    // hint and the actual behaviour now agree.
+    //
+    // prepareMounts() reads this key FIRST and only falls back to walking up
+    // from `#chapterSelect`, so editing it really does move the toggle. What it
+    // has to match is that inner grid, NOT the final mount point: the toggle
+    // lands in the Reading Preferences box, which is found from this element's
+    // parent (the nav bar). See prepareReadingPrefsCluster.
     togglePlacement: "[class*='grid-cols-2']:has(#chapterSelect)",
     settingsPlacement: "#dialog-content-reading-preferences",
     blurb: "#about-accordion [data-rr-show-more-content]",
@@ -155,14 +159,21 @@ export class RedesignAdapter extends BaseAdapter {
         const base = super.prepareMounts(selectors)
 
         // The chapter nav bar is the `flex flex-col lg:flex-row` container holding
-        // the select/prev/next grid AND the Reading Preferences cluster. The
-        // stable `#chapterSelect` lives inside an inner `grid-cols-2` grid, so the
-        // nav bar is that grid's parent. Fall back to the hero header.
-        const navBar =
+        // the select/prev/next grid AND the Reading Preferences cluster, so it is
+        // that grid's parent.
+        //
+        // The configured `togglePlacement` is asked first — otherwise the key
+        // would be editable in Advanced Settings while changing nothing — and the
+        // walk up from the stable `#chapterSelect` is the fallback for when a
+        // user's (or a stale default's) selector stops matching. Both resolve to
+        // the same inner grid on today's markup. Last resort: the hero header.
+        const navGrid =
+            this.query(selectors.togglePlacement) ??
             document
                 .querySelector("#chapterSelect")
-                ?.closest("[class*='grid-cols-2']")?.parentElement ??
-            document.querySelector(REDESIGN_SENTINEL)
+                ?.closest("[class*='grid-cols-2']")
+        const navBar =
+            navGrid?.parentElement ?? document.querySelector(REDESIGN_SENTINEL)
 
         const toggle = this.resolveToggle(navBar)
 
