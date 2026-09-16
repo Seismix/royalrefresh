@@ -15,6 +15,22 @@ import {
 const NAV_TIMEOUT = 30_000
 
 /**
+ * Budget for the `beforeAll` navigations. It MUST stay above `NAV_TIMEOUT`.
+ *
+ * Playwright gives a hook the test timeout (30s by default), which is exactly
+ * `NAV_TIMEOUT` — so the two raced, and the hook lost. `page.goto()` never got
+ * to throw the error `isSiteUnreachable()` reads, the whole outage path below
+ * was unreachable in practice, and a slow RoyalRoad surfaced as
+ * `"beforeAll" hook timeout of 30000ms exceeded` pinned to whichever selector
+ * test happened to be collected first. That is how a RoyalRoad gateway timeout
+ * on the redesign's fiction page got reported for days as `blurb` drifting —
+ * a selector that was fine and was never actually evaluated.
+ *
+ * Keep the margin: `goto` has to lose this race for an outage to be skippable.
+ */
+const HOOK_TIMEOUT = NAV_TIMEOUT + 15_000
+
+/**
  * Budget for the resolve-to-the-right-element probes below. Short on purpose:
  * the matching `… selector exists` test already reports absence, so when a
  * selector matches nothing these should fail fast rather than spend the full
@@ -38,12 +54,28 @@ const BETA_COOKIE = "beta-ui-v2"
  * "this layout's selectors drifted" — different problems with different fixes,
  * and without the split the first masquerades as the second across every test.
  *
+ * It keys off site CHROME rather than page content. `#chapterHeroData` served
+ * as the redesign's marker once, but it only exists on chapter pages, so the
+ * fiction block had no guard at all and nothing there could tell a wrong-layout
+ * page from a drifted selector. The redesign is the Tailwind-built layout and
+ * loads a Tailwind stylesheet that legacy never does, which identifies the
+ * layout on every page type without depending on the reader's theme. Losing
+ * `#chapterHeroData` here costs no coverage — `chapterTitle` and `fictionTitle`
+ * are both scoped to it, so a hero that stops rendering still fails loudly.
+ *
+ * Whatever replaces this must survive JS. `<html class="ie8 no-js">` looks like
+ * a free layout marker in `view-source`, and is not one: the site strips those
+ * classes on load, so it matches under `curl` and never in a real browser.
+ *
+ * Verified live on both layouts, on chapter and fiction pages alike.
+ *
  * Typed as a total `Record<UiVersion, ...>` on purpose: adding a layout to the
  * registry fails to compile until the canary knows how to reach it.
  */
+const REDESIGN_MARKER = "link[href*='tailwind']"
 const LAYOUTS: Record<UiVersion, { cookie: string; served: string }> = {
-    redesign: { cookie: "always", served: "#chapterHeroData" },
-    legacy: { cookie: "never", served: "body:not(:has(#chapterHeroData))" },
+    redesign: { cookie: "always", served: `html:has(${REDESIGN_MARKER})` },
+    legacy: { cookie: "never", served: `html:not(:has(${REDESIGN_MARKER}))` },
 }
 
 /**
@@ -98,6 +130,18 @@ function unreachableMessage(url: string, error: unknown) {
     return `RoyalRoad appears to be down or unreachable, so the live selector canary could not run. This is NOT a selector failure — re-run this canary once the site is back up.\n  URL:   ${url}\n  Cause: ${detail}`
 }
 
+/**
+ * Message shown on the skipped tests when RoyalRoad answers but is broken.
+ *
+ * Named apart from `unreachableMessage` so the skip reason says which kind of
+ * outage it was: "nothing answered" and "RoyalRoad answered 504" send whoever
+ * reads this to different places, and only one of them is worth reporting to
+ * RoyalRoad.
+ */
+function serverErrorMessage(url: string, status: number) {
+    return `RoyalRoad returned HTTP ${status} for this page, so the live selector canary could not run. This is NOT a selector failure — it is RoyalRoad's own server failing, and it can affect one layout while the other stays healthy. Re-run this canary once the site recovers.\n  URL:    ${url}\n  Status: ${status}`
+}
+
 /** Collapse the whitespace RoyalRoad's templates leave in headings so heading
  * text can be compared against the flat `<title>`. */
 function normalize(text: string | null) {
@@ -132,10 +176,22 @@ async function openAs(
 
     try {
         const page = await context.newPage()
-        await page.goto(url, {
+        const response = await page.goto(url, {
             waitUntil: "domcontentloaded",
             timeout: NAV_TIMEOUT,
         })
+
+        // A 5xx is RoyalRoad (or Cloudflare in front of it) failing, not our
+        // selectors. Without this the canary happily runs every selector against
+        // a gateway error page, finds none of them, and reports the layout as
+        // drifted — the same misdiagnosis the hook timeout above produced, just
+        // arriving by a different route when the origin fails fast.
+        const status = response?.status() ?? 0
+        if (status >= 500) {
+            await context.close()
+            return { unreachable: serverErrorMessage(url, status) }
+        }
+
         return { page }
     } catch (error) {
         // Only the happy path hands a page back, and `afterAll` closes contexts
@@ -174,6 +230,7 @@ for (const { id, label } of ADAPTERS) {
         let wrongLayout: string | null = null
 
         test.beforeAll(async ({ browser }) => {
+            test.setTimeout(HOOK_TIMEOUT)
             const opened = await openAs(browser, version, CHAPTER_URL)
             if ("unreachable" in opened) {
                 unreachable = opened.unreachable
@@ -263,14 +320,25 @@ for (const { id, label } of ADAPTERS) {
     test.describe(`${label} — fiction page`, () => {
         let page: Page
         let unreachable: string | null = null
+        // The fiction block went without this for a while, on the assumption
+        // that an overview page can't be served in the wrong layout. It can —
+        // RoyalRoad serves these two routes from different code paths, and one
+        // can break or flip while the other stays healthy.
+        let wrongLayout: string | null = null
 
         test.beforeAll(async ({ browser }) => {
+            test.setTimeout(HOOK_TIMEOUT)
             const opened = await openAs(browser, version, FICTION_URL)
             if ("unreachable" in opened) {
                 unreachable = opened.unreachable
                 return
             }
             page = opened.page
+
+            const served = await page.locator(LAYOUTS[version].served).count()
+            if (served !== 1) {
+                wrongLayout = wrongLayoutMessage(version, label)
+            }
         })
 
         test.afterAll(async () => {
@@ -279,6 +347,17 @@ for (const { id, label } of ADAPTERS) {
 
         test.beforeEach(() => {
             test.skip(unreachable !== null, unreachable ?? "")
+            test.skip(
+                wrongLayout !== null && test.info().title !== SERVED_TEST,
+                wrongLayout ?? "",
+            )
+        })
+
+        test(SERVED_TEST, async () => {
+            await expect(
+                page.locator(LAYOUTS[version].served),
+                wrongLayoutMessage(version, label),
+            ).toHaveCount(1)
         })
 
         for (const [key, selector] of Object.entries(
