@@ -38,8 +38,19 @@ const HOOK_TIMEOUT = NAV_TIMEOUT + 15_000
  */
 const PROBE_TIMEOUT = 5_000
 
-/** The cookie RoyalRoad gates its redesign beta on. */
-const BETA_COOKIE = "beta-ui-v2"
+/**
+ * The cookie RoyalRoad picks the layout from for a logged-out visitor.
+ *
+ * It was `beta-ui-v2` (`always` / `never`) until RoyalRoad replaced it, around
+ * 2026-09-18, with `rr_ui_mode` (`redesign` / `legacy`) — the name its own
+ * layout switcher now writes, alongside a `sitePresentationMode` account
+ * setting for logged-in users. The old cookie is ignored outright: every value
+ * got the legacy page, which the `served` guard below reported as the redesign
+ * not being served. If that guard fails for every page of one layout at once,
+ * check which cookie RoyalRoad's `/dist/site-*.js` writes before touching a
+ * selector.
+ */
+const LAYOUT_COOKIE = "rr_ui_mode"
 
 /**
  * How to make RoyalRoad serve each layout, and how to tell that it did.
@@ -74,8 +85,8 @@ const BETA_COOKIE = "beta-ui-v2"
  */
 const REDESIGN_MARKER = "link[href*='tailwind']"
 const LAYOUTS: Record<UiVersion, { cookie: string; served: string }> = {
-    redesign: { cookie: "always", served: `html:has(${REDESIGN_MARKER})` },
-    legacy: { cookie: "never", served: `html:not(:has(${REDESIGN_MARKER}))` },
+    redesign: { cookie: "redesign", served: `html:has(${REDESIGN_MARKER})` },
+    legacy: { cookie: "legacy", served: `html:not(:has(${REDESIGN_MARKER}))` },
 }
 
 /**
@@ -100,7 +111,7 @@ const SERVED_TEST = "RoyalRoad served this layout"
 
 /** Why a layout the canary asked for is not the layout it got. */
 function wrongLayoutMessage(version: UiVersion, label: string) {
-    return `RoyalRoad did not serve the ${label} layout for ${BETA_COOKIE}=${LAYOUTS[version].cookie}. The cookie may have been renamed, or this layout retired/promoted — that is a registry question, not a selector fix.`
+    return `RoyalRoad did not serve the ${label} layout for ${LAYOUT_COOKIE}=${LAYOUTS[version].cookie}. The cookie may have been renamed, or this layout retired/promoted — that is a registry question, not a selector fix.`
 }
 
 /** The fiction the canary reads. Long-running and complete, so its chapter and
@@ -167,7 +178,7 @@ async function openAs(
     const context = await browser.newContext({ ...devices["Desktop Chrome"] })
     await context.addCookies([
         {
-            name: BETA_COOKIE,
+            name: LAYOUT_COOKIE,
             value: LAYOUTS[version].cookie,
             domain: ".royalroad.com",
             path: "/",
