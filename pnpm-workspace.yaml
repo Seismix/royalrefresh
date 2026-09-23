@@ -28,11 +28,12 @@ minimumReleaseAgeExclude:
 # Each floor below is the advisory's first patched version, and each parent was
 # re-checked to still declare a vulnerable range:
 #   shell-quote  fx-runner pins 1.7.3              GHSA-395f-4hp3-45gv (#99)
-#   adm-zip      firefox-profile allows ~0.5.x     GHSA-xcpc-8h2w-3j85 (#97)
+#   adm-zip      firefox-profile allows ~0.5.x     GHSA-7q85-xj36-vmfc (#122, supersedes #97)
 #   tmp          web-ext pins 0.2.5                GHSA-ph9p-34f9-6g65 (#69)
 #   uuid         node-notifier allows ^8.3.2       GHSA-w5hq-g745-h8pq (#68)
 #   esbuild      tsx pins ~0.27.0                  GHSA-g7r4-m6w7-qqqr (#90)
 #   yauzl        addons-scanner-utils pins 3.2.0   GHSA-gmq8-994r-jv83 (#100)
+#   image-size   addons-linter 9 pins 2.0.2        GHSA-w3rx-r6r6-pgpr, GHSA-5p2g-fcmc-qvqq
 #   brace-exp.   see the per-major note below      GHSA-mh99-v99m-4gvg
 #
 # `yauzl@3` is scoped to the 3.x line on purpose: only 3.2.0 is affected, and
@@ -47,11 +48,12 @@ minimumReleaseAgeExclude:
 # (CVE-2026-14257) to 1.1.17 and 2.1.3, so each line gets its own floor.
 overrides:
   shell-quote: ">=1.9.0"
-  adm-zip: ">=0.6.0"
+  adm-zip: ">=0.6.1"
   tmp: ">=0.2.6"
   uuid: ">=11.1.1"
   esbuild: ">=0.28.1"
   yauzl@3: ">=3.2.1"
+  image-size: ">=2.0.3"
   brace-expansion@1: ">=1.1.17 <2"
   brace-expansion@2: ">=2.1.3 <3"
   brace-expansion@5: ">=5.0.8 <6"
