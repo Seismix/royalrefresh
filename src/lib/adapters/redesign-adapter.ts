@@ -11,8 +11,8 @@ import type { MountSet, MountTarget } from "./types"
 // ---------------------------------------------------------------------------
 
 /**
- * Redesign-only element the layout is recognised by. RoyalRoad gates the beta
- * on its own `beta-ui-v2` cookie, but this sentinel is what was actually
+ * Redesign-only element the layout is recognised by. RoyalRoad picks the layout
+ * from its own `rr_ui_mode` cookie, but this sentinel is what was actually
  * rendered — a stale cookie could claim a layout the page isn't using.
  *
  * Only present on chapter pages (see `resolveAdapter`'s note).
