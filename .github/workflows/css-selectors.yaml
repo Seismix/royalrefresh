@@ -2,7 +2,7 @@ name: CSS Selectors (live canary)
 
 # Hits live royalroad.com to verify our CSS selectors still match the real page
 # layout, for EVERY layout in src/lib/adapters/registry.ts — the canary asks
-# RoyalRoad for each one via the `beta-ui-v2` cookie in turn. When it fails,
+# RoyalRoad for each one via the `rr_ui_mode` cookie in turn. When it fails,
 # refresh that layout's selectors in its adapter and the fixtures in
 # src/tests/fixtures/.
 #
