@@ -8,7 +8,7 @@ import type { UiAdapter } from "./types"
  *
  * The extension deliberately does NOT decide which layout RoyalRoad serves — it
  * adapts to whichever one arrived, judged from the rendered DOM rather than from
- * RoyalRoad's `beta-ui-v2` cookie: the page is what it is, a cookie only records
+ * RoyalRoad's `rr_ui_mode` cookie: the page is what it is, a cookie only records
  * what was once asked for.
  *
  * NOTE: layout sentinels generally exist only on chapter pages, so passing a
