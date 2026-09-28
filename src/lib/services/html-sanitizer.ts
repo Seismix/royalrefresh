@@ -1,4 +1,4 @@
-import DOMPurify from "dompurify"
+import DOMPurify, { type Config } from "dompurify"
 
 /**
  * HTML Sanitizer Service - Sanitizes HTML content to prevent XSS attacks
@@ -94,13 +94,17 @@ export class HtmlSanitizer {
      * @returns Sanitized HTML string safe for use with {@html}
      */
     static sanitize(html: string): string {
+        return this.clean(html, this.config)
+    }
+
+    private static clean(html: string, config: Config): string {
         if (!html || typeof html !== "string") {
             return ""
         }
 
         try {
             // Use DOMPurify to clean the HTML - ensure we get a string result
-            const cleaned = DOMPurify.sanitize(html, this.config) as string
+            const cleaned = DOMPurify.sanitize(html, config) as string
 
             // Additional cleanup: remove any remaining empty attributes that might cause issues
             return cleaned
@@ -137,17 +141,27 @@ export class HtmlSanitizer {
         const original = html
         const removed: string[] = []
 
-        // Hook into DOMPurify's removal process
+        // Hook into DOMPurify's removal process. The walk starts at DOMPurify's
+        // own <body> wrapper, which is never part of the input, so skip it.
         DOMPurify.addHook("uponSanitizeElement", (node, data) => {
-            if (data.allowedTags[data.tagName] === undefined) {
+            if (
+                data.tagName !== "body" &&
+                data.allowedTags[data.tagName] === undefined
+            ) {
                 removed.push(`<${data.tagName}>`)
             }
         })
 
-        const sanitized = this.sanitize(html)
-
-        // Clean up the hook
-        DOMPurify.removeAllHooks()
+        let sanitized: string
+        try {
+            // FORCE_BODY keeps leading elements like <script> in <body>, where
+            // the hook sees them; otherwise the parser moves them into <head>
+            // and DOMPurify drops them without reporting.
+            sanitized = this.clean(html, { ...this.config, FORCE_BODY: true })
+        } finally {
+            // Remove only our hook, not any registered elsewhere
+            DOMPurify.removeHook("uponSanitizeElement")
+        }
 
         return {
             sanitized,

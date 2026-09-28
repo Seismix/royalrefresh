@@ -164,10 +164,7 @@ describe("HtmlSanitizer", () => {
             expect(result.isModified).toBe(false)
         })
 
-        // Known bug: a leading <script> is parsed into <head>, which the
-        // uponSanitizeElement hook never visits, so `removed` omits it.
-        // Flip to `it` once sanitizeWithInfo tracks head content.
-        it.fails("lists each removed tag once", () => {
+        it("lists each removed tag once", () => {
             const input =
                 "<script>1</script><script>2</script><script>3</script>"
             const result = HtmlSanitizer.sanitizeWithInfo(input)
@@ -200,10 +197,7 @@ describe("HtmlSanitizer", () => {
             expect(HtmlSanitizer.containsDangerousContent(input)).toBe(true)
         })
 
-        // Known bug: the hook records DOMPurify's own <body> wrapper as a
-        // removed tag, so every non-empty input is flagged. Flip to `it` once
-        // sanitizeWithInfo ignores the wrapper.
-        it.fails("does not flag a simple paragraph", () => {
+        it("does not flag a simple paragraph", () => {
             expect(HtmlSanitizer.containsDangerousContent("<p>safe</p>")).toBe(
                 false,
             )
