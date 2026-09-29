@@ -41,6 +41,20 @@ jobs:
                       echo "should_publish=true" >> "$GITHUB_OUTPUT"
                   fi
 
+            # The release job builds its notes from this file, but only after
+            # both stores have accepted the version. Fail here instead, before
+            # anything is submitted, so a missing file can't leave a published
+            # version with no tag or release.
+            - name: Require patch notes for the new version
+              if: steps.check.outputs.should_publish == 'true'
+              run: |
+                  file="src/assets/patches/v${{ steps.version.outputs.version }}.json"
+                  if [ ! -f "$file" ]; then
+                      echo "::error::$file is missing - add patch notes before releasing."
+                      exit 1
+                  fi
+                  jq -e '.summary | strings' "$file" >/dev/null || { echo "::error::$file has no summary."; exit 1; }
+
             # `secrets` is not available in job-level `if:`, so resolve the Chrome
             # token gate here and expose it as an output the chrome job can read.
             - name: Detect Chrome credentials
@@ -152,10 +166,33 @@ jobs:
         steps:
             - uses: actions/checkout@v7
 
+            # The release body is the same patch notes the extension's "What's
+            # New" popup shows, not GitHub's generated PR list: PRs here carry
+            # no labels to categorise by, and the notes are already written
+            # for users. Headings match the popup's.
+            - name: Render release notes from patch notes
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  jq -r '
+                      .summary, "",
+                      (if (.new // []) | length > 0 then "## New Features", "", (.new[] | "- " + .), "" else empty end),
+                      (if (.fixes // []) | length > 0 then "## Bug Fixes", "", (.fixes[] | "- " + .), "" else empty end)
+                  ' "src/assets/patches/v$VERSION.json" > release-notes.md
+
+                  # Link the full diff against the previous release. Read before
+                  # this run's tag exists, so "latest" is still the previous one.
+                  previous=$(gh release view --json tagName --jq .tagName 2>/dev/null || true)
+                  if [ -n "$previous" ]; then
+                      echo "**Full Changelog**: https://github.com/$GITHUB_REPOSITORY/compare/$previous...v$VERSION" >> release-notes.md
+                  fi
+
+                  cat release-notes.md
+
             - name: Tag and create GitHub release
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                   git tag "v$VERSION"
                   git push origin "v$VERSION"
-                  gh release create "v$VERSION" --title "v$VERSION" --generate-notes
+                  gh release create "v$VERSION" --title "v$VERSION" --notes-file release-notes.md
