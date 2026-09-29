@@ -80,6 +80,13 @@ jobs:
             - name: Build & zip (Firefox + sources)
               run: pnpm zip:firefox
 
+            # Rebuild the extension from the sources zip alone and compare it
+            # file-by-file against the firefox zip, as an AMO reviewer does. A
+            # sources archive that doesn't reproduce the build otherwise fails
+            # in AMO review days later; this stops it before submission.
+            - name: Verify the sources zip rebuilds the shipped extension
+              run: pnpm verify:sources
+
             - name: Submit to Firefox Add-ons
               run: |
                   pnpm wxt submit \
