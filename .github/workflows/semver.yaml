@@ -1,17 +1,16 @@
 name: Check version bump
+
+# main only receives release merges from dev (dev is the default branch, so the
+# scheduled canary and Dependabot never need a fix landed on main directly), and
+# every release needs a new version, so every PR here must bump it.
+#
+# No `paths-ignore:` on purpose. This is a required status check, and a
+# workflow skipped by a path filter never reports a status at all, so the check
+# sits on "Expected" forever and the PR can never merge.
 on:
     pull_request:
         branches: [main]
         types: [opened, reopened, synchronize, ready_for_review]
-        paths-ignore:
-            - '**.md'
-            - 'docs/**'
-            - '.github/ISSUE_TEMPLATE/**'
-            - '.github/pull_request_template.md'
-            - '.github/workflows/**'
-            - '.gitignore'
-            - '.editorconfig'
-            - '.prettierrc'
 
 jobs:
     semver-check:
