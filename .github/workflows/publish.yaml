@@ -20,7 +20,7 @@ jobs:
             has_chrome: ${{ steps.chrome.outputs.has_chrome }}
             version: ${{ steps.version.outputs.version }}
         steps:
-            - uses: actions/checkout@v7
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   fetch-depth: 0
 
@@ -115,13 +115,13 @@ jobs:
         if: needs.check.outputs.should_publish == 'true'
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v7
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
             - name: Install pnpm
-              uses: pnpm/action-setup@v6
+              uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
 
             - name: Setup Node.js
-              uses: actions/setup-node@v7
+              uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
               with:
                   node-version: lts/*
                   cache: "pnpm"
@@ -155,13 +155,13 @@ jobs:
         if: needs.check.outputs.should_publish == 'true' && needs.check.outputs.has_chrome == 'true'
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v7
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
             - name: Install pnpm
-              uses: pnpm/action-setup@v6
+              uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
 
             - name: Setup Node.js
-              uses: actions/setup-node@v7
+              uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
               with:
                   node-version: lts/*
                   cache: "pnpm"
@@ -201,7 +201,7 @@ jobs:
         env:
             VERSION: ${{ needs.check.outputs.version }}
         steps:
-            - uses: actions/checkout@v7
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
             # The release body is the same patch notes the extension's "What's
             # New" popup shows, not GitHub's generated PR list: PRs here carry
