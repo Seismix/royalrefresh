@@ -192,7 +192,8 @@ pnpm test
 ```
 
 The canary suite checks the CSS selectors against the live site — this is what
-catches a RoyalRoad redesign:
+catches a RoyalRoad redesign. It does not run in CI (RoyalRoad's Cloudflare
+challenges GitHub's runners), so run it locally before a release:
 
 ```bash
 pnpm test:canary
