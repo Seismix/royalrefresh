@@ -1,7 +1,14 @@
+import { flushSync, type ComponentProps } from "svelte"
 import { beforeEach, describe, expect, it } from "vitest"
-import { render, fireEvent } from "@testing-library/svelte"
+import { render } from "~/tests/setup/render"
 import { recapState } from "~/lib/state/recap-state.svelte"
 import ToggleButton from "./ToggleButton.svelte"
+
+function renderButton(props: ComponentProps<typeof ToggleButton>) {
+    return render(ToggleButton, props).querySelector(
+        "button",
+    ) as HTMLButtonElement
+}
 
 // These tests drive the button purely off recapState (no network): we
 // pre-seed content so clicks just toggle show/hide, which is the deterministic,
@@ -15,67 +22,66 @@ describe("ToggleButton", () => {
     })
 
     it("renders the Recap label with a Show prefix when hidden", () => {
-        const { getByRole } = render(ToggleButton, { props: { type: "recap" } })
-        const button = getByRole("button")
+        const button = renderButton({ type: "recap" })
         expect(button.textContent).toContain("Show")
         expect(button.textContent).toContain("Recap")
     })
 
     it("renders the Blurb label for the blurb type", () => {
-        const { getByRole } = render(ToggleButton, { props: { type: "blurb" } })
-        expect(getByRole("button").textContent).toContain("Blurb")
+        expect(renderButton({ type: "blurb" }).textContent).toContain("Blurb")
     })
 
-    it("flips to 'Hide' once content is visible", async () => {
-        const { getByRole } = render(ToggleButton, { props: { type: "recap" } })
+    it("flips to 'Hide' once content is visible", () => {
+        const button = renderButton({ type: "recap" })
 
         recapState.setContent("<p>cached recap</p>", "recap")
-        await Promise.resolve()
+        flushSync()
 
-        expect(getByRole("button").textContent).toContain("Hide")
+        expect(button.textContent).toContain("Hide")
     })
 
-    it("shows a Loading label and is disabled while loading", async () => {
-        const { getByRole } = render(ToggleButton, { props: { type: "recap" } })
+    it("shows a Loading label and is disabled while loading", () => {
+        const button = renderButton({ type: "recap" })
 
         recapState.setLoading()
-        await Promise.resolve()
+        flushSync()
 
-        const button = getByRole("button") as HTMLButtonElement
         expect(button.textContent).toContain("Loading")
         expect(button.disabled).toBe(true)
     })
 
-    it("stops the click from bubbling to an ancestor (redesign dialog trigger)", async () => {
+    it("stops the click from bubbling to an ancestor (redesign dialog trigger)", () => {
         // On the redesign the toggle mounts inside RoyalRoad's `.rr-dialog`,
         // whose bubbled click opens the Reading Preferences modal. The toggle
         // must stop propagation so it doesn't also trigger that ancestor.
         recapState.setContent("<p>cached recap</p>", "recap")
         recapState.hide()
 
-        const { getByRole, container } = render(ToggleButton, {
-            props: { type: "recap" },
-        })
+        const button = renderButton({ type: "recap" })
         let ancestorClicked = false
-        container.addEventListener("click", () => (ancestorClicked = true))
+        button.parentElement!.addEventListener(
+            "click",
+            () => (ancestorClicked = true),
+        )
 
-        await fireEvent.click(getByRole("button"))
+        button.click()
         expect(ancestorClicked).toBe(false)
     })
 
-    it("clicking with existing content toggles visibility (no fetch)", async () => {
+    it("clicking with existing content toggles visibility (no fetch)", () => {
         // Pre-seed content but hide it -> click should just show it
         recapState.setContent("<p>cached recap</p>", "recap")
         recapState.hide()
 
-        const { getByRole } = render(ToggleButton, { props: { type: "recap" } })
-        const button = getByRole("button")
+        const button = renderButton({ type: "recap" })
 
-        await fireEvent.click(button)
+        button.click()
+        flushSync()
         expect(recapState.isVisible).toBe(true)
 
         // Clicking again hides
-        await fireEvent.click(button)
+        button.click()
+        flushSync()
         expect(recapState.visibility).toBe("hidden")
     })
 })

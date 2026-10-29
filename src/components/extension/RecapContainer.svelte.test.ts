@@ -1,5 +1,6 @@
+import { flushSync } from "svelte"
 import { beforeEach, describe, expect, it } from "vitest"
-import { render } from "@testing-library/svelte"
+import { render } from "~/tests/setup/render"
 import { recapState } from "~/lib/state/recap-state.svelte"
 import RecapContainer from "./RecapContainer.svelte"
 
@@ -15,40 +16,40 @@ describe("RecapContainer", () => {
     })
 
     it("is hidden (display:none) when nothing is shown", () => {
-        const { container } = render(RecapContainer)
+        const container = render(RecapContainer)
         const root = container.querySelector("#recapContainer") as HTMLElement
         expect(root).toBeTruthy()
         expect(root.style.display).toBe("none")
     })
 
-    it("renders the loading indicator when loading", async () => {
-        const { container, findByText } = render(RecapContainer)
+    it("renders the loading indicator when loading", () => {
+        const container = render(RecapContainer)
 
         recapState.setLoading()
-        expect(await findByText(/loading/i)).toBeInTheDocument()
+        flushSync()
+        expect(container.textContent).toMatch(/loading/i)
 
         const root = container.querySelector("#recapContainer") as HTMLElement
         expect(root.style.display).toBe("block")
     })
 
-    it("renders the error message when in error state", async () => {
-        const { findByText } = render(RecapContainer)
+    it("renders the error message when in error state", () => {
+        const container = render(RecapContainer)
 
         recapState.setError("RoyalRoad layout changed")
-        expect(await findByText("RoyalRoad layout changed")).toBeInTheDocument()
+        flushSync()
+        expect(container.textContent).toContain("RoyalRoad layout changed")
     })
 
-    it("renders sanitized content via {@html} when visible", async () => {
-        const { container } = render(RecapContainer)
+    it("renders sanitized content via {@html} when visible", () => {
+        const container = render(RecapContainer)
 
         recapState.setContent(
             "<h1>RoyalRefresh of Test Story</h1><p>body</p>",
             "recap",
         )
 
-        // Wait a microtask for the reactive update to flush
-        await Promise.resolve()
-        await Promise.resolve()
+        flushSync()
 
         const root = container.querySelector("#recapContainer") as HTMLElement
         expect(root.style.display).toBe("block")
