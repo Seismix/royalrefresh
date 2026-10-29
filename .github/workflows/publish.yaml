@@ -1,15 +1,15 @@
 name: Publish
 
+# A release is a deliberate act: push a `v<version>` tag on main. Merging into
+# main publishes nothing, so main can take CI, docs and test changes without a
+# version bump. The `check` job below is the only gate between the tag and
+# the stores, so it validates the tag before anything is built.
+#
+# workflow_dispatch is for a run whose re-run window has expired. It must be
+# started on the tag ("Use workflow from" → the tag), not on a branch.
 on:
     push:
-        branches: [main]
-        paths-ignore:
-            - "**.md"
-            - "docs/**"
-            - ".github/**"
-            - ".gitignore"
-            - ".editorconfig"
-            - ".prettierrc"
+        tags: ["v*"]
     workflow_dispatch:
 
 jobs:
@@ -28,14 +28,54 @@ jobs:
               id: version
               run: echo "version=$(jq -r .version package.json)" >> "$GITHUB_OUTPUT"
 
-            # The semver workflow already enforces a version bump on every PR to
-            # main, but guard on the tag so re-runs and non-version pushes (or a
-            # manual dispatch) never submit the same version twice.
+            # Each of these stops a tag that would publish the wrong thing: a
+            # tag that disagrees with package.json (the stores read the
+            # manifest, not the tag), a version that doesn't move forward (an
+            # old local tag sent by `git push --tags`), and a commit that
+            # never went through main's required checks.
+            - name: Validate the release tag
+              env:
+                  VERSION: ${{ steps.version.outputs.version }}
+              run: |
+                  if [ "$GITHUB_REF_TYPE" != "tag" ]; then
+                      echo "::error::Run this workflow on a v* tag, not on the branch $GITHUB_REF_NAME."
+                      exit 1
+                  fi
+                  tag="$GITHUB_REF_NAME"
+
+                  if [ "$tag" != "v$VERSION" ]; then
+                      echo "::error::Tag $tag does not match package.json version $VERSION - expected v$VERSION."
+                      exit 1
+                  fi
+
+                  previous=$(git tag --list 'v*' --sort=-v:refname | grep -vx "$tag" | head -1)
+                  if [ -n "$previous" ]; then
+                      highest=$(printf '%s\n%s\n' "${previous#v}" "$VERSION" | sort -V | tail -1)
+                      if [ "$highest" != "$VERSION" ]; then
+                          echo "::error::$tag is not newer than the latest release tag $previous."
+                          exit 1
+                      fi
+                  fi
+
+                  git fetch origin main --quiet
+                  if ! git merge-base --is-ancestor "$(git rev-parse "$tag^{commit}")" origin/main; then
+                      echo "::error::$tag points at a commit that is not on main. Merge into main first, then tag main."
+                      exit 1
+                  fi
+
+                  echo "Releasing $tag (previous: ${previous:-none})"
+
+            # The GitHub release is created last, only once the stores accepted
+            # the version, so it is the "already published" marker. This makes a
+            # full re-run of a finished release, or a dispatch on an old tag, a
+            # no-op instead of a second store submission.
             - name: Skip if version already released
               id: check
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
-                  if git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
-                      echo "Tag v${{ steps.version.outputs.version }} already exists - nothing to publish."
+                  if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+                      echo "Release $GITHUB_REF_NAME already exists - nothing to publish."
                       echo "should_publish=false" >> "$GITHUB_OUTPUT"
                   else
                       echo "should_publish=true" >> "$GITHUB_OUTPUT"
@@ -148,9 +188,10 @@ jobs:
                   CHROME_PUBLISH_TARGET: ${{ secrets.CHROME_PUBLISH_TARGET }}
                   CHROME_SKIP_SUBMIT_REVIEW: ${{ secrets.CHROME_SKIP_SUBMIT_REVIEW }}
 
-    # Only tag and release once the stores are done. Runs when Firefox succeeded
-    # and Chrome either succeeded or was skipped (no token yet). If either store
-    # failed, the release is held back so a retry can complete it before tagging.
+    # Only create the GitHub release once the stores are done. Runs when Firefox
+    # succeeded and Chrome either succeeded or was skipped (no token yet). If
+    # either store failed, the release is held back so "Re-run failed jobs" can
+    # complete it — the tag stays where it is.
     release:
         needs: [check, firefox, chrome]
         if: >-
@@ -181,7 +222,7 @@ jobs:
                   ' "src/assets/patches/v$VERSION.json" > release-notes.md
 
                   # Link the full diff against the previous release. Read before
-                  # this run's tag exists, so "latest" is still the previous one.
+                  # this run's release exists, so "latest" is still the previous one.
                   previous=$(gh release view --json tagName --jq .tagName 2>/dev/null || true)
                   if [ -n "$previous" ]; then
                       echo "**Full Changelog**: https://github.com/$GITHUB_REPOSITORY/compare/$previous...v$VERSION" >> release-notes.md
@@ -189,10 +230,9 @@ jobs:
 
                   cat release-notes.md
 
-            - name: Tag and create GitHub release
+            # --verify-tag: the tag that triggered this run must already exist;
+            # never let `gh` create one on the default branch instead.
+            - name: Create GitHub release
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: |
-                  git tag "v$VERSION"
-                  git push origin "v$VERSION"
-                  gh release create "v$VERSION" --title "v$VERSION" --notes-file release-notes.md
+              run: gh release create "v$VERSION" --verify-tag --title "v$VERSION" --notes-file release-notes.md
