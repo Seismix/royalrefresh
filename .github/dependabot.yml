@@ -19,6 +19,9 @@ updates:
           # svelte-check only accepts typescript ^5 || ^6.
           - dependency-name: typescript
             update-types: [version-update:semver-major]
+          # Track the active Node LTS (CI runs lts/*), not Current; bump by hand.
+          - dependency-name: "@types/node"
+            update-types: [version-update:semver-major]
       groups:
           # Released in lockstep; a split PR fails peer resolution.
           vitest:
