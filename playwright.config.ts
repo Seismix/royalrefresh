@@ -36,8 +36,10 @@ export default defineConfig({
 
     /* Two projects, selected via --project:
      *   - "e2e"    : mocked-page extension tests (zero network) — runs on every PR.
-     *   - "canary" : live RoyalRoad selector check — scheduled / manual only.
-     * `pnpm test` defaults to the e2e project so the live canary never blocks PRs. */
+     *   - "canary" : live RoyalRoad selector check — run locally, never in CI.
+     * `pnpm test` defaults to the e2e project so the live canary never blocks PRs.
+     * Not in CI: Cloudflare challenges GitHub's runner IPs, so every page the
+     * canary loads there is the challenge page, not RoyalRoad. */
     projects: [
         {
             name: "e2e",
