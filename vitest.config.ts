@@ -1,7 +1,6 @@
 import { defineConfig } from "vitest/config"
 import { WxtVitest } from "wxt/testing/vitest-plugin"
 import { svelte, vitePreprocess } from "@sveltejs/vite-plugin-svelte"
-import { svelteTesting } from "@testing-library/svelte/vite"
 
 // Vitest is the unit/component runner. WxtVitest auto-mocks `browser.*`
 // (via @webext-core/fake-browser) and resolves WXT's `~/` and `wxt/*` aliases.
@@ -18,7 +17,6 @@ export default defineConfig({
         // pipeline, so we register it ourselves (configFile:false mirrors how
         // @wxt-dev/module-svelte configures it for the real build).
         svelte({ configFile: false, preprocess: [vitePreprocess()] }),
-        svelteTesting(),
         WxtVitest(),
     ],
     resolve: {

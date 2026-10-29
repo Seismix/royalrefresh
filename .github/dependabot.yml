@@ -1,0 +1,47 @@
+version: 2
+
+updates:
+    - package-ecosystem: npm
+      directory: /
+      schedule:
+          interval: weekly
+          day: monday
+      # Longer than pnpm's minimumReleaseAge, so CI never refuses a version
+      # Dependabot proposes. Security updates ignore cooldown.
+      cooldown:
+          default-days: 3
+          semver-major-days: 7
+      labels: [dependencies]
+      commit-message:
+          prefix: fix(deps)
+          prefix-development: chore(deps)
+      ignore:
+          # svelte-check only accepts typescript ^5 || ^6.
+          - dependency-name: typescript
+            update-types: [version-update:semver-major]
+          # Track the active Node LTS (CI runs lts/*), not Current; bump by hand.
+          - dependency-name: "@types/node"
+            update-types: [version-update:semver-major]
+      groups:
+          # Released in lockstep; a split PR fails peer resolution.
+          vitest:
+              patterns: [vitest, "@vitest/*"]
+          vite:
+              patterns: [vite, "@sveltejs/vite-plugin-svelte"]
+          dev-minor-patch:
+              dependency-type: development
+              update-types: [minor, patch]
+          security:
+              applies-to: security-updates
+              dependency-type: development
+
+    - package-ecosystem: github-actions
+      directory: /
+      schedule:
+          interval: monthly
+      labels: [dependencies]
+      commit-message:
+          prefix: ci
+      groups:
+          actions:
+              patterns: ["*"]

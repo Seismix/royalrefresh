@@ -1,6 +1,8 @@
 {
   "extends": "./.wxt/tsconfig.json",
   "compilerOptions": {
-    "useDefineForClassFields": true
+    "useDefineForClassFields": true,
+    // TS 6 defaults `types` to []; background.ts needs these globals.
+    "types": ["firefox-webext-browser"]
   }
 }
