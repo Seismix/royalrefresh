@@ -153,6 +153,17 @@ function serverErrorMessage(url: string, status: number) {
     return `RoyalRoad returned HTTP ${status} for this page, so the live selector canary could not run. This is NOT a selector failure — it is RoyalRoad's own server failing, and it can affect one layout while the other stays healthy. Re-run this canary once the site recovers.\n  URL:    ${url}\n  Status: ${status}`
 }
 
+/**
+ * Message shown on the skipped tests when Cloudflare challenges the request.
+ *
+ * The challenge page is a 403, not a 5xx, so without its own check it fell
+ * through to the selectors and was reported as every layout drifting at once —
+ * which is how GitHub's runners got blocked and filed a false drift issue.
+ */
+function challengedMessage(url: string) {
+    return `Cloudflare answered with a bot challenge instead of RoyalRoad's page, so the live selector canary could not run. This is NOT a selector failure — RoyalRoad's Cloudflare is challenging requests from this network (it always does for CI runners). Re-run from another network or later.\n  URL: ${url}`
+}
+
 /** Collapse the whitespace RoyalRoad's templates leave in headings so heading
  * text can be compared against the flat `<title>`. */
 function normalize(text: string | null) {
@@ -191,6 +202,13 @@ async function openAs(
             waitUntil: "domcontentloaded",
             timeout: NAV_TIMEOUT,
         })
+
+        // Checked before the 5xx branch: some challenge types answer 503, and
+        // "you were challenged" points somewhere other than "the site is down".
+        if (response?.headers()["cf-mitigated"] === "challenge") {
+            await context.close()
+            return { unreachable: challengedMessage(url) }
+        }
 
         // A 5xx is RoyalRoad (or Cloudflare in front of it) failing, not our
         // selectors. Without this the canary happily runs every selector against

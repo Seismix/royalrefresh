@@ -1,15 +1,15 @@
 name: Publish
 
+# A release is a deliberate act: push a `v<version>` tag on main. Merging into
+# main publishes nothing, so main can take CI, docs and test changes without a
+# version bump. The `check` job below is the only gate between the tag and
+# the stores, so it validates the tag before anything is built.
+#
+# workflow_dispatch is for a run whose re-run window has expired. It must be
+# started on the tag ("Use workflow from" → the tag), not on a branch.
 on:
     push:
-        branches: [main]
-        paths-ignore:
-            - "**.md"
-            - "docs/**"
-            - ".github/**"
-            - ".gitignore"
-            - ".editorconfig"
-            - ".prettierrc"
+        tags: ["v*"]
     workflow_dispatch:
 
 jobs:
@@ -28,18 +28,72 @@ jobs:
               id: version
               run: echo "version=$(jq -r .version package.json)" >> "$GITHUB_OUTPUT"
 
-            # The semver workflow already enforces a version bump on every PR to
-            # main, but guard on the tag so re-runs and non-version pushes (or a
-            # manual dispatch) never submit the same version twice.
+            # Each of these stops a tag that would publish the wrong thing: a
+            # tag that disagrees with package.json (the stores read the
+            # manifest, not the tag), a version that doesn't move forward (an
+            # old local tag sent by `git push --tags`), and a commit that
+            # never went through main's required checks.
+            - name: Validate the release tag
+              env:
+                  VERSION: ${{ steps.version.outputs.version }}
+              run: |
+                  if [ "$GITHUB_REF_TYPE" != "tag" ]; then
+                      echo "::error::Run this workflow on a v* tag, not on the branch $GITHUB_REF_NAME."
+                      exit 1
+                  fi
+                  tag="$GITHUB_REF_NAME"
+
+                  if [ "$tag" != "v$VERSION" ]; then
+                      echo "::error::Tag $tag does not match package.json version $VERSION - expected v$VERSION."
+                      exit 1
+                  fi
+
+                  previous=$(git tag --list 'v*' --sort=-v:refname | grep -vx "$tag" | head -1)
+                  if [ -n "$previous" ]; then
+                      highest=$(printf '%s\n%s\n' "${previous#v}" "$VERSION" | sort -V | tail -1)
+                      if [ "$highest" != "$VERSION" ]; then
+                          echo "::error::$tag is not newer than the latest release tag $previous."
+                          exit 1
+                      fi
+                  fi
+
+                  git fetch origin main --quiet
+                  if ! git merge-base --is-ancestor "$(git rev-parse "$tag^{commit}")" origin/main; then
+                      echo "::error::$tag points at a commit that is not on main. Merge into main first, then tag main."
+                      exit 1
+                  fi
+
+                  echo "Releasing $tag (previous: ${previous:-none})"
+
+            # The GitHub release is created last, only once the stores accepted
+            # the version, so it is the "already published" marker. This makes a
+            # full re-run of a finished release, or a dispatch on an old tag, a
+            # no-op instead of a second store submission.
             - name: Skip if version already released
               id: check
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
-                  if git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
-                      echo "Tag v${{ steps.version.outputs.version }} already exists - nothing to publish."
+                  if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+                      echo "Release $GITHUB_REF_NAME already exists - nothing to publish."
                       echo "should_publish=false" >> "$GITHUB_OUTPUT"
                   else
                       echo "should_publish=true" >> "$GITHUB_OUTPUT"
                   fi
+
+            # The release job builds its notes from this file, but only after
+            # both stores have accepted the version. Fail here instead, before
+            # anything is submitted, so a missing file can't leave a published
+            # version with no tag or release.
+            - name: Require patch notes for the new version
+              if: steps.check.outputs.should_publish == 'true'
+              run: |
+                  file="src/assets/patches/v${{ steps.version.outputs.version }}.json"
+                  if [ ! -f "$file" ]; then
+                      echo "::error::$file is missing - add patch notes before releasing."
+                      exit 1
+                  fi
+                  jq -e '.summary | strings' "$file" >/dev/null || { echo "::error::$file has no summary."; exit 1; }
 
             # `secrets` is not available in job-level `if:`, so resolve the Chrome
             # token gate here and expose it as an output the chrome job can read.
@@ -79,6 +133,13 @@ jobs:
 
             - name: Build & zip (Firefox + sources)
               run: pnpm zip:firefox
+
+            # Rebuild the extension from the sources zip alone and compare it
+            # file-by-file against the firefox zip, as an AMO reviewer does. A
+            # sources archive that doesn't reproduce the build otherwise fails
+            # in AMO review days later; this stops it before submission.
+            - name: Verify the sources zip rebuilds the shipped extension
+              run: pnpm verify:sources
 
             - name: Submit to Firefox Add-ons
               run: |
@@ -127,9 +188,10 @@ jobs:
                   CHROME_PUBLISH_TARGET: ${{ secrets.CHROME_PUBLISH_TARGET }}
                   CHROME_SKIP_SUBMIT_REVIEW: ${{ secrets.CHROME_SKIP_SUBMIT_REVIEW }}
 
-    # Only tag and release once the stores are done. Runs when Firefox succeeded
-    # and Chrome either succeeded or was skipped (no token yet). If either store
-    # failed, the release is held back so a retry can complete it before tagging.
+    # Only create the GitHub release once the stores are done. Runs when Firefox
+    # succeeded and Chrome either succeeded or was skipped (no token yet). If
+    # either store failed, the release is held back so "Re-run failed jobs" can
+    # complete it — the tag stays where it is.
     release:
         needs: [check, firefox, chrome]
         if: >-
@@ -145,10 +207,32 @@ jobs:
         steps:
             - uses: actions/checkout@v7
 
-            - name: Tag and create GitHub release
+            # The release body is the same patch notes the extension's "What's
+            # New" popup shows, not GitHub's generated PR list: PRs here carry
+            # no labels to categorise by, and the notes are already written
+            # for users. Headings match the popup's.
+            - name: Render release notes from patch notes
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
-                  git tag "v$VERSION"
-                  git push origin "v$VERSION"
-                  gh release create "v$VERSION" --title "v$VERSION" --generate-notes
+                  jq -r '
+                      .summary, "",
+                      (if (.new // []) | length > 0 then "## New Features", "", (.new[] | "- " + .), "" else empty end),
+                      (if (.fixes // []) | length > 0 then "## Bug Fixes", "", (.fixes[] | "- " + .), "" else empty end)
+                  ' "src/assets/patches/v$VERSION.json" > release-notes.md
+
+                  # Link the full diff against the previous release. Read before
+                  # this run's release exists, so "latest" is still the previous one.
+                  previous=$(gh release view --json tagName --jq .tagName 2>/dev/null || true)
+                  if [ -n "$previous" ]; then
+                      echo "**Full Changelog**: https://github.com/$GITHUB_REPOSITORY/compare/$previous...v$VERSION" >> release-notes.md
+                  fi
+
+                  cat release-notes.md
+
+            # --verify-tag: the tag that triggered this run must already exist;
+            # never let `gh` create one on the default branch instead.
+            - name: Create GitHub release
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: gh release create "v$VERSION" --verify-tag --title "v$VERSION" --notes-file release-notes.md
